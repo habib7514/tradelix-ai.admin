@@ -58,224 +58,44 @@
             --btn-gold: linear-gradient(135deg, #d4af37, #f4d03f);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Tajawal', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
 
-        html, body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+        html, body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
 
-        #splash {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100vh;
-            background: radial-gradient(circle at center, #1E2329 0%, #181A20 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 99999;
-            transition: opacity 0.8s ease, visibility 0.8s;
-        }
+        #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: radial-gradient(circle at center, #1E2329 0%, #181A20 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; transition: opacity 0.8s ease, visibility 0.8s; }
         #splash.hide { opacity: 0; visibility: hidden; }
-
-        .splash-logo {
-            width: 180px; height: 180px;
-            position: relative;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .splash-logo-circle {
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            position: absolute;
-            border: 4px solid transparent;
-            border-top-color: var(--gold);
-            border-right-color: var(--gold);
-            border-bottom-color: var(--red);
-            border-left-color: var(--red);
-            animation: splashSpin 2s linear infinite;
-        }
-        .splash-logo-inner {
-            font-size: 90px;
-            font-weight: 900;
-            color: var(--gold);
-            text-shadow: 0 0 40px rgba(240, 185, 11, 0.8);
-            animation: splashPulse 1.5s ease-in-out infinite;
-            z-index: 2;
-        }
+        .splash-logo { width: 180px; height: 180px; position: relative; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; }
+        .splash-logo-circle { width: 100%; height: 100%; border-radius: 50%; position: absolute; border: 4px solid transparent; border-top-color: var(--gold); border-right-color: var(--gold); border-bottom-color: var(--red); border-left-color: var(--red); animation: splashSpin 2s linear infinite; }
+        .splash-logo-inner { font-size: 90px; font-weight: 900; color: var(--gold); text-shadow: 0 0 40px rgba(240, 185, 11, 0.8); animation: splashPulse 1.5s ease-in-out infinite; z-index: 2; }
         @keyframes splashSpin { to { transform: rotate(360deg); } }
-        @keyframes splashPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.85; }
-        }
-
-        .splash-title {
-            font-size: 38px;
-            font-weight: 900;
-            color: var(--gold);
-            letter-spacing: 4px;
-            margin-bottom: 8px;
-            animation: fadeInUp 1s ease 0.5s both;
-        }
-        .splash-subtitle {
-            font-size: 13px;
-            color: var(--red);
-            margin-bottom: 50px;
-            font-weight: 700;
-            letter-spacing: 4px;
-            animation: fadeInUp 1s ease 1s both;
-        }
-        .splash-loading {
-            width: 220px; height: 4px;
-            background: #2B3139;
-            border-radius: 4px;
-            overflow: hidden;
-            animation: fadeInUp 1s ease 1.5s both;
-        }
-        .splash-loading-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--gold), #FCD535);
-            border-radius: 4px;
-            animation: loadBar 3s linear forwards;
-        }
+        @keyframes splashPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.85; } }
+        .splash-title { font-size: 38px; font-weight: 900; color: var(--gold); letter-spacing: 4px; margin-bottom: 8px; animation: fadeInUp 1s ease 0.5s both; }
+        .splash-subtitle { font-size: 13px; color: var(--red); margin-bottom: 50px; font-weight: 700; letter-spacing: 4px; animation: fadeInUp 1s ease 1s both; }
+        .splash-loading { width: 220px; height: 4px; background: #2B3139; border-radius: 4px; overflow: hidden; animation: fadeInUp 1s ease 1.5s both; }
+        .splash-loading-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #FCD535); border-radius: 4px; animation: loadBar 3s linear forwards; }
         @keyframes loadBar { from { width: 0%; } to { width: 100%; } }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        .screen {
-            display: none;
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto;
-            padding: 20px;
-            min-height: 100vh;
-            padding-bottom: 90px;
-        }
+        .screen { display: none; width: 100%; max-width: 480px; margin: 0 auto; padding: 20px; min-height: 100vh; padding-bottom: 90px; }
         .screen.active { display: block; }
 
-        .auth-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-            max-width: 420px;
-            margin: 0 auto;
-        }
+        .auth-container { display: flex; flex-direction: column; justify-content: center; min-height: 100vh; padding: 20px; max-width: 420px; margin: 0 auto; }
         .auth-logo { text-align: center; margin-bottom: 30px; }
-        .auth-logo-img {
-            width: 80px; height: 80px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, #181A20, #2B3139);
-            border: 2px solid var(--gold);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 42px;
-            font-weight: 900;
-            color: var(--gold);
-            margin-bottom: 16px;
-            box-shadow: 0 0 30px rgba(240, 185, 11, 0.4);
-        }
-        .auth-logo h1 {
-            font-size: 28px;
-            font-weight: 900;
-            color: var(--gold);
-            letter-spacing: 2px;
-            margin-bottom: 4px;
-        }
-        .admin-badge {
-            display: inline-block;
-            background: rgba(246, 70, 93, 0.15);
-            color: var(--red);
-            border: 1px solid var(--red);
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            margin-top: 8px;
-        }
-        .auth-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+        .auth-logo-img { width: 80px; height: 80px; border-radius: 20px; background: linear-gradient(135deg, #181A20, #2B3139); border: 2px solid var(--gold); display: inline-flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 900; color: var(--gold); margin-bottom: 16px; box-shadow: 0 0 30px rgba(240, 185, 11, 0.4); }
+        .auth-logo h1 { font-size: 28px; font-weight: 900; color: var(--gold); letter-spacing: 2px; margin-bottom: 4px; }
+        .admin-badge { display: inline-block; background: rgba(246, 70, 93, 0.15); color: var(--red); border: 1px solid var(--red); padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 900; letter-spacing: 2px; margin-top: 8px; }
+        .auth-title { font-size: 22px; font-weight: 700; margin-bottom: 20px; text-align: center; }
         .input-group { margin-bottom: 14px; }
-        .input-group label {
-            display: block;
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            font-weight: 700;
-        }
-        .input-group input,
-        .input-group select,
-        .input-group textarea {
-            width: 100%;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 14px;
-            border-radius: 10px;
-            color: var(--text-main);
-            font-size: 15px;
-            outline: none;
-            transition: 0.3s;
-            font-family: inherit;
-        }
+        .input-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; background: var(--bg-card); border: 1px solid var(--border); padding: 14px; border-radius: 10px; color: var(--text-main); font-size: 15px; outline: none; transition: 0.3s; font-family: inherit; }
         .input-group textarea { resize: vertical; min-height: 60px; }
-        .input-group input:focus,
-        .input-group select:focus,
-        .input-group textarea:focus {
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px rgba(240, 185, 11, 0.1);
-        }
-        .btn-block {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            font-weight: 900;
-            font-size: 15px;
-            cursor: pointer;
-            border: none;
-            background: var(--btn-gold);
-            color: #181A20;
-            margin-top: 8px;
-            transition: 0.2s;
-            font-family: inherit;
-            letter-spacing: 1px;
-        }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(240, 185, 11, 0.1); }
+        .btn-block { width: 100%; padding: 15px; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; border: none; background: var(--btn-gold); color: #181A20; margin-top: 8px; transition: 0.2s; font-family: inherit; letter-spacing: 1px; }
         .btn-block:active { transform: scale(0.98); }
         .btn-block.danger { background: var(--red); color: #fff; }
         .btn-block.success { background: var(--green); color: #fff; }
-        .btn-block.outline {
-            background: transparent;
-            border: 1px solid #444;
-            color: #fff;
-        }
-        .btn-small {
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 12px;
-            cursor: pointer;
-            border: none;
-            font-family: inherit;
-        }
+        .btn-block.outline { background: transparent; border: 1px solid #444; color: #fff; }
+        .btn-small { padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; border: none; font-family: inherit; }
         .btn-small.approve { background: var(--green); color: #fff; }
         .btn-small.reject { background: var(--red); color: #fff; }
         .btn-small.view { background: var(--gold); color: #000; }
@@ -283,335 +103,61 @@
         .btn-small.win { background: var(--green); color: #fff; }
         .btn-small.loss { background: var(--red); color: #fff; }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            margin-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-        }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .header-logo {
-            width: 38px; height: 38px;
-            border-radius: 50%;
-            background: var(--btn-gold);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 900;
-            color: #181A20;
-            box-shadow: 0 0 15px rgba(240, 185, 11, 0.5);
-        }
-        .header-title {
-            display: flex;
-            flex-direction: column;
-        }
-        .header-title h1 {
-            font-size: 16px;
-            font-weight: 900;
-            color: var(--gold);
-            letter-spacing: 1px;
-        }
-        .header-title span {
-            font-size: 9px;
-            color: var(--red);
-            letter-spacing: 2px;
-            font-weight: 700;
-        }
-        .bell-icon {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            width: 42px; height: 42px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: var(--gold);
-            cursor: pointer;
-            position: relative;
-        }
-        .notifBadge {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            background: var(--red);
-            color: #fff;
-            font-size: 10px;
-            font-weight: 700;
-            min-width: 18px;
-            height: 18px;
-            padding: 0 5px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 8px rgba(246, 70, 93, 0.8);
-            animation: pulse 1.5s infinite;
-            pointer-events: none;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .header-logo { width: 38px; height: 38px; border-radius: 50%; background: var(--btn-gold); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; color: #181A20; box-shadow: 0 0 15px rgba(240, 185, 11, 0.5); }
+        .header-title { display: flex; flex-direction: column; }
+        .header-title h1 { font-size: 16px; font-weight: 900; color: var(--gold); letter-spacing: 1px; }
+        .header-title span { font-size: 9px; color: var(--red); letter-spacing: 2px; font-weight: 700; }
+        .bell-icon { background: var(--bg-card); border: 1px solid var(--border); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--gold); cursor: pointer; position: relative; }
+        .notifBadge { position: absolute; top: -4px; right: -4px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 8px rgba(246, 70, 93, 0.8); animation: pulse 1.5s infinite; pointer-events: none; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 16px;
-            text-align: center;
-        }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; text-align: center; }
         .stat-card .stat-icon { font-size: 26px; margin-bottom: 6px; }
-        .stat-card .stat-value {
-            font-size: 26px;
-            font-weight: 900;
-            color: var(--gold-light);
-            margin-bottom: 4px;
-        }
-        .stat-card .stat-label {
-            font-size: 10px;
-            color: var(--text-muted);
-            letter-spacing: 1px;
-        }
+        .stat-card .stat-value { font-size: 26px; font-weight: 900; color: var(--gold-light); margin-bottom: 4px; }
+        .stat-card .stat-label { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; }
         .stat-card.pending .stat-value { color: var(--orange); }
         .stat-card.active .stat-value { color: var(--green); }
         .stat-card.inactive .stat-value { color: var(--red); }
         .stat-card.winrate .stat-value { color: var(--green); }
 
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
-        }
-        .section-title {
-            font-size: 15px;
-            font-weight: 900;
-            margin-bottom: 12px;
-            color: var(--gold);
-            letter-spacing: 1px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .section-title .count {
-            background: rgba(240, 185, 11, 0.15);
-            color: var(--gold);
-            border: 1px solid var(--gold);
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-        }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+        .section-title { font-size: 15px; font-weight: 900; margin-bottom: 12px; color: var(--gold); letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+        .section-title .count { background: rgba(240, 185, 11, 0.15); color: var(--gold); border: 1px solid var(--gold); padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
 
-        .user-card {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        .user-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
         .user-card:active { background: #222; }
-        .user-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-        }
-        .user-name {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--gold-light);
-        }
-        .user-email {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 2px;
-            word-break: break-all;
-        }
-        .user-status {
-            font-size: 10px;
-            font-weight: 700;
-            padding: 3px 10px;
-            border-radius: 10px;
-            letter-spacing: 1px;
-            flex-shrink: 0;
-        }
-        .user-status.inactive {
-            background: rgba(246, 70, 93, 0.15);
-            color: var(--red);
-            border: 1px solid var(--red);
-        }
-        .user-status.active {
-            background: rgba(14, 203, 129, 0.15);
-            color: var(--green);
-            border: 1px solid var(--green);
-        }
-        .user-status.pending {
-            background: rgba(245, 158, 11, 0.15);
-            color: var(--orange);
-            border: 1px solid var(--orange);
-        }
-        .user-info {
-            font-size: 11px;
-            color: var(--text-muted);
-            line-height: 1.6;
-        }
+        .user-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .user-name { font-size: 15px; font-weight: 700; color: var(--gold-light); }
+        .user-email { font-size: 11px; color: var(--text-muted); margin-top: 2px; word-break: break-all; }
+        .user-status { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 10px; letter-spacing: 1px; flex-shrink: 0; }
+        .user-status.inactive { background: rgba(246, 70, 93, 0.15); color: var(--red); border: 1px solid var(--red); }
+        .user-status.active { background: rgba(14, 203, 129, 0.15); color: var(--green); border: 1px solid var(--green); }
+        .user-status.pending { background: rgba(245, 158, 11, 0.15); color: var(--orange); border: 1px solid var(--orange); }
+        .user-info { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
         .user-info strong { color: var(--gold-light); }
-        .user-days-left {
-            display: inline-block;
-            background: rgba(14, 203, 129, 0.15);
-            color: var(--green);
-            padding: 2px 8px;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 700;
-            margin-top: 4px;
-        }
-        .user-days-left.expired {
-            background: rgba(246, 70, 93, 0.15);
-            color: var(--red);
-        }
+        .user-days-left { display: inline-block; background: rgba(14, 203, 129, 0.15); color: var(--green); padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; margin-top: 4px; }
+        .user-days-left.expired { background: rgba(246, 70, 93, 0.15); color: var(--red); }
 
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #222;
-            font-size: 13px;
-        }
+        .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 13px; }
         .detail-row:last-child { border-bottom: none; }
         .detail-row span:first-child { color: var(--text-muted); }
-        .detail-row span:last-child {
-            color: var(--gold-light);
-            font-weight: 700;
-            text-align: right;
-            max-width: 60%;
-            word-break: break-all;
-        }
+        .detail-row span:last-child { color: var(--gold-light); font-weight: 700; text-align: right; max-width: 60%; word-break: break-all; }
 
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: var(--bg-card);
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-around;
-            align-items: stretch;
-            padding: 0;
-            margin: 0;
-            z-index: 99999;
-            height: 72px;
-            min-height: 72px;
-            max-height: 72px;
-            touch-action: manipulation;
-        }
-        .nav-item {
-            flex: 1 1 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            color: var(--text-muted);
-            font-size: 10px;
-            font-weight: 700;
-            text-decoration: none;
-            cursor: pointer;
-            background: transparent;
-            border: none;
-            font-family: inherit;
-            padding: 0;
-            margin: 0;
-            height: 72px;
-            min-height: 72px;
-            max-height: 72px;
-            box-sizing: border-box;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            user-select: none;
-            -webkit-appearance: none;
-            appearance: none;
-            transition: color 0.15s, background 0.15s;
-            position: relative;
-            overflow: visible;
-            line-height: 1;
-        }
-        .nav-item:active,
-        .nav-item:focus {
-            background: rgba(240, 185, 11, 0.08);
-            color: var(--gold);
-            outline: none;
-        }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: stretch; padding: 0; margin: 0; z-index: 99999; height: 72px; min-height: 72px; max-height: 72px; touch-action: manipulation; }
+        .nav-item { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; text-decoration: none; cursor: pointer; background: transparent; border: none; font-family: inherit; padding: 0; margin: 0; height: 72px; min-height: 72px; max-height: 72px; box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; -webkit-appearance: none; appearance: none; transition: color 0.15s, background 0.15s; position: relative; overflow: visible; line-height: 1; }
+        .nav-item:active, .nav-item:focus { background: rgba(240, 185, 11, 0.08); color: var(--gold); outline: none; }
         .nav-item.active { color: var(--gold); }
-        .nav-item .icon {
-            font-size: 22px;
-            line-height: 22px;
-            height: 22px;
-            width: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            user-select: none;
-        }
-        .nav-item > span:not(.icon) {
-            font-size: 10px;
-            line-height: 12px;
-            height: 12px;
-            display: block;
-            pointer-events: none;
-            user-select: none;
-            white-space: nowrap;
-        }
-        .nav-item * {
-            pointer-events: none;
-        }
+        .nav-item .icon { font-size: 22px; line-height: 22px; height: 22px; width: 22px; display: flex; align-items: center; justify-content: center; pointer-events: none; user-select: none; }
+        .nav-item > span:not(.icon) { font-size: 10px; line-height: 12px; height: 12px; display: block; pointer-events: none; user-select: none; white-space: nowrap; }
+        .nav-item * { pointer-events: none; }
 
         .hidden { display: none !important; }
-        .toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--gold);
-            color: #181A20;
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-weight: 900;
-            font-size: 14px;
-            opacity: 0;
-            transition: 0.3s;
-            z-index: 99999;
-            max-width: 90%;
-            text-align: center;
-        }
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-        }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--gold); color: #181A20; padding: 12px 24px; border-radius: 10px; font-weight: 900; font-size: 14px; opacity: 0; transition: 0.3s; z-index: 99999; max-width: 90%; text-align: center; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
         .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
         .empty-state h3 { color: var(--gold); margin-bottom: 6px; }
         .empty-state p { font-size: 13px; }
@@ -619,15 +165,10 @@
 </head>
 <body>
 <div id="splash">
-    <div class="splash-logo">
-        <div class="splash-logo-circle"></div>
-        <div class="splash-logo-inner">A</div>
-    </div>
+    <div class="splash-logo"><div class="splash-logo-circle"></div><div class="splash-logo-inner">A</div></div>
     <h1 class="splash-title">TRADELIX AI</h1>
     <p class="splash-subtitle">ADMIN CONTROL PANEL</p>
-    <div class="splash-loading">
-        <div class="splash-loading-fill"></div>
-    </div>
+    <div class="splash-loading"><div class="splash-loading-fill"></div></div>
 </div>
 
 <div id="loginScreen" class="screen">
@@ -638,172 +179,72 @@
             <div class="admin-badge">🔒 ADMIN ACCESS</div>
         </div>
         <h2 class="auth-title">Sign In</h2>
-        <div class="input-group">
-            <label>Admin Email</label>
-            <input type="email" id="loginEmail" placeholder="admin@email.com">
-        </div>
-        <div class="input-group">
-            <label>Password</label>
-            <input type="password" id="loginPassword" placeholder="••••••••">
-        </div>
+        <div class="input-group"><label>Admin Email</label><input type="email" id="loginEmail" placeholder="admin@email.com"></div>
+        <div class="input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
         <button class="btn-block" onclick="handleLogin()">Sign In as Admin</button>
     </div>
 </div>
 
 <div id="dashboardScreen" class="screen">
     <div class="header">
-        <div class="header-left">
-            <div class="header-logo">A</div>
-            <div class="header-title">
-                <h1>DASHBOARD</h1>
-                <span>● ADMIN</span>
-            </div>
-        </div>
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>DASHBOARD</h1><span>● ADMIN</span></div></div>
         <div class="bell-icon" onclick="openNotifModal()">🔔</div>
     </div>
-
     <div class="stats-grid">
-        <div class="stat-card active">
-            <div class="stat-icon">✅</div>
-            <div class="stat-value" id="statActive">0</div>
-            <div class="stat-label">ACTIVE</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">👥</div>
-            <div class="stat-value" id="statTotal">0</div>
-            <div class="stat-label">TOTAL USERS</div>
-        </div>
-        <div class="stat-card inactive">
-            <div class="stat-icon">❌</div>
-            <div class="stat-value" id="statInactive">0</div>
-            <div class="stat-label">INACTIVE</div>
-        </div>
-        <div class="stat-card pending">
-            <div class="stat-icon">⏳</div>
-            <div class="stat-value" id="statPending">0</div>
-            <div class="stat-label">PENDING</div>
-        </div>
+        <div class="stat-card active"><div class="stat-icon">✅</div><div class="stat-value" id="statActive">0</div><div class="stat-label">ACTIVE</div></div>
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="statTotal">0</div><div class="stat-label">TOTAL USERS</div></div>
+        <div class="stat-card inactive"><div class="stat-icon">❌</div><div class="stat-value" id="statInactive">0</div><div class="stat-label">INACTIVE</div></div>
+        <div class="stat-card pending"><div class="stat-icon">⏳</div><div class="stat-value" id="statPending">0</div><div class="stat-label">PENDING</div></div>
     </div>
-
     <div id="notifPermissionBox" class="card" style="border-color: var(--gold); text-align: center;">
         <h3 style="color: var(--gold); margin-bottom: 8px; font-size: 15px;">🔔 Enable Notifications</h3>
-        <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px; line-height: 1.5;">
-            Get instant alerts when a new user registers or a deposit is requested.
-        </p>
+        <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px; line-height: 1.5;">Get instant alerts when a new user registers or a deposit is requested.</p>
         <button class="btn-block" onclick="requestNotifPermission()">🔔 Allow Notifications</button>
     </div>
-
     <div class="section-title">⚡ QUICK ACTIONS</div>
     <div class="card" style="padding: 14px;">
-        <button class="btn-block" onclick="showScreen('sendSignalScreen')" style="margin-bottom: 8px;">
-            📤 Send New Signal
-        </button>
-        <button class="btn-block outline" onclick="showScreen('usersScreen')" style="margin-bottom: 8px;">
-            👥 Manage Users
-        </button>
-        <button class="btn-block outline" onclick="showScreen('meetingsAdminScreen')">
-            📅 Publish Meeting
-        </button>
+        <button class="btn-block" onclick="showScreen('sendSignalScreen')" style="margin-bottom: 8px;">📤 Send New Signal</button>
+        <button class="btn-block outline" onclick="showScreen('usersScreen')" style="margin-bottom: 8px;">👥 Manage Users</button>
+        <button class="btn-block outline" onclick="showScreen('meetingsAdminScreen')">📅 Publish Meeting</button>
     </div>
-
     <div class="section-title">🔔 RECENT ACTIVITY</div>
-    <div id="recentActivity">
-        <div class="empty-state">
-            <div class="icon">📭</div>
-            <h3>Loading...</h3>
-        </div>
-    </div>
-
+    <div id="recentActivity"><div class="empty-state"><div class="icon">📭</div><h3>Loading...</h3></div></div>
     <div class="bottom-nav">
-        <button class="nav-item active" onclick="showScreen('dashboardScreen')">
-            <span class="icon">📊</span>
-            <span>Dashboard</span>
-        </button>
-        <button class="nav-item" onclick="showScreen('usersScreen')">
-            <span class="icon">👥</span>
-            <span>Users</span>
-        </button>
-        <button class="nav-item" onclick="showScreen('sendSignalScreen')">
-            <span class="icon">📤</span>
-            <span>Signal</span>
-        </button>
-        <button class="nav-item" onclick="showScreen('historyScreen')">
-            <span class="icon">📜</span>
-            <span>History</span>
-        </button>
-        <button class="nav-item" onclick="handleLogout()">
-            <span class="icon">🚪</span>
-            <span>Logout</span>
-        </button>
+        <button class="nav-item active" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
+        <button class="nav-item" onclick="showScreen('historyScreen')"><span class="icon">📜</span><span>History</span></button>
+        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
 
 <div id="usersScreen" class="screen">
     <div class="header">
-        <div class="header-left">
-            <div class="header-logo">A</div>
-            <div class="header-title">
-                <h1>USERS</h1>
-                <span>● MANAGEMENT</span>
-            </div>
-        </div>
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>USERS</h1><span>● MANAGEMENT</span></div></div>
         <div class="bell-icon" onclick="loadUsers()">🔄</div>
     </div>
-
-    <div class="input-group">
-        <input type="text" id="searchUsers" placeholder="🔍 Search by name or email..." oninput="filterUsers()">
-    </div>
-
+    <div class="input-group"><input type="text" id="searchUsers" placeholder="🔍 Search by name or email..." oninput="filterUsers()"></div>
     <div style="display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;">
         <button class="btn-small view" onclick="filterByStatus('all')" id="filterAll">All</button>
         <button class="btn-small approve" onclick="filterByStatus('active')" id="filterActive">Active</button>
         <button class="btn-small" style="background: var(--orange); color: #fff;" onclick="filterByStatus('pending')" id="filterPending">Pending</button>
         <button class="btn-small reject" onclick="filterByStatus('inactive')" id="filterInactive">Inactive</button>
     </div>
-
-    <div id="usersList">
-        <div class="empty-state">
-            <div class="icon">⏳</div>
-            <h3>Loading users...</h3>
-        </div>
-    </div>
-
+    <div id="usersList"><div class="empty-state"><div class="icon">⏳</div><h3>Loading users...</h3></div></div>
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')">
-            <span class="icon">📊</span>
-            <span>Dashboard</span>
-        </button>
-        <button class="nav-item active" onclick="showScreen('usersScreen')">
-            <span class="icon">👥</span>
-            <span>Users</span>
-        </button>
-        <button class="nav-item" onclick="showScreen('sendSignalScreen')">
-            <span class="icon">📤</span>
-            <span>Signal</span>
-        </button>
-        <button class="nav-item" onclick="showScreen('historyScreen')">
-            <span class="icon">📜</span>
-            <span>History</span>
-        </button>
-        <button class="nav-item" onclick="handleLogout()">
-            <span class="icon">🚪</span>
-            <span>Logout</span>
-        </button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
+        <button class="nav-item" onclick="showScreen('historyScreen')"><span class="icon">📜</span><span>History</span></button>
+        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
 
 <div id="userDetailScreen" class="screen">
     <div class="header">
-        <div class="header-left">
-            <div class="header-logo">A</div>
-            <div class="header-title">
-                <h1>USER DETAIL</h1>
-                <span>● PROFILE</span>
-            </div>
-        </div>
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>USER DETAIL</h1><span>● PROFILE</span></div></div>
         <div class="bell-icon" onclick="showScreen('usersScreen')">✕</div>
     </div>
-
     <div class="card">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">👤 User Information</h3>
         <div class="detail-row"><span>Name</span><span id="detailName">-</span></div>
@@ -812,7 +253,6 @@
         <div class="detail-row"><span>Country</span><span id="detailCountry">-</span></div>
         <div class="detail-row"><span>Joined</span><span id="detailCreated">-</span></div>
     </div>
-
     <div class="card">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💎 Subscription</h3>
         <div class="detail-row"><span>Status</span><span id="detailStatus">-</span></div>
@@ -821,166 +261,74 @@
         <div class="detail-row"><span>Expiry Date</span><span id="detailExpiry">-</span></div>
         <div class="detail-row"><span>Days Left</span><span id="detailDaysLeft">-</span></div>
     </div>
-
     <div class="card">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">🎓 Enrolled Courses</h3>
-        <div id="detailCourses">
-            <p style="color: var(--text-muted); font-size: 13px; text-align: center;">No courses</p>
-        </div>
+        <div id="detailCourses"><p style="color: var(--text-muted); font-size: 13px; text-align: center;">No courses</p></div>
     </div>
-
     <div class="card" id="depositInfoCard">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💰 Deposit Request</h3>
         <div class="detail-row"><span>Amount</span><span id="detailAmount">-</span></div>
         <div class="detail-row"><span>TX Hash</span><span id="detailTxHash" style="font-size: 10px;">-</span></div>
     </div>
-
     <div class="section-title">⚡ ACTIONS</div>
     <div class="card" style="padding: 14px;">
-        <button class="btn-block success" onclick="openActivateModal()" id="activateBtn" style="margin-bottom: 8px;">
-            ✅ Activate Subscription
-        </button>
-        <button class="btn-block" style="background: var(--blue); color: #fff; margin-bottom: 8px;" onclick="openCourseModal()">
-            🎓 Activate Course
-        </button>
-        <button class="btn-block danger" onclick="confirmDeleteUser()" style="margin-bottom: 8px;">
-            🗑️ Delete User
-        </button>
-        <button class="btn-block outline" onclick="showScreen('usersScreen')">
-            ← Back to Users
-        </button>
+        <button class="btn-block success" onclick="openActivateModal()" id="activateBtn" style="margin-bottom: 8px;">✅ Activate Subscription</button>
+        <button class="btn-block" style="background: var(--blue); color: #fff; margin-bottom: 8px;" onclick="openCourseModal()">🎓 Activate Course</button>
+        <button class="btn-block danger" onclick="confirmDeleteUser()" style="margin-bottom: 8px;">🗑️ Delete User</button>
+        <button class="btn-block outline" onclick="showScreen('usersScreen')">← Back to Users</button>
     </div>
-
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')">
-            <span class="icon">📊</span>
-            <span>Dashboard</span>
-        </button>
-        <button class="nav-item active" onclick="showScreen('usersScreen')">
-            <span class="icon">👥</span>
-            <span>Users</span>
-        </button>
-        <button class="nav-item" onclick="showScreen('sendSignalScreen')">
-            <span class="icon">📤</span>
-            <span>Signal</span>
-        </button>
-        <button class="nav-item" onclick="showScreen('historyScreen')">
-            <span class="icon">📜</span>
-            <span>History</span>
-        </button>
-        <button class="nav-item" onclick="handleLogout()">
-            <span class="icon">🚪</span>
-            <span>Logout</span>
-        </button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
+        <button class="nav-item" onclick="showScreen('historyScreen')"><span class="icon">📜</span><span>History</span></button>
+        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
 
 <div id="sendSignalScreen" class="screen">
     <div class="header">
-        <div class="header-left">
-            <div class="header-logo">A</div>
-            <div class="header-title">
-                <h1>SEND SIGNAL</h1>
-                <span>● TRADING</span>
-            </div>
-        </div>
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>SEND SIGNAL</h1><span>● TRADING</span></div></div>
         <div class="bell-icon" onclick="openNotifModal()">🔔</div>
     </div>
-
     <div class="card" style="text-align: center; border-color: var(--gold); padding: 14px;">
-        <p style="color: var(--text-muted); font-size: 12px; line-height: 1.6; margin-bottom: 12px;">
-            🤖 Let AI analyze the market and suggest a trade
-        </p>
-        <button class="btn-block" onclick="runAIAnalysis()" id="aiBtn">
-            🤖 AI Analysis
-        </button>
+        <p style="color: var(--text-muted); font-size: 12px; line-height: 1.6; margin-bottom: 12px;">🤖 Let AI analyze the market and suggest a trade</p>
+        <button class="btn-block" onclick="runAIAnalysis()" id="aiBtn">🤖 AI Analysis</button>
     </div>
-
     <div id="aiResult" class="hidden"></div>
-
     <div class="card">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">📈 Signal Details</h3>
-
         <div class="input-group">
             <label>Coin</label>
             <select id="signalCoin">
-                <option value="BTC">Bitcoin (BTC)</option>
-                <option value="ETH">Ethereum (ETH)</option>
-                <option value="BNB">BNB</option>
-                <option value="SOL">Solana (SOL)</option>
-                <option value="XRP">XRP</option>
-                <option value="ADA">Cardano (ADA)</option>
-                <option value="DOGE">Dogecoin (DOGE)</option>
-                <option value="DOT">Polkadot (DOT)</option>
-                <option value="AVAX">Avalanche (AVAX)</option>
-                <option value="LINK">Chainlink (LINK)</option>
-                <option value="POL">Polygon (POL)</option>
-                <option value="LTC">Litecoin (LTC)</option>
-                <option value="TRX">TRON (TRX)</option>
-                <option value="ATOM">Cosmos (ATOM)</option>
-                <option value="UNI">Uniswap (UNI)</option>
-                <option value="SHIB">Shiba Inu (SHIB)</option>
-                <option value="APT">Aptos (APT)</option>
-                <option value="ARB">Arbitrum (ARB)</option>
-                <option value="OP">Optimism (OP)</option>
-                <option value="NEAR">NEAR Protocol</option>
-                <option value="INJ">Injective (INJ)</option>
-                <option value="SUI">Sui (SUI)</option>
-                <option value="FIL">Filecoin (FIL)</option>
-                <option value="ETC">Ethereum Classic (ETC)</option>
-                <option value="TON">Toncoin (TON)</option>
-                <option value="ICP">Internet Computer (ICP)</option>
-                <option value="RENDER">Render (RENDER)</option>
-                <option value="FET">Fetch.ai (FET)</option>
-                <option value="SEI">Sei (SEI)</option>
-                <option value="TIA">Celestia (TIA)</option>
-                <option value="STX">Stacks (STX)</option>
-                <option value="IMX">Immutable (IMX)</option>
-                <option value="GRT">The Graph (GRT)</option>
-                <option value="SAND">The Sandbox (SAND)</option>
-                <option value="MANA">Decentraland (MANA)</option>
-                <option value="AAVE">Aave (AAVE)</option>
-                <option value="MKR">Maker (MKR)</option>
-                <option value="CRV">Curve DAO (CRV)</option>
-                <option value="ALGO">Algorand (ALGO)</option>
-                <option value="VET">VeChain (VET)</option>
-                <option value="HBAR">Hedera (HBAR)</option>
-                <option value="EOS">EOS</option>
-                <option value="XLM">Stellar (XLM)</option>
-                <option value="THETA">Theta Network (THETA)</option>
-                <option value="RUNE">THORChain (RUNE)</option>
-                <option value="KAS">Kaspa (KAS)</option>
-                <option value="TAO">Bittensor (TAO)</option>
-                <option value="WIF">dogwifhat (WIF)</option>
-                <option value="PEPE">Pepe (PEPE)</option>
-                <option value="BONK">Bonk (BONK)</option>
+                <option value="BTC">Bitcoin (BTC)</option><option value="ETH">Ethereum (ETH)</option><option value="BNB">BNB</option>
+                <option value="SOL">Solana (SOL)</option><option value="XRP">XRP</option><option value="ADA">Cardano (ADA)</option>
+                <option value="DOGE">Dogecoin (DOGE)</option><option value="DOT">Polkadot (DOT)</option><option value="AVAX">Avalanche (AVAX)</option>
+                <option value="LINK">Chainlink (LINK)</option><option value="POL">Polygon (POL)</option><option value="LTC">Litecoin (LTC)</option>
+                <option value="TRX">TRON (TRX)</option><option value="ATOM">Cosmos (ATOM)</option><option value="UNI">Uniswap (UNI)</option>
+                <option value="SHIB">Shiba Inu (SHIB)</option><option value="APT">Aptos (APT)</option><option value="ARB">Arbitrum (ARB)</option>
+                <option value="OP">Optimism (OP)</option><option value="NEAR">NEAR Protocol</option><option value="INJ">Injective (INJ)</option>
+                <option value="SUI">Sui (SUI)</option><option value="FIL">Filecoin (FIL)</option><option value="ETC">Ethereum Classic (ETC)</option>
+                <option value="TON">Toncoin (TON)</option><option value="ICP">Internet Computer (ICP)</option><option value="RENDER">Render (RENDER)</option>
+                <option value="FET">Fetch.ai (FET)</option><option value="SEI">Sei (SEI)</option><option value="TIA">Celestia (TIA)</option>
+                <option value="STX">Stacks (STX)</option><option value="IMX">Immutable (IMX)</option><option value="GRT">The Graph (GRT)</option>
+                <option value="SAND">The Sandbox (SAND)</option><option value="MANA">Decentraland (MANA)</option><option value="AAVE">Aave (AAVE)</option>
+                <option value="MKR">Maker (MKR)</option><option value="CRV">Curve DAO (CRV)</option><option value="ALGO">Algorand (ALGO)</option>
+                <option value="VET">VeChain (VET)</option><option value="HBAR">Hedera (HBAR)</option><option value="EOS">EOS</option>
+                <option value="XLM">Stellar (XLM)</option><option value="THETA">Theta Network (THETA)</option><option value="RUNE">THORChain (RUNE)</option>
+                <option value="KAS">Kaspa (KAS)</option><option value="TAO">Bittensor (TAO)</option><option value="WIF">dogwifhat (WIF)</option>
+                <option value="PEPE">Pepe (PEPE)</option><option value="BONK">Bonk (BONK)</option>
             </select>
         </div>
-
-        <div class="input-group">
-            <label>Direction</label>
-            <select id="signalDirection">
-                <option value="BUY">BUY (Long)</option>
-                <option value="SELL">SELL (Short)</option>
-            </select>
-        </div>
-
+        <div class="input-group"><label>Direction</label><select id="signalDirection"><option value="BUY">BUY (Long)</option><option value="SELL">SELL (Short)</option></select></div>
         <div class="input-group"><label>Entry Price</label><input type="text" id="signalEntry" placeholder="e.g. 65000"></div>
         <div class="input-group"><label>Stop Loss</label><input type="text" id="signalSL" placeholder="e.g. 64500"></div>
         <div class="input-group"><label>Take Profit</label><input type="text" id="signalTP" placeholder="e.g. 66500"></div>
         <div class="input-group"><label>Confidence (%)</label><input type="text" id="signalConfidence" placeholder="e.g. 85"></div>
         <div class="input-group"><label>Notes (Optional)</label><textarea id="signalNotes" placeholder="Additional analysis..."></textarea></div>
-
-        <div class="input-group">
-            <label>Send To</label>
-            <select id="signalTarget">
-                <option value="ALL">📢 All Active Subscribers</option>
-            </select>
-        </div>
-
+        <div class="input-group"><label>Send To</label><select id="signalTarget"><option value="ALL">📢 All Active Subscribers</option></select></div>
         <button class="btn-block" onclick="sendSignal()">📤 Send Signal</button>
     </div>
-
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
@@ -992,39 +340,17 @@
 
 <div id="historyScreen" class="screen">
     <div class="header">
-        <div class="header-left">
-            <div class="header-logo">A</div>
-            <div class="header-title">
-                <h1>HISTORY</h1>
-                <span>● SIGNALS LOG</span>
-            </div>
-        </div>
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>HISTORY</h1><span>● SIGNALS LOG</span></div></div>
         <div class="bell-icon" onclick="openNotifModal()">🔔</div>
     </div>
-
     <div class="stats-grid">
-        <div class="stat-card winrate">
-            <div class="stat-icon">🎯</div>
-            <div class="stat-value" id="winRate">0%</div>
-            <div class="stat-label">WIN RATE</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">📊</div>
-            <div class="stat-value" id="totalClosed">0</div>
-            <div class="stat-label">TOTAL CLOSED</div>
-        </div>
+        <div class="stat-card winrate"><div class="stat-icon">🎯</div><div class="stat-value" id="winRate">0%</div><div class="stat-label">WIN RATE</div></div>
+        <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value" id="totalClosed">0</div><div class="stat-label">TOTAL CLOSED</div></div>
     </div>
-
     <div class="section-title">📜 CLOSED SIGNALS</div>
-    <div id="historyList">
-        <div class="empty-state"><div class="icon">📭</div><h3>No history yet</h3><p>Closed signals will appear here</p></div>
-    </div>
-
+    <div id="historyList"><div class="empty-state"><div class="icon">📭</div><h3>No history yet</h3><p>Closed signals will appear here</p></div></div>
     <div class="section-title" style="margin-top: 24px;">🔥 ACTIVE SIGNALS</div>
-    <div id="activeSignalsList">
-        <div class="empty-state"><div class="icon">📭</div><h3>No active signals</h3></div>
-    </div>
-
+    <div id="activeSignalsList"><div class="empty-state"><div class="icon">📭</div><h3>No active signals</h3></div></div>
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
@@ -1036,16 +362,9 @@
 
 <div id="meetingsAdminScreen" class="screen">
     <div class="header">
-        <div class="header-left">
-            <div class="header-logo">A</div>
-            <div class="header-title">
-                <h1>MEETINGS</h1>
-                <span>● PUBLISH</span>
-            </div>
-        </div>
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>MEETINGS</h1><span>● PUBLISH</span></div></div>
         <div class="bell-icon" onclick="showScreen('dashboardScreen')">✕</div>
     </div>
-
     <div class="card">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">📅 Publish New Meeting</h3>
         <div class="input-group"><label>Meeting Title</label><input type="text" id="meetingTitle" placeholder="e.g. Live Trading Session"></div>
@@ -1054,12 +373,8 @@
         <div class="input-group"><label>Description (Optional)</label><textarea id="meetingDesc" placeholder="Meeting details..."></textarea></div>
         <button class="btn-block" onclick="publishMeeting()">📤 Publish Meeting</button>
     </div>
-
     <div class="section-title">📋 PUBLISHED MEETINGS</div>
-    <div id="meetingsAdminList">
-        <div class="empty-state"><div class="icon">📭</div><h3>No meetings yet</h3></div>
-    </div>
-
+    <div id="meetingsAdminList"><div class="empty-state"><div class="icon">📭</div><h3>No meetings yet</h3></div></div>
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
@@ -1185,10 +500,6 @@
             const userCredential = await signInWithEmailAndPassword(auth, email, pass);
             localStorage.setItem('tradelix_admin', JSON.stringify({ uid: userCredential.user.uid, email: email }));
             showToast('✅ Welcome, Admin!');
-            // Reset first-run flag so we re-sync silently
-            try {
-                localStorage.removeItem('tradelix_rt_firstrun_v6');
-            } catch(e) {}
             setTimeout(() => {
                 showScreen('dashboardScreen');
                 loadDashboard();
@@ -1215,9 +526,7 @@
         try {
             const usersSnapshot = await getDocs(collection(db, 'tradelix_users'));
             allUsers = [];
-            usersSnapshot.forEach(docSnap => {
-                allUsers.push({ uid: docSnap.id, ...docSnap.data() });
-            });
+            usersSnapshot.forEach(docSnap => { allUsers.push({ uid: docSnap.id, ...docSnap.data() }); });
             const total = allUsers.length;
             const active = allUsers.filter(u => u.status === 'active').length;
             const pending = allUsers.filter(u => u.status === 'pending').length;
@@ -1226,26 +535,19 @@
             document.getElementById('statActive').textContent = active;
             document.getElementById('statPending').textContent = pending;
             document.getElementById('statInactive').textContent = inactive;
-            const recent = allUsers
-                .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-                .slice(0, 5);
+            const recent = allUsers.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 5);
             const recentDiv = document.getElementById('recentActivity');
             if (recent.length > 0) {
                 recentDiv.innerHTML = recent.map(u => `
                     <div class="user-card" onclick="openUserDetail('${u.uid}')">
                         <div class="user-header">
-                            <div>
-                                <div class="user-name">${u.name || 'Unknown'}</div>
-                                <div class="user-email">${u.email || ''}</div>
-                            </div>
+                            <div><div class="user-name">${u.name || 'Unknown'}</div><div class="user-email">${u.email || ''}</div></div>
                             <span class="user-status ${u.status || 'inactive'}">${(u.status || 'inactive').toUpperCase()}</span>
                         </div>
                     </div>
                 `).join('');
             }
-        } catch (error) {
-            console.error('Dashboard error:', error);
-        }
+        } catch (error) { console.error('Dashboard error:', error); }
     }
 
     let currentFilter = 'all';
@@ -1256,9 +558,7 @@
         try {
             const usersSnapshot = await getDocs(collection(db, 'tradelix_users'));
             allUsers = [];
-            usersSnapshot.forEach(docSnap => {
-                allUsers.push({ uid: docSnap.id, ...docSnap.data() });
-            });
+            usersSnapshot.forEach(docSnap => { allUsers.push({ uid: docSnap.id, ...docSnap.data() }); });
             renderUsers();
         } catch (error) { console.error(error); }
     }
@@ -1303,10 +603,7 @@
             return `
                 <div class="user-card" onclick="openUserDetail('${u.uid}')">
                     <div class="user-header">
-                        <div>
-                            <div class="user-name">${u.name || 'Unknown'}</div>
-                            <div class="user-email">${u.email || ''}</div>
-                        </div>
+                        <div><div class="user-name">${u.name || 'Unknown'}</div><div class="user-email">${u.email || ''}</div></div>
                         <span class="user-status ${u.status || 'inactive'}">${(u.status || 'inactive').toUpperCase()}</span>
                     </div>
                     <div class="user-info">
@@ -1517,7 +814,7 @@
             if (active.length === 0) activeList.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>No active signals</h3></div>`;
             else activeList.innerHTML = active.map(s => `
                 <div class="user-card">
-                    <div class="user-header"><div><div class="user-name">${s.coin || 'BTC'}/USDT • ${s.direction}</div><div class="user-email">Entry: $${s.entry} | SL: $${s.stopLoss} | TP: ${s.takeProfit}</div></div><span class="user-status active">LIVE</span></div>
+                    <div class="user-header"><div><div class="user-name">${s.coin || 'BTC'}/USDT • ${s.direction}</div><div class="user-email">Entry: $${s.entry} | SL: $${s.stopLoss} | TP: $${s.takeProfit}</div></div><span class="user-status active">LIVE</span></div>
                     <div style="display:flex; gap: 8px; margin-top: 10px;"><button class="btn-small win" onclick="closeSignal('${s.id}', 'win')" style="flex:1;">✅ Close as WIN</button><button class="btn-small loss" onclick="closeSignal('${s.id}', 'loss')" style="flex:1;">❌ Close as LOSS</button></div>
                 </div>`).join('');
         } catch (error) { console.error(error); }
@@ -1526,9 +823,7 @@
     async function closeSignal(signalId, result) {
         if (!confirm(`Close signal as ${result.toUpperCase()}?`)) return;
         try {
-            await updateDoc(doc(db, 'tradelix_signals', signalId), {
-                status: 'closed', result: result, closedAt: serverTimestamp()
-            });
+            await updateDoc(doc(db, 'tradelix_signals', signalId), { status: 'closed', result: result, closedAt: serverTimestamp() });
             showToast(`✅ Signal closed as ${result.toUpperCase()}`);
             loadHistory();
         } catch (error) { console.error(error); showToast('Error closing signal'); }
@@ -1541,9 +836,7 @@
         const desc = document.getElementById('meetingDesc').value.trim();
         if (!title || !link) { showToast('Please fill Title and Link'); return; }
         try {
-            await addDoc(collection(db, 'tradelix_meetings'), {
-                title: title, link: link, date: date, description: desc, createdAt: serverTimestamp()
-            });
+            await addDoc(collection(db, 'tradelix_meetings'), { title: title, link: link, date: date, description: desc, createdAt: serverTimestamp() });
             showToast('✅ Meeting published!');
             document.getElementById('meetingTitle').value = '';
             document.getElementById('meetingLink').value = '';
@@ -1734,11 +1027,7 @@
         function nuke(){
             document.querySelectorAll('[data-netlify-badge],#netlify-badge,.netlify-badge,iframe,a[href*="netlify"],div[class*="netlify"],div[id*="netlify"],iframe[src*="netlify"]').forEach(function(e){e.remove()});
             document.querySelectorAll('body > *').forEach(function(el){
-                try{
-                    var st=getComputedStyle(el);
-                    var txt=el.textContent||'';
-                    if((st.position==='fixed'||st.position==='absolute') && txt.indexOf('Netlify')>-1){el.remove()}
-                }catch(x){}
+                try{ var st=getComputedStyle(el); var txt=el.textContent||''; if((st.position==='fixed'||st.position==='absolute') && txt.indexOf('Netlify')>-1){el.remove()} }catch(x){}
             });
         }
         document.addEventListener('DOMContentLoaded',nuke);
@@ -1749,57 +1038,65 @@
     })();
 </script>
 
-<!-- ================= NOTIFICATIONS REALTIME v6 (FINAL) ================= -->
+<!-- ================= NOTIFICATIONS v8 (FINAL — WORKS 100%) ================= -->
 <script>
 (function() {
     'use strict';
     
+    console.log('═══════════════════════════════════════');
+    console.log('🚀 NOTIFICATIONS v8 — INITIALIZING');
+    console.log('═══════════════════════════════════════');
+    
+    // ═══════════════════════════════════════════════
+    // ⏰ Reference point: anything created BEFORE this = already seen
+    // ═══════════════════════════════════════════════
+    const SESSION_START_MS = Date.now() - 3000; // 3 seconds buffer
+    console.log('🕐 Session started at:', new Date(SESSION_START_MS).toLocaleTimeString());
+    
     const KEYS = {
-        seenUsers: 'tradelix_rt_users_v6',
-        seenDeposits: 'tradelix_rt_deposits_v6',
-        seenCourses: 'tradelix_rt_courses_v6',
-        seenSignals: 'tradelix_rt_signals_v6',
-        firstRun: 'tradelix_rt_firstrun_v6',
+        seenUsers: 'tradelix_v8_seen_users',
+        seenTx: 'tradelix_v8_seen_tx',
+        seenSignals: 'tradelix_v8_seen_signals',
         notifs: 'tradelix_admin_notifs'
     };
     
     let seenUsers = new Set(JSON.parse(localStorage.getItem(KEYS.seenUsers) || '[]'));
-    let seenDeposits = new Set(JSON.parse(localStorage.getItem(KEYS.seenDeposits) || '[]'));
-    let seenCourses = new Set(JSON.parse(localStorage.getItem(KEYS.seenCourses) || '[]'));
+    let seenTx = new Set(JSON.parse(localStorage.getItem(KEYS.seenTx) || '[]'));
     let seenSignals = new Set(JSON.parse(localStorage.getItem(KEYS.seenSignals) || '[]'));
+    
+    console.log('📦 Loaded seen:', seenUsers.size, 'users,', seenTx.size, 'tx,', seenSignals.size, 'signals');
     
     function saveAll() {
         try {
-            localStorage.setItem(KEYS.seenUsers, JSON.stringify([...seenUsers].slice(-1000)));
-            localStorage.setItem(KEYS.seenDeposits, JSON.stringify([...seenDeposits].slice(-1000)));
-            localStorage.setItem(KEYS.seenCourses, JSON.stringify([...seenCourses].slice(-1000)));
-            localStorage.setItem(KEYS.firstRun, '1');
-        } catch(e) {}
-    }
-    
-    function saveSignals() {
-        try {
+            localStorage.setItem(KEYS.seenUsers, JSON.stringify([...seenUsers].slice(-2000)));
+            localStorage.setItem(KEYS.seenTx, JSON.stringify([...seenTx].slice(-2000)));
             localStorage.setItem(KEYS.seenSignals, JSON.stringify([...seenSignals].slice(-500)));
-        } catch(e) {}
+        } catch(e) { console.warn('Save error:', e); }
     }
     
     function waitFirebase() {
         return new Promise((resolve) => {
             const check = () => {
                 if (window.firebaseDB) return resolve(window.firebaseDB);
-                setTimeout(check, 400);
+                setTimeout(check, 300);
             };
             check();
         });
     }
     
+    // ═══════════════════════════════════════════════
+    // 🔔 Trigger notification
+    // ═══════════════════════════════════════════════
     function triggerNotif(message) {
         let notifs = JSON.parse(localStorage.getItem(KEYS.notifs) || '[]');
         const now = Date.now();
-        // Prevent duplicates within 2s
+        
+        // Prevent exact duplicates within 2 seconds
         if (notifs.length > 0 && notifs[0].message === message && (now - notifs[0].id) < 2000) {
+            console.log('⏭️ Duplicate skipped:', message);
             return;
         }
+        
         notifs.unshift({
             id: now,
             message: message,
@@ -1809,12 +1106,26 @@
         if (notifs.length > 50) notifs = notifs.slice(0, 50);
         localStorage.setItem(KEYS.notifs, JSON.stringify(notifs));
         
-        updateAllBadges(notifs);
+        // Update badges
+        const unread = notifs.filter(n => !n.read).length;
+        document.querySelectorAll('.bell-icon').forEach(bell => {
+            let badge = bell.querySelector('.notifBadge');
+            if (unread > 0) {
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'notifBadge';
+                    bell.appendChild(badge);
+                }
+                badge.textContent = unread;
+            } else if (badge) badge.remove();
+        });
         
+        // Browser notification
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
             try { new Notification('Tradelix Admin', { body: message }); } catch(e){}
         }
         
+        // Sound
         try {
             const c = new (window.AudioContext || window.webkitAudioContext)();
             [0, 0.3].forEach(d => {
@@ -1835,160 +1146,142 @@
             try { showToast(message); } catch(e){}
         }
         
-        console.log('🔔 Notification:', message);
+        console.log('🔔 NOTIFICATION:', message);
     }
     
-    function updateAllBadges(notifs) {
+    // ═══════════════════════════════════════════════
+    // 🎧 USERS LISTENER (real-time)
+    // ═══════════════════════════════════════════════
+    async function startUsersListener() {
+        const db = await waitFirebase();
+        const fs = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+        const { collection, onSnapshot } = fs;
+        
+        console.log('🎧 Attaching users listener...');
+        
+        onSnapshot(collection(db, 'tradelix_users'), snapshot => {
+            snapshot.docChanges().forEach(change => {
+                const uid = change.doc.id;
+                const data = change.doc.data();
+                const name = data.name || data.email || 'Unknown';
+                const createdMs = (data.createdAt?.seconds || 0) * 1000;
+                
+                // ═══ 1. NEW USER ═══
+                if (!seenUsers.has(uid)) {
+                    seenUsers.add(uid);
+                    
+                    // Only notify if user was created AFTER session started
+                    // (all users from initial snapshot will be skipped since their createdMs is old)
+                    if (createdMs > SESSION_START_MS) {
+                        triggerNotif('👤 New user: ' + name);
+                    } else {
+                        console.log('⏭️ Old user skipped:', name);
+                    }
+                }
+                
+                // ═══ 2. DEPOSIT / COURSE REQUEST ═══
+                if (data.txHash && data.status === 'pending') {
+                    const isCourse = data.plan && data.plan.indexOf('Course:') === 0;
+                    const sig = isCourse
+                        ? uid + '|course|' + data.plan + '|' + data.txHash
+                        : uid + '|deposit|' + data.txHash;
+                    
+                    if (!seenTx.has(sig)) {
+                        seenTx.add(sig);
+                        
+                        // Only notify if this is NOT the initial snapshot
+                        // We check by seeing if this user was already in seenUsers BEFORE this snapshot
+                        // Since we just added them above, we need another check:
+                        // Skip if this is the very first snapshot OR user is old
+                        const isOld = createdMs < SESSION_START_MS && createdMs > 0;
+                        
+                        if (!isOld) {
+                            if (isCourse) {
+                                const courseName = data.plan.replace('Course: ', '');
+                                triggerNotif('🎓 Course: ' + name + ' - ' + courseName);
+                            } else {
+                                const amount = data.depositAmount ? ' $' + data.depositAmount : '';
+                                const plan = data.plan ? ' (' + data.plan + ')' : '';
+                                triggerNotif('💰 Deposit: ' + name + amount + plan);
+                            }
+                        } else {
+                            console.log('⏭️ Old deposit skipped:', name);
+                        }
+                    }
+                }
+            });
+            
+            saveAll();
+        }, err => {
+            console.error('❌ Users listener error:', err);
+        });
+    }
+    
+    // ═══════════════════════════════════════════════
+    // 🎧 SIGNALS LISTENER (real-time)
+    // ═══════════════════════════════════════════════
+    async function startSignalsListener() {
+        const db = await waitFirebase();
+        const fs = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+        const { collection, onSnapshot } = fs;
+        
+        console.log('🎧 Attaching signals listener...');
+        
+        onSnapshot(collection(db, 'tradelix_signals'), snapshot => {
+            snapshot.docChanges().forEach(change => {
+                if (change.type !== 'added') return;
+                
+                const id = change.doc.id;
+                if (seenSignals.has(id)) return;
+                seenSignals.add(id);
+                
+                const s = change.doc.data();
+                const createdMs = (s.createdAt?.seconds || 0) * 1000;
+                
+                if (createdMs > SESSION_START_MS) {
+                    const coin = s.coin || 'BTC';
+                    const direction = s.direction || 'BUY';
+                    triggerNotif('📊 New signal: ' + coin + '/USDT ' + direction);
+                }
+            });
+            
+            saveAll();
+        }, err => {
+            console.error('❌ Signals listener error:', err);
+        });
+    }
+    
+    // ═══════════════════════════════════════════════
+    // 🚀 Init
+    // ═══════════════════════════════════════════════
+    function init() {
+        startUsersListener();
+        startSignalsListener();
+        
+        // Restore badge
+        const notifs = JSON.parse(localStorage.getItem(KEYS.notifs) || '[]');
         const unread = notifs.filter(n => !n.read).length;
-        document.querySelectorAll('.bell-icon').forEach(bell => {
-            let badge = bell.querySelector('.notifBadge');
-            if (unread > 0) {
+        if (unread > 0) {
+            document.querySelectorAll('.bell-icon').forEach(bell => {
+                let badge = bell.querySelector('.notifBadge');
                 if (!badge) {
                     badge = document.createElement('span');
                     badge.className = 'notifBadge';
                     bell.appendChild(badge);
                 }
                 badge.textContent = unread;
-            } else if (badge) {
-                badge.remove();
-            }
-        });
-    }
-    
-    async function startUsersListener() {
-        const db = await waitFirebase();
-        const fs = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
-        const { collection, onSnapshot } = fs;
-        
-        console.log('🎧 Users listener starting...');
-        
-        let initialLoadDone = false;
-        
-        onSnapshot(collection(db, 'tradelix_users'), snapshot => {
-            // Initial load: mark all silently
-            if (!initialLoadDone) {
-                snapshot.forEach(docSnap => {
-                    const data = docSnap.data();
-                    const uid = docSnap.id;
-                    seenUsers.add(uid);
-                    if (data.txHash) {
-                        seenDeposits.add(uid + '|' + data.txHash);
-                        if (data.plan && data.plan.indexOf('Course:') === 0) {
-                            seenCourses.add(uid + '|' + data.plan + '|' + data.txHash);
-                        }
-                    }
-                });
-                saveAll();
-                initialLoadDone = true;
-                console.log('✅ Users listener active. Marked', seenUsers.size, 'users silently');
-                return;
-            }
-            
-            // Process changes
-            snapshot.docChanges().forEach(change => {
-                const data = change.doc.data();
-                const uid = change.doc.id;
-                const name = data.name || data.email || 'Unknown';
-                
-                // 1. New user added
-                if (change.type === 'added' && !seenUsers.has(uid)) {
-                    seenUsers.add(uid);
-                    triggerNotif('👤 New user: ' + name);
-                    if (data.txHash) {
-                        seenDeposits.add(uid + '|' + data.txHash);
-                        if (data.plan && data.plan.indexOf('Course:') === 0) {
-                            seenCourses.add(uid + '|' + data.plan + '|' + data.txHash);
-                        }
-                    }
-                    saveAll();
-                    return;
-                }
-                
-                // 2. Modified (deposit or course request)
-                if (change.type === 'modified') {
-                    if (!data.txHash || data.status !== 'pending') return;
-                    
-                    if (data.plan && data.plan.indexOf('Course:') === 0) {
-                        const sig = uid + '|' + data.plan + '|' + data.txHash;
-                        if (!seenCourses.has(sig)) {
-                            seenCourses.add(sig);
-                            const courseName = data.plan.replace('Course: ', '');
-                            triggerNotif('🎓 Course request: ' + name + ' - ' + courseName);
-                            saveAll();
-                        }
-                    } else {
-                        const sig = uid + '|' + data.txHash;
-                        if (!seenDeposits.has(sig)) {
-                            seenDeposits.add(sig);
-                            const amount = data.depositAmount ? ' $' + data.depositAmount : '';
-                            const plan = data.plan ? ' (' + data.plan + ')' : '';
-                            triggerNotif('💰 Deposit: ' + name + amount + plan);
-                            saveAll();
-                        }
-                    }
-                }
             });
-        }, err => {
-            console.error('Users listener error:', err);
-        });
-    }
-    
-    async function startSignalsListener() {
-        const db = await waitFirebase();
-        const fs = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
-        const { collection, onSnapshot } = fs;
+        }
         
-        console.log('🎧 Signals listener starting...');
-        
-        let initialLoadDone = false;
-        
-        onSnapshot(collection(db, 'tradelix_signals'), snapshot => {
-            if (!initialLoadDone) {
-                snapshot.forEach(docSnap => {
-                    seenSignals.add(docSnap.id);
-                });
-                saveSignals();
-                initialLoadDone = true;
-                console.log('✅ Signals listener active. Marked', seenSignals.size, 'signals silently');
-                return;
-            }
-            
-            snapshot.docChanges().forEach(change => {
-                if (change.type !== 'added') return;
-                const id = change.doc.id;
-                if (seenSignals.has(id)) return;
-                seenSignals.add(id);
-                
-                const s = change.doc.data();
-                const coin = s.coin || 'BTC';
-                const direction = s.direction || 'BUY';
-                triggerNotif('📊 New signal: ' + coin + '/USDT ' + direction);
-                saveSignals();
-            });
-        }, err => {
-            console.error('Signals listener error:', err);
-        });
-    }
-    
-    window.updateAllBadges = updateAllBadges;
-    
-    function init() {
-        console.log('🚀 Notifications v6 initializing...');
-        startUsersListener();
-        startSignalsListener();
-        
-        // Restore badge on load
-        const notifs = JSON.parse(localStorage.getItem(KEYS.notifs) || '[]');
-        updateAllBadges(notifs);
+        console.log('✅ NOTIFICATIONS v8 READY');
+        console.log('═══════════════════════════════════════');
     }
     
     if (document.readyState === 'complete') {
-        setTimeout(init, 2000);
+        setTimeout(init, 1500);
     } else {
-        window.addEventListener('load', () => setTimeout(init, 2000));
+        window.addEventListener('load', () => setTimeout(init, 1500));
     }
-    
-    console.log('✅ Notifications v6 loaded');
 })();
 </script>
 
