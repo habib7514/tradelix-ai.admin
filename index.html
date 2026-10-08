@@ -2211,6 +2211,149 @@ async function activateCourse() {
         try{new MutationObserver(nuke).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}
     })();
 </script>
+<!-- ================= NOTIFICATIONS FIX v3 ================= -->
+<script>
+(function() {
+    'use strict';
+    
+    const SEEN_KEY = 'tradelix_seen_users_v3';
+    const PENDING_KEY = 'tradelix_seen_pending_v3';
+    const NOTIF_KEY = 'tradelix_admin_notifs';
+    
+    let seenUsers = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'));
+    let seenPending = new Set(JSON.parse(localStorage.getItem(PENDING_KEY) || '[]'));
+    let initialized = false;
+    let lastCheck = 0;
+    
+    function waitFirebase() {
+        return new Promise((resolve) => {
+            const check = () => {
+                if (window.firebaseDB) return resolve(window.firebaseDB);
+                setTimeout(check, 500);
+            };
+            check();
+        });
+    }
+    
+    async function checkNewUsers() {
+        try {
+            const db = await waitFirebase();
+            const fs = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+            const { collection, getDocs } = fs;
+            
+            const snap = await getDocs(collection(db, 'tradelix_users'));
+            const now = Date.now();
+            let hasNew = false;
+            
+            snap.forEach(d => {
+                const uid = d.id;
+                const data = d.data();
+                const createdSec = data.createdAt?.seconds || 0;
+                const createdMs = createdSec * 1000;
+                
+                if (!seenUsers.has(uid)) {
+                    if (initialized && createdMs > lastCheck - 60000) {
+                        triggerNotif('👤 New user: ' + (data.name || data.email || 'Unknown'));
+                        hasNew = true;
+                    }
+                    seenUsers.add(uid);
+                }
+                
+                if (data.txHash && data.status === 'pending' && !seenPending.has(uid)) {
+                    if (initialized) {
+                        triggerNotif('💰 Deposit: ' + (data.name || data.email || 'Unknown'));
+                        hasNew = true;
+                    }
+                    seenPending.add(uid);
+                }
+            });
+            
+            localStorage.setItem(SEEN_KEY, JSON.stringify([...seenUsers]));
+            localStorage.setItem(PENDING_KEY, JSON.stringify([...seenPending]));
+            lastCheck = now;
+            
+            if (!initialized) {
+                initialized = true;
+                console.log('✅ Polling active. Users:', seenUsers.size);
+            }
+        } catch (e) {
+            console.warn('Poll error:', e.message);
+        }
+    }
+    
+    function triggerNotif(message) {
+        let notifs = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+        notifs.unshift({
+            id: Date.now(),
+            message: message,
+            time: new Date().toLocaleString('en-GB'),
+            read: false
+        });
+        if (notifs.length > 50) notifs = notifs.slice(0, 50);
+        localStorage.setItem(NOTIF_KEY, JSON.stringify(notifs));
+        
+        updateAllBadges(notifs);
+        
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+            try { new Notification('Tradelix Admin', { body: message }); } catch(e){}
+        }
+        
+        try {
+            const c = new (window.AudioContext || window.webkitAudioContext)();
+            [0, 0.3].forEach(d => {
+                const o = c.createOscillator();
+                const g = c.createGain();
+                o.connect(g); g.connect(c.destination);
+                o.frequency.value = 880;
+                g.gain.setValueAtTime(0.3, c.currentTime + d);
+                g.gain.exponentialRampToValueAtTime(0.01, c.currentTime + d + 0.2);
+                o.start(c.currentTime + d);
+                o.stop(c.currentTime + d + 0.2);
+            });
+        } catch(e){}
+        
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        
+        if (typeof showToast === 'function') {
+            try { showToast(message); } catch(e){}
+        }
+    }
+    
+    function updateAllBadges(notifs) {
+        const unread = notifs.filter(n => !n.read).length;
+        document.querySelectorAll('.bell-icon').forEach(bell => {
+            let badge = bell.querySelector('.notifBadge');
+            if (unread > 0) {
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'notifBadge';
+                    bell.appendChild(badge);
+                }
+                badge.textContent = unread;
+            } else if (badge) {
+                badge.remove();
+            }
+        });
+    }
+    
+    function startPolling() {
+        checkNewUsers();
+        setInterval(checkNewUsers, 5000);
+    }
+    
+    if (document.readyState === 'complete') {
+        setTimeout(startPolling, 3000);
+    } else {
+        window.addEventListener('load', () => setTimeout(startPolling, 3000));
+    }
+    
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) checkNewUsers();
+    });
+    
+    console.log('✅ Notifications Fix v3 loaded');
+})();
+</script>
 
 </body>
 </html>
