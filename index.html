@@ -914,6 +914,7 @@
     let adminNotifs = JSON.parse(localStorage.getItem('tradelix_admin_notifs') || '[]');
 
     function openNotifModal() {
+        adminNotifs = JSON.parse(localStorage.getItem('tradelix_admin_notifs') || '[]');
         const list = document.getElementById('notifList');
         if (adminNotifs.length === 0) list.innerHTML = '<p style="color:#848E9C; text-align:center; padding:20px;">No notifications yet</p>';
         else list.innerHTML = adminNotifs.map(n => `
@@ -930,14 +931,15 @@
     function closeNotifModal() { document.getElementById('notifModal').style.display = 'none'; }
 
     function updateBadge() {
+        adminNotifs = JSON.parse(localStorage.getItem('tradelix_admin_notifs') || '[]');
         const unread = adminNotifs.filter(n => !n.read).length;
-        const bell = document.querySelector('.bell-icon');
-        if (!bell) return;
-        let badge = bell.querySelector('.notifBadge');
-        if (unread > 0) {
-            if (!badge) { badge = document.createElement('span'); badge.className = 'notifBadge'; bell.appendChild(badge); }
-            badge.textContent = unread;
-        } else if (badge) badge.remove();
+        document.querySelectorAll('.bell-icon').forEach(bell => {
+            let badge = bell.querySelector('.notifBadge');
+            if (unread > 0) {
+                if (!badge) { badge = document.createElement('span'); badge.className = 'notifBadge'; bell.appendChild(badge); }
+                badge.textContent = unread;
+            } else if (badge) badge.remove();
+        });
     }
 
     function showToast(msg) {
@@ -1000,63 +1002,34 @@
     })();
 </script>
 
-<!-- ================= NOTIFICATIONS v10 — POLLING (RELIABLE) ================= -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- NOTIFICATIONS v12 — SNAPSHOT COMPARE (DEFINITIVE FIX)      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
 <script>
 (function() {
     'use strict';
     
-    console.log('═══════════════════════════════════════════');
-    console.log('🚀 NOTIFICATIONS v10 — POLLING');
-    console.log('═══════════════════════════════════════════');
-    
-    const STORAGE_KEY = 'tradelix_notif_v10';
+    const SNAPSHOT_KEY = 'tradelix_admin_snap_v12';
     const NOTIF_KEY = 'tradelix_admin_notifs';
+    let isChecking = false;
+    let checkCount = 0;
     
-    // Load state from localStorage
-    let state = { seenUsers: [], seenTx: [], seenSignals: [], initialized: false };
-    try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) state = Object.assign(state, JSON.parse(saved));
-    } catch(e) { console.warn('Load state error:', e); }
+    console.log('');
+    console.log('%c═══════════════════════════════════════', 'color:#F0B90B;font-weight:bold');
+    console.log('%c🚀 NOTIFICATIONS v12 — SNAPSHOT COMPARE', 'color:#0ECB81;font-weight:bold');
+    console.log('%c═══════════════════════════════════════', 'color:#F0B90B;font-weight:bold');
     
-    let seenUsers = new Set(state.seenUsers);
-    let seenTx = new Set(state.seenTx);
-    let seenSignals = new Set(state.seenSignals);
-    let initialized = state.initialized;
-    
-    console.log('📦 Loaded:', seenUsers.size, 'users,', seenTx.size, 'tx,', seenSignals.size, 'signals');
-    console.log('🔧 Initialized:', initialized);
-    
-    function saveState() {
-        try {
-            state.seenUsers = [...seenUsers].slice(-2000);
-            state.seenTx = [...seenTx].slice(-2000);
-            state.seenSignals = [...seenSignals].slice(-500);
-            state.initialized = initialized;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        } catch(e) { console.warn('Save error:', e); }
-    }
-    
-    function waitFirebase() {
-        return new Promise((resolve) => {
-            const check = () => {
-                if (window.firebaseDB) return resolve(window.firebaseDB);
-                setTimeout(check, 300);
-            };
-            check();
-        });
-    }
-    
-    // ═══════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
     // 🔔 TRIGGER NOTIFICATION
-    // ═══════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
     function triggerNotif(message) {
-        let notifs = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+        let notifs = [];
+        try { notifs = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); } catch(e) { notifs = []; }
+        
         const now = Date.now();
         
         // Prevent duplicate within 2 seconds
         if (notifs.length > 0 && notifs[0].message === message && (now - notifs[0].id) < 2000) {
-            console.log('⏭️ Duplicate skipped');
             return;
         }
         
@@ -1069,7 +1042,7 @@
         if (notifs.length > 50) notifs = notifs.slice(0, 50);
         localStorage.setItem(NOTIF_KEY, JSON.stringify(notifs));
         
-        // Update all bell icons
+        // Update all bell badges
         const unread = notifs.filter(n => !n.read).length;
         document.querySelectorAll('.bell-icon').forEach(bell => {
             let badge = bell.querySelector('.notifBadge');
@@ -1109,143 +1082,210 @@
             try { showToast(message); } catch(e){}
         }
         
-        console.log('🔔 NOTIFICATION:', message);
+        console.log('%c🔔 NOTIFICATION: ' + message, 'color:#0ECB81;font-weight:bold');
     }
     
-    // ═══════════════════════════════════════════════
-    // 🔄 POLL: fetch all data, compare, notify
-    // ═══════════════════════════════════════════════
-    let isFetching = false;
+    // ═══════════════════════════════════════════════════════════
+    // 🎧 WAIT FOR FIREBASE
+    // ═══════════════════════════════════════════════════════════
+    function waitForFirebase() {
+        return new Promise((resolve) => {
+            const check = () => {
+                if (window.firebaseDB) return resolve();
+                setTimeout(check, 300);
+            };
+            check();
+        });
+    }
     
-    async function poll() {
-        if (isFetching) return;
-        isFetching = true;
+    // ═══════════════════════════════════════════════════════════
+    // 🔄 CHECK FUNCTION
+    // ═══════════════════════════════════════════════════════════
+    async function check() {
+        if (isChecking) return;
+        isChecking = true;
+        checkCount++;
         
         try {
-            const db = await waitFirebase();
+            if (!window.firebaseDB) { isChecking = false; return; }
+            
             const fs = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
             const { collection, getDocs } = fs;
             
             // ═══ FETCH USERS ═══
-            let usersSnap;
+            let currentUsers = {};
             try {
-                usersSnap = await getDocs(collection(db, 'tradelix_users'));
+                const usersSnap = await getDocs(collection(window.firebaseDB, 'tradelix_users'));
+                usersSnap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    currentUsers[docSnap.id] = {
+                        name: data.name || data.email || 'Unknown',
+                        txHash: data.txHash || '',
+                        status: data.status || 'inactive',
+                        plan: data.plan || '',
+                        depositAmount: data.depositAmount || ''
+                    };
+                });
             } catch(e) {
-                console.warn('Users fetch failed:', e.message);
-                isFetching = false;
+                console.warn('⚠️ Users fetch failed:', e.message);
+                isChecking = false;
                 return;
             }
             
-            const newUsers = [];
-            const newRequests = [];
-            
-            usersSnap.forEach(docSnap => {
-                const uid = docSnap.id;
-                const data = docSnap.data();
-                const name = data.name || data.email || 'Unknown';
-                
-                // ─── New user? ───
-                if (!seenUsers.has(uid)) {
-                    seenUsers.add(uid);
-                    if (initialized) {
-                        newUsers.push({ name });
-                        console.log('🆕 New user detected:', name);
-                    } else {
-                        console.log('📝 First-scan user (silent):', name);
-                    }
-                }
-                
-                // ─── Pending deposit/course? ───
-                if (data.txHash && data.status === 'pending') {
-                    const isCourse = data.plan && data.plan.indexOf('Course:') === 0;
-                    const sig = isCourse
-                        ? 'C|' + uid + '|' + data.plan + '|' + data.txHash
-                        : 'D|' + uid + '|' + data.txHash;
-                    
-                    if (!seenTx.has(sig)) {
-                        seenTx.add(sig);
-                        if (initialized) {
-                            newRequests.push({ name, data, isCourse });
-                            console.log('💸 Request detected:', name, isCourse ? '(course)' : '(deposit)');
-                        }
-                    }
-                }
-            });
-            
             // ═══ FETCH SIGNALS ═══
-            let signalsSnap = null;
+            let currentSignals = {};
             try {
-                signalsSnap = await getDocs(collection(db, 'tradelix_signals'));
-            } catch(e) { /* ignore */ }
-            
-            const newSignals = [];
-            if (signalsSnap) {
+                const signalsSnap = await getDocs(collection(window.firebaseDB, 'tradelix_signals'));
                 signalsSnap.forEach(docSnap => {
-                    const id = docSnap.id;
-                    if (!seenSignals.has(id)) {
-                        seenSignals.add(id);
-                        if (initialized) {
-                            const s = docSnap.data();
-                            newSignals.push({ coin: s.coin || 'BTC', direction: s.direction || 'BUY' });
-                        }
-                    }
+                    const s = docSnap.data();
+                    currentSignals[docSnap.id] = {
+                        coin: s.coin || 'BTC',
+                        direction: s.direction || 'BUY'
+                    };
                 });
+            } catch(e) {
+                // Ignore
             }
             
-            // ═══ SEND NOTIFICATIONS ═══
-            newUsers.forEach(u => triggerNotif('👤 New user: ' + u.name));
+            // ═══ READ SAVED SNAPSHOT ═══
+            let savedRaw = null;
+            try { savedRaw = localStorage.getItem(SNAPSHOT_KEY); } catch(e) {}
             
-            newRequests.forEach(r => {
-                if (r.isCourse) {
-                    const courseName = r.data.plan.replace('Course: ', '');
-                    triggerNotif('🎓 Course: ' + r.name + ' - ' + courseName);
+            // ═══ FIRST RUN: SAVE AND SKIP ═══
+            if (!savedRaw) {
+                try {
+                    localStorage.setItem(SNAPSHOT_KEY, JSON.stringify({
+                        users: currentUsers,
+                        signals: currentSignals
+                    }));
+                } catch(e) {}
+                console.log('%c📸 FIRST RUN — Snapshot saved:', 'color:#FCD535;font-weight:bold',
+                    Object.keys(currentUsers).length, 'users,',
+                    Object.keys(currentSignals).length, 'signals');
+                console.log('%c   No notifications on first run (existing data skipped)', 'color:#848E9C');
+                isChecking = false;
+                return;
+            }
+            
+            // ═══ PARSE SNAPSHOT ═══
+            let old = { users: {}, signals: {} };
+            try {
+                old = JSON.parse(savedRaw);
+                if (!old.users) old.users = {};
+                if (!old.signals) old.signals = {};
+            } catch(e) {
+                console.warn('⚠️ Corrupt snapshot — resetting');
+                try {
+                    localStorage.setItem(SNAPSHOT_KEY, JSON.stringify({
+                        users: currentUsers,
+                        signals: currentSignals
+                    }));
+                } catch(ex) {}
+                isChecking = false;
+                return;
+            }
+            
+            // ═══ DETECT NEW USERS ═══
+            let newUserCount = 0;
+            Object.keys(currentUsers).forEach(uid => {
+                const u = currentUsers[uid];
+                const oldU = old.users[uid];
+                
+                if (!oldU) {
+                    // Brand new user
+                    triggerNotif('👤 New user: ' + u.name);
+                    newUserCount++;
+                    
+                    // If they already have a pending tx, notify separately
+                    if (u.txHash && u.status === 'pending') {
+                        if (u.plan && u.plan.indexOf('Course:') === 0) {
+                            const courseName = u.plan.replace('Course: ', '');
+                            triggerNotif('🎓 Course: ' + u.name + ' - ' + courseName);
+                        } else {
+                            const amount = u.depositAmount ? ' $' + u.depositAmount : '';
+                            const plan = u.plan ? ' (' + u.plan + ')' : '';
+                            triggerNotif('💰 Deposit: ' + u.name + amount + plan);
+                        }
+                    }
                 } else {
-                    const amount = r.data.depositAmount ? ' $' + r.data.depositAmount : '';
-                    const plan = r.data.plan ? ' (' + r.data.plan + ')' : '';
-                    triggerNotif('💰 Deposit: ' + r.name + amount + plan);
+                    // Existing user — check for NEW deposit/course
+                    const hasNewTx = u.txHash && u.txHash !== oldU.txHash && u.status === 'pending';
+                    if (hasNewTx) {
+                        if (u.plan && u.plan.indexOf('Course:') === 0) {
+                            const courseName = u.plan.replace('Course: ', '');
+                            triggerNotif('🎓 Course: ' + u.name + ' - ' + courseName);
+                        } else {
+                            const amount = u.depositAmount ? ' $' + u.depositAmount : '';
+                            const plan = u.plan ? ' (' + u.plan + ')' : '';
+                            triggerNotif('💰 Deposit: ' + u.name + amount + plan);
+                        }
+                    }
                 }
             });
             
-            newSignals.forEach(s => triggerNotif('📊 New signal: ' + s.coin + '/USDT ' + s.direction));
+            // ═══ DETECT NEW SIGNALS ═══
+            let newSignalCount = 0;
+            Object.keys(currentSignals).forEach(id => {
+                if (!old.signals[id]) {
+                    const s = currentSignals[id];
+                    triggerNotif('📊 New signal: ' + s.coin + '/USDT ' + s.direction);
+                    newSignalCount++;
+                }
+            });
             
-            // ═══ MARK INITIALIZED AFTER FIRST SUCCESSFUL POLL ═══
-            if (!initialized) {
-                initialized = true;
-                console.log('✅ First scan complete. Users:', seenUsers.size, 'Tx:', seenTx.size, 'Signals:', seenSignals.size);
+            // ═══ SAVE CURRENT SNAPSHOT ═══
+            try {
+                localStorage.setItem(SNAPSHOT_KEY, JSON.stringify({
+                    users: currentUsers,
+                    signals: currentSignals
+                }));
+            } catch(e) {
+                console.warn('⚠️ Save snapshot failed:', e.message);
             }
             
-            saveState();
+            // ═══ LOG IF SOMETHING HAPPENED ═══
+            if (newUserCount > 0 || newSignalCount > 0) {
+                console.log('%c✅ Detected ' + newUserCount + ' new users, ' + newSignalCount + ' new signals', 'color:#0ECB81;font-weight:bold');
+            } else if (checkCount % 20 === 0) {
+                // Every 20 checks (~60 seconds) log a heartbeat
+                console.log('%c💓 Heartbeat: ' + Object.keys(currentUsers).length + ' users tracked', 'color:#848E9C');
+            }
             
         } catch(e) {
-            console.warn('Poll error:', e.message);
+            console.warn('⚠️ Check error:', e.message);
         } finally {
-            isFetching = false;
+            isChecking = false;
         }
     }
     
-    // ═══════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
     // 🚀 START
-    // ═══════════════════════════════════════════════
-    function start() {
-        console.log('🎧 Starting polling...');
-        poll();
-        setInterval(poll, 3000);
+    // ═══════════════════════════════════════════════════════════
+    async function start() {
+        await waitForFirebase();
+        console.log('%c🎧 Polling started — checking every 3 seconds', 'color:#3B82F6;font-weight:bold');
+        
+        // First check immediately
+        await check();
+        
+        // Then every 3 seconds
+        setInterval(check, 3000);
+        
+        // Also check when tab becomes visible
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) check();
+        });
     }
     
-    // Start after 2 seconds (allow Firebase to be ready)
     if (document.readyState === 'complete') {
         setTimeout(start, 2000);
     } else {
         window.addEventListener('load', () => setTimeout(start, 2000));
     }
     
-    // Poll when tab becomes visible
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) poll();
-    });
-    
-    console.log('✅ NOTIFICATIONS v10 LOADED');
-    console.log('═══════════════════════════════════════════');
+    console.log('%c✅ NOTIFICATIONS v12 LOADED', 'color:#0ECB81;font-weight:bold');
+    console.log('%c═══════════════════════════════════════', 'color:#F0B90B;font-weight:bold');
+    console.log('');
 })();
 </script>
 
