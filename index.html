@@ -939,6 +939,50 @@
                 <option value="SOL">Solana (SOL)</option>
                 <option value="XRP">XRP</option>
                 <option value="ADA">Cardano (ADA)</option>
+                <option value="DOGE">Dogecoin (DOGE)</option>
+                <option value="DOT">Polkadot (DOT)</option>
+                <option value="AVAX">Avalanche (AVAX)</option>
+                <option value="LINK">Chainlink (LINK)</option>
+                <option value="POL">Polygon (POL)</option>
+                <option value="LTC">Litecoin (LTC)</option>
+                <option value="TRX">TRON (TRX)</option>
+                <option value="ATOM">Cosmos (ATOM)</option>
+                <option value="UNI">Uniswap (UNI)</option>
+                <option value="SHIB">Shiba Inu (SHIB)</option>
+                <option value="APT">Aptos (APT)</option>
+                <option value="ARB">Arbitrum (ARB)</option>
+                <option value="OP">Optimism (OP)</option>
+                <option value="NEAR">NEAR Protocol</option>
+                <option value="INJ">Injective (INJ)</option>
+                <option value="SUI">Sui (SUI)</option>
+                <option value="FIL">Filecoin (FIL)</option>
+                <option value="ETC">Ethereum Classic (ETC)</option>
+                <option value="TON">Toncoin (TON)</option>
+                <option value="ICP">Internet Computer (ICP)</option>
+                <option value="RENDER">Render (RENDER)</option>
+                <option value="FET">Fetch.ai (FET)</option>
+                <option value="SEI">Sei (SEI)</option>
+                <option value="TIA">Celestia (TIA)</option>
+                <option value="STX">Stacks (STX)</option>
+                <option value="IMX">Immutable (IMX)</option>
+                <option value="GRT">The Graph (GRT)</option>
+                <option value="SAND">The Sandbox (SAND)</option>
+                <option value="MANA">Decentraland (MANA)</option>
+                <option value="AAVE">Aave (AAVE)</option>
+                <option value="MKR">Maker (MKR)</option>
+                <option value="CRV">Curve DAO (CRV)</option>
+                <option value="ALGO">Algorand (ALGO)</option>
+                <option value="VET">VeChain (VET)</option>
+                <option value="HBAR">Hedera (HBAR)</option>
+                <option value="EOS">EOS</option>
+                <option value="XLM">Stellar (XLM)</option>
+                <option value="THETA">Theta Network (THETA)</option>
+                <option value="RUNE">THORChain (RUNE)</option>
+                <option value="KAS">Kaspa (KAS)</option>
+                <option value="TAO">Bittensor (TAO)</option>
+                <option value="WIF">dogwifhat (WIF)</option>
+                <option value="PEPE">Pepe (PEPE)</option>
+                <option value="BONK">Bonk (BONK)</option>
             </select>
         </div>
 
@@ -1645,7 +1689,8 @@ async function activateCourse() {
 
     try {
         const userDoc = await getDoc(doc(db, 'tradelix_users', currentUserUID));
-        const existing = userDoc.data().courses || [];
+        const data = userDoc.data();
+        const existing = data.courses || [];
 
         if (existing.includes(courseName)) {
             showToast('⚠️ Course already activated');
@@ -1654,10 +1699,27 @@ async function activateCourse() {
 
         existing.push(courseName);
 
-        await updateDoc(doc(db, 'tradelix_users', currentUserUID), {
+        const updateData = {
             courses: existing,
             courseRequest: null
-        });
+        };
+
+        // ✅ الإصلاح: إذا كان الطلب بسبب كورس → فعّل المستخدم تلقائياً
+        // شرط: status = pending  +  plan يبدأ بـ 'Course:'
+        if (data.status === 'pending' && data.plan && data.plan.indexOf('Course:') === 0) {
+            updateData.status = 'active';
+            updateData.plan = 'Course Member';
+            updateData.startDate = new Date().toISOString().split('T')[0];
+            // امسح بيانات الدفع القديمة
+            updateData.txHash = null;
+            updateData.depositAmount = null;
+            // احسب expiry سنة من الآن للكورسات
+            const expiry = new Date();
+            expiry.setFullYear(expiry.getFullYear() + 1);
+            updateData.expiryDate = expiry.toISOString().split('T')[0];
+        }
+
+        await updateDoc(doc(db, 'tradelix_users', currentUserUID), updateData);
 
         showToast('✅ Course activated!');
         closeCourseModal();
