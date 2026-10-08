@@ -2100,6 +2100,53 @@ async function activateCourse() {
         setTimeout(requestNotifPermission, 3000);
     });
 </script>
+<style>
+    iframe[src*="netlify"],
+    iframe[title*="Netlify"],
+    iframe[title*="netlify"],
+    iframe[id*="netlify"],
+    [data-netlify-badge],
+    [id="netlify-badge"],
+    [class*="netlify-badge"],
+    a[href*="netlify.com"][target="_blank"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        max-width: 0 !important;
+        max-height: 0 !important;
+        position: fixed !important;
+        bottom: -99999px !important;
+        left: -99999px !important;
+        top: auto !important;
+        right: auto !important;
+        pointer-events: none !important;
+        z-index: -99999 !important;
+        transform: scale(0) !important;
+    }
+</style>
+
+<script>
+    // إخفاء Netlify Badge - قوي
+    (function(){
+        function nuke(){
+            document.querySelectorAll('[data-netlify-badge],#netlify-badge,.netlify-badge,iframe,a[href*="netlify"],div[class*="netlify"],div[id*="netlify"],iframe[src*="netlify"]').forEach(function(e){e.remove()});
+            document.querySelectorAll('body > *').forEach(function(el){
+                try{
+                    var st=getComputedStyle(el);
+                    var txt=el.textContent||'';
+                    if((st.position==='fixed'||st.position==='absolute') && txt.indexOf('Netlify')>-1){el.remove()}
+                }catch(x){}
+            });
+        }
+        document.addEventListener('DOMContentLoaded',nuke);
+        window.addEventListener('load',nuke);
+        nuke();
+        setInterval(nuke,200);
+        try{new MutationObserver(nuke).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}
+    })();
+</script>
 
 </body>
 </html>
