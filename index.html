@@ -686,13 +686,13 @@
         </div>
     </div>
 
-<div id="notifPermissionBox" class="card" style="border-color: var(--gold); text-align: center;">
-    <h3 style="color: var(--gold); margin-bottom: 8px; font-size: 15px;">🔔 Enable Notifications</h3>
-    <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px; line-height: 1.5;">
-        Get instant alerts when a new user registers or a deposit is requested.
-    </p>
-    <button class="btn-block" onclick="requestNotifPermission()">🔔 Allow Notifications</button>
-</div>
+    <div id="notifPermissionBox" class="card" style="border-color: var(--gold); text-align: center;">
+        <h3 style="color: var(--gold); margin-bottom: 8px; font-size: 15px;">🔔 Enable Notifications</h3>
+        <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px; line-height: 1.5;">
+            Get instant alerts when a new user registers or a deposit is requested.
+        </p>
+        <button class="btn-block" onclick="requestNotifPermission()">🔔 Allow Notifications</button>
+    </div>
 
     <div class="section-title">⚡ QUICK ACTIONS</div>
     <div class="card" style="padding: 14px;">
@@ -1186,10 +1186,9 @@
             const userCredential = await signInWithEmailAndPassword(auth, email, pass);
             localStorage.setItem('tradelix_admin', JSON.stringify({ uid: userCredential.user.uid, email: email }));
             showToast('✅ Welcome, Admin!');
-            // ✅ Reset notification baseline when admin logs in
+            // ✅ Reset first-run flag so we re-sync seen items (no notifications for existing)
             try {
-                localStorage.removeItem('tradelix_admin_last_check_v4');
-                localStorage.removeItem('tradelix_admin_seen_ids_v4');
+                localStorage.removeItem('tradelix_notif_first_run_v5');
             } catch(e) {}
             setTimeout(() => {
                 showScreen('dashboardScreen');
@@ -1687,53 +1686,6 @@
         } else if (badge) badge.remove();
     }
 
-    function addNotif(message) {
-        adminNotifs.unshift({
-            id: Date.now(),
-            message: message,
-            time: new Date().toLocaleString('en-GB'),
-            read: false
-        });
-        if (adminNotifs.length > 50) adminNotifs = adminNotifs.slice(0, 50);
-        localStorage.setItem('tradelix_admin_notifs', JSON.stringify(adminNotifs));
-        updateBadge();
-        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-            try { new Notification('Tradelix Admin', { body: message }); } catch(e){}
-        }
-        try {
-            const c = new (window.AudioContext || window.webkitAudioContext)();
-            [0, 0.3].forEach(d => {
-                const o = c.createOscillator();
-                const g = c.createGain();
-                o.connect(g); g.connect(c.destination);
-                o.frequency.value = 880;
-                g.gain.setValueAtTime(0.3, c.currentTime + d);
-                g.gain.exponentialRampToValueAtTime(0.01, c.currentTime + d + 0.2);
-                o.start(c.currentTime + d);
-                o.stop(c.currentTime + d + 0.2);
-            });
-        } catch(e){}
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-    }
-
-    async function startAdminListeners() {
-        if (!db) { setTimeout(startAdminListeners, 1000); return; }
-        try {
-            onSnapshot(collection(db, 'tradelix_users'), s => {
-                s.docChanges().forEach(c => {
-                    if (c.type !== 'added') return;
-                    const d = c.doc.data();
-                    const createdMs = (d.createdAt?.seconds || 0) * 1000;
-                    const now = Date.now();
-                    if (createdMs > now - 30000) {
-                        addNotif('👤 New user: ' + (d.name || d.email || 'Unknown'));
-                    }
-                });
-            });
-            console.log('✅ Admin listeners active');
-        } catch (e) { console.error(e); }
-    }
-
     function showToast(msg) {
         const t = document.getElementById('toast');
         t.textContent = msg;
@@ -1759,7 +1711,6 @@
     window.addEventListener('load', async () => {
         await initFirebase();
         updateBadge();
-        setTimeout(startAdminListeners, 2000);
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
             const box = document.getElementById('notifPermissionBox');
             if (box) box.style.display = 'none';
@@ -1799,18 +1750,25 @@
     })();
 </script>
 
-<!-- ================= NOTIFICATIONS POLLING v4 (FINAL) ================= -->
+<!-- ================= NOTIFICATIONS POLLING v5 (COMPREHENSIVE) ================= -->
 <script>
 (function() {
     'use strict';
     
-    const SEEN_IDS_KEY = 'tradelix_admin_seen_ids_v4';
-    const NOTIF_KEY = 'tradelix_admin_notifs';
-    const LAST_CHECK_KEY = 'tradelix_admin_last_check_v4';
-    const FIRST_RUN_KEY = 'tradelix_admin_first_run_done_v4';
+    const KEYS = {
+        users: 'tradelix_notif_seen_users_v5',
+        deposits: 'tradelix_notif_seen_deposits_v5',
+        courses: 'tradelix_notif_seen_courses_v5',
+        signals: 'tradelix_notif_seen_signals_v5',
+        firstRun: 'tradelix_notif_first_run_v5',
+        notifs: 'tradelix_admin_notifs'
+    };
     
-    let seenIds = new Set(JSON.parse(localStorage.getItem(SEEN_IDS_KEY) || '[]'));
-    let firstRunDone = localStorage.getItem(FIRST_RUN_KEY) === '1';
+    let seenUsers = new Set(JSON.parse(localStorage.getItem(KEYS.users) || '[]'));
+    let seenDeposits = new Set(JSON.parse(localStorage.getItem(KEYS.deposits) || '[]'));
+    let seenCourses = new Set(JSON.parse(localStorage.getItem(KEYS.courses) || '[]'));
+    let seenSignals = new Set(JSON.parse(localStorage.getItem(KEYS.signals) || '[]'));
+    let firstRunDone = localStorage.getItem(KEYS.firstRun) === '1';
     let isRunning = false;
     
     function waitFirebase() {
@@ -1823,92 +1781,188 @@
         });
     }
     
-    async function fetchUsers() {
+    async function fetchCollection(name, limitN) {
         const db = await waitFirebase();
         const fs = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
         const { collection, getDocs, query, orderBy, limit } = fs;
-        
         try {
-            const q = query(collection(db, 'tradelix_users'), orderBy('createdAt', 'desc'), limit(50));
+            const q = query(collection(db, name), orderBy('createdAt', 'desc'), limit(limitN || 100));
             return await getDocs(q);
         } catch(e) {
-            // Fallback if orderBy fails
-            return await getDocs(collection(db, 'tradelix_users'));
+            return await getDocs(collection(db, name));
         }
     }
     
-    async function checkNewUsers() {
-        if (isRunning) return;
-        isRunning = true;
-        
+    function parseUser(docSnap) {
+        const d = docSnap.data();
+        return {
+            id: docSnap.id,
+            name: d.name || '',
+            email: d.email || '',
+            status: d.status || 'inactive',
+            plan: d.plan || '',
+            txHash: d.txHash || null,
+            depositAmount: d.depositAmount || null,
+            createdMs: (d.createdAt?.seconds || 0) * 1000
+        };
+    }
+    
+    function isCourseRequest(user) {
+        return user.plan && user.plan.indexOf('Course:') === 0;
+    }
+    
+    async function checkUsers() {
         try {
-            const snap = await fetchUsers();
-            const now = Date.now();
+            const snap = await fetchCollection('tradelix_users', 100);
+            const users = [];
+            snap.forEach(d => users.push(parseUser(d)));
             
-            // Collect all users with their creation time
-            const allUsers = [];
-            snap.forEach(d => {
-                const data = d.data();
-                const createdSec = data.createdAt?.seconds || 0;
-                const createdMs = createdSec * 1000;
-                allUsers.push({
-                    id: d.id,
-                    name: data.name || '',
-                    email: data.email || '',
-                    status: data.status || 'inactive',
-                    txHash: data.txHash || null,
-                    createdMs: createdMs
-                });
-            });
-            
-            // First run: register all users WITHOUT notifications
+            // First run: mark all as seen silently
             if (!firstRunDone) {
-                allUsers.forEach(u => seenIds.add(u.id));
-                localStorage.setItem(SEEN_IDS_KEY, JSON.stringify([...seenIds]));
-                localStorage.setItem(FIRST_RUN_KEY, '1');
-                localStorage.setItem(LAST_CHECK_KEY, String(now));
+                users.forEach(u => {
+                    seenUsers.add(u.id);
+                    if (u.txHash) {
+                        seenDeposits.add(u.id + '|' + u.txHash);
+                        if (isCourseRequest(u)) {
+                            seenCourses.add(u.id + '|' + u.plan + '|' + u.txHash);
+                        }
+                    }
+                });
+                saveAll();
                 firstRunDone = true;
-                console.log('✅ First run: registered', seenIds.size, 'users silently');
-                isRunning = false;
+                console.log('✅ First run: registered', seenUsers.size, 'users silently');
                 return;
             }
             
-            // Normal run: detect new users
             const newUsers = [];
-            allUsers.forEach(u => {
-                if (!seenIds.has(u.id)) {
-                    // Genuinely new user
+            const newDeposits = [];
+            const newCourses = [];
+            
+            users.forEach(u => {
+                // 1. New user?
+                if (!seenUsers.has(u.id)) {
+                    seenUsers.add(u.id);
                     newUsers.push(u);
-                    seenIds.add(u.id);
+                    if (u.txHash) {
+                        seenDeposits.add(u.id + '|' + u.txHash);
+                        if (isCourseRequest(u)) {
+                            seenCourses.add(u.id + '|' + u.plan + '|' + u.txHash);
+                        }
+                    }
+                    return;
+                }
+                
+                // 2. New deposit or course request?
+                if (u.txHash && u.status === 'pending') {
+                    if (isCourseRequest(u)) {
+                        const sig = u.id + '|' + u.plan + '|' + u.txHash;
+                        if (!seenCourses.has(sig)) {
+                            seenCourses.add(sig);
+                            newCourses.push(u);
+                        }
+                    } else {
+                        const sig = u.id + '|' + u.txHash;
+                        if (!seenDeposits.has(sig)) {
+                            seenDeposits.add(sig);
+                            newDeposits.push(u);
+                        }
+                    }
                 }
             });
             
-            // Notify for new users (from oldest to newest for correct order)
-            if (newUsers.length > 0) {
-                // Sort ascending by creation time
-                newUsers.sort((a, b) => a.createdMs - b.createdMs);
-                
-                newUsers.forEach(u => {
-                    const displayName = u.name || u.email || 'Unknown';
-                    triggerNotif('👤 New user: ' + displayName);
-                });
-                
-                console.log('✅ Detected', newUsers.length, 'new user(s)');
+            // Send notifications
+            newUsers.sort((a, b) => a.createdMs - b.createdMs);
+            newUsers.forEach(u => {
+                triggerNotif('👤 New user: ' + (u.name || u.email || 'Unknown'));
+            });
+            
+            newDeposits.forEach(u => {
+                const amount = u.depositAmount ? ' $' + u.depositAmount : '';
+                const plan = u.plan ? ' (' + u.plan + ')' : '';
+                triggerNotif('💰 Deposit: ' + (u.name || u.email || 'Unknown') + amount + plan);
+            });
+            
+            newCourses.forEach(u => {
+                const course = u.plan.replace('Course: ', '');
+                triggerNotif('🎓 Course request: ' + (u.name || u.email || 'Unknown') + ' - ' + course);
+            });
+            
+            if (newUsers.length + newDeposits.length + newCourses.length > 0) {
+                console.log('✅ Notifications:', { users: newUsers.length, deposits: newDeposits.length, courses: newCourses.length });
             }
             
-            // Save
-            localStorage.setItem(SEEN_IDS_KEY, JSON.stringify([...seenIds].slice(-500)));
-            localStorage.setItem(LAST_CHECK_KEY, String(now));
+            saveAll();
+        } catch(e) {
+            console.warn('checkUsers error:', e.message);
+        }
+    }
+    
+    async function checkSignals() {
+        try {
+            const snap = await fetchCollection('tradelix_signals', 30);
+            const signals = [];
+            snap.forEach(d => {
+                const s = d.data();
+                signals.push({
+                    id: d.id,
+                    coin: s.coin || 'BTC',
+                    direction: s.direction || 'BUY',
+                    status: s.status || 'active',
+                    createdMs: (s.createdAt?.seconds || 0) * 1000
+                });
+            });
             
-        } catch (e) {
-            console.warn('Poll error:', e.message);
+            if (!firstRunDone) {
+                signals.forEach(s => seenSignals.add(s.id));
+                return;
+            }
+            
+            const newSignals = [];
+            signals.forEach(s => {
+                if (!seenSignals.has(s.id)) {
+                    seenSignals.add(s.id);
+                    newSignals.push(s);
+                }
+            });
+            
+            newSignals.sort((a, b) => a.createdMs - b.createdMs);
+            newSignals.forEach(s => {
+                triggerNotif('📊 New signal: ' + s.coin + '/USDT ' + s.direction);
+            });
+            
+            if (newSignals.length > 0) {
+                localStorage.setItem(KEYS.signals, JSON.stringify([...seenSignals].slice(-500)));
+                console.log('✅ Signal notifications:', newSignals.length);
+            }
+        } catch(e) {
+            console.warn('checkSignals error:', e.message);
+        }
+    }
+    
+    function saveAll() {
+        try {
+            localStorage.setItem(KEYS.users, JSON.stringify([...seenUsers].slice(-1000)));
+            localStorage.setItem(KEYS.deposits, JSON.stringify([...seenDeposits].slice(-1000)));
+            localStorage.setItem(KEYS.courses, JSON.stringify([...seenCourses].slice(-1000)));
+            localStorage.setItem(KEYS.firstRun, '1');
+        } catch(e) { console.warn('Save error:', e.message); }
+    }
+    
+    async function pollCycle() {
+        if (isRunning) return;
+        isRunning = true;
+        try {
+            await checkUsers();
+            await checkSignals();
+        } catch(e) {
+            console.warn('Poll cycle error:', e.message);
         } finally {
             isRunning = false;
         }
     }
     
     function triggerNotif(message) {
-        let notifs = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+        let notifs = JSON.parse(localStorage.getItem(KEYS.notifs) || '[]');
         notifs.unshift({
             id: Date.now() + Math.random(),
             message: message,
@@ -1916,7 +1970,7 @@
             read: false
         });
         if (notifs.length > 50) notifs = notifs.slice(0, 50);
-        localStorage.setItem(NOTIF_KEY, JSON.stringify(notifs));
+        localStorage.setItem(KEYS.notifs, JSON.stringify(notifs));
         
         updateAllBadges(notifs);
         
@@ -1963,9 +2017,9 @@
     }
     
     function startPolling() {
-        console.log('🚀 Notification polling started');
-        checkNewUsers();
-        setInterval(checkNewUsers, 4000);
+        console.log('🚀 Notification polling v5 started');
+        pollCycle();
+        setInterval(pollCycle, 4000);
     }
     
     if (document.readyState === 'complete') {
@@ -1975,10 +2029,10 @@
     }
     
     document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) checkNewUsers();
+        if (!document.hidden) pollCycle();
     });
     
-    console.log('✅ Notifications Polling v4 loaded');
+    console.log('✅ Notifications Polling v5 loaded');
 })();
 </script>
 
