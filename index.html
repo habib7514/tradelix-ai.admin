@@ -797,6 +797,12 @@
             <span id="detailDaysLeft">-</span>
         </div>
     </div>
+<div class="card">
+    <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">🎓 Enrolled Courses</h3>
+    <div id="detailCourses">
+        <p style="color: var(--text-muted); font-size: 13px; text-align: center;">No courses</p>
+    </div>
+</div>
 
     <div class="card" id="depositInfoCard">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💰 Deposit Request</h3>
@@ -815,6 +821,9 @@
         <button class="btn-block success" onclick="openActivateModal()" id="activateBtn" style="margin-bottom: 8px;">
             ✅ Activate Subscription
         </button>
+        <button class="btn-block" style="background: var(--blue); color: #fff; margin-bottom: 8px;" onclick="openCourseModal()">
+    🎓 Activate Course
+</button>
         <button class="btn-block danger" onclick="confirmDeleteUser()" style="margin-bottom: 8px;">
             🗑️ Delete User
         </button>
@@ -1118,6 +1127,29 @@
             ✅ Confirm Activation
         </button>
         <button class="btn-block outline" onclick="closeActivateModal()">
+            Cancel
+        </button>
+    </div>
+</div>
+<!-- ================= COURSE MODAL ================= -->
+<div id="courseModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:99998; align-items:center; justify-content:center; padding:20px;">
+    <div style="background: var(--bg-card); border: 1px solid var(--gold); border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
+        <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">🎓 Activate Course</h3>
+
+        <div class="input-group">
+            <label>Select Course</label>
+            <select id="courseSelect">
+                <option value="Course: Basics">Trading Basics</option>
+                <option value="Course: Technical">Technical Analysis</option>
+                <option value="Course: Risk">Risk Management</option>
+                <option value="Course: Advanced">Advanced Strategies</option>
+            </select>
+        </div>
+
+        <button class="btn-block success" onclick="activateCourse()" style="margin-bottom: 8px;">
+            ✅ Confirm Course
+        </button>
+        <button class="btn-block outline" onclick="closeCourseModal()">
             Cancel
         </button>
     </div>
@@ -1462,6 +1494,18 @@
                 daysEl.textContent = '-';
                 daysEl.style.color = 'var(--text-muted)';
             }
+// Courses
+const coursesEl = document.getElementById('detailCourses');
+const courses = u.courses || [];
+if (courses.length === 0) {
+    coursesEl.innerHTML = '<p style="color: var(--text-muted); font-size: 13px; text-align: center;">No courses</p>';
+} else {
+    coursesEl.innerHTML = courses.map(c => `
+        <div style="background: #0d0d0d; border-radius: 10px; padding: 10px; margin-bottom: 8px; border-left: 3px solid var(--gold);">
+            <div style="color: var(--gold); font-weight: 700; font-size: 13px;">📚 ${c}</div>
+        </div>
+    `).join('');
+}
 
             const depositCard = document.getElementById('depositInfoCard');
             if (u.txHash) {
@@ -1539,6 +1583,46 @@
             showToast('Error activating');
         }
     }
+// ===== COURSE MANAGEMENT =====
+function openCourseModal() {
+    document.getElementById('courseModal').style.display = 'flex';
+}
+
+function closeCourseModal() {
+    document.getElementById('courseModal').style.display = 'none';
+}
+
+async function activateCourse() {
+    if (!currentUserUID) return;
+    const courseName = document.getElementById('courseSelect').value;
+
+    try {
+        const userDoc = await getDoc(doc(db, 'tradelix_users', currentUserUID));
+        const existing = userDoc.data().courses || [];
+
+        if (existing.includes(courseName)) {
+            showToast('⚠️ Course already activated');
+            return;
+        }
+
+        existing.push(courseName);
+
+        await updateDoc(doc(db, 'tradelix_users', currentUserUID), {
+            courses: existing,
+            courseRequest: null
+        });
+
+        showToast('✅ Course activated!');
+        closeCourseModal();
+
+        setTimeout(() => {
+            openUserDetail(currentUserUID);
+        }, 1000);
+    } catch (error) {
+        console.error(error);
+        showToast('Error activating course');
+    }
+}
 
     // ===== DELETE USER =====
     async function confirmDeleteUser() {
