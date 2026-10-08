@@ -350,8 +350,20 @@
             color: #fff;
             font-size: 10px;
             font-weight: 700;
-            padding: 2px 6px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
             border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 8px rgba(246, 70, 93, 0.8);
+            animation: pulse 1.5s infinite;
+            pointer-events: none;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
         }
 
         /* STATS */
@@ -1991,6 +2003,7 @@ async function activateCourse() {
 
     // ===== NOTIFICATIONS =====
     let adminNotifs = JSON.parse(localStorage.getItem('tradelix_admin_notifs') || '[]');
+    updateBadge();
 
     function openNotifModal() {
         const list = document.getElementById('notifList');
@@ -2007,12 +2020,33 @@ async function activateCourse() {
         document.getElementById('notifModal').style.display = 'block';
         adminNotifs.forEach(n => n.read = true);
         localStorage.setItem('tradelix_admin_notifs', JSON.stringify(adminNotifs));
+        updateBadge();
     }
 
     function closeNotifModal() {
         document.getElementById('notifModal').style.display = 'none';
     }
 
+    // ===== UPDATE BADGE =====
+    function updateBadge() {
+        const unread = adminNotifs.filter(n => !n.read).length;
+        const bell = document.querySelector('.bell-icon');
+        if (!bell) return;
+
+        let badge = bell.querySelector('.notifBadge');
+        if (unread > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'notifBadge';
+                bell.appendChild(badge);
+            }
+            badge.textContent = unread;
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+
+    // ===== ADD NOTIFICATION =====
     function addNotif(message) {
         adminNotifs.unshift({
             id: Date.now(),
@@ -2023,9 +2057,12 @@ async function activateCourse() {
         if (adminNotifs.length > 50) adminNotifs = adminNotifs.slice(0, 50);
         localStorage.setItem('tradelix_admin_notifs', JSON.stringify(adminNotifs));
 
-        if (Notification.permission === 'granted') {
+        updateBadge();
+
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
             try { new Notification('Tradelix Admin', { body: message }); } catch(e){}
         }
+
         try {
             const c = new (window.AudioContext || window.webkitAudioContext)();
             [0, 0.3].forEach(d => {
@@ -2114,11 +2151,17 @@ async function activateCourse() {
             }
         } catch(e) { console.error(e); }
     }
+
     // ===== INIT =====
     window.addEventListener('load', async () => {
         await initFirebase();
         setTimeout(startAdminListeners, 2000);
-        setTimeout(requestNotifPermission, 3000);
+
+        // إخفاء زر الإشعارات إذا كان الإذن ممنوحاً
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+            const box = document.getElementById('notifPermissionBox');
+            if (box) box.style.display = 'none';
+        }
     });
 </script>
 <style>
