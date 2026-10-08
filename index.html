@@ -9,7 +9,6 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -1186,9 +1185,9 @@
             const userCredential = await signInWithEmailAndPassword(auth, email, pass);
             localStorage.setItem('tradelix_admin', JSON.stringify({ uid: userCredential.user.uid, email: email }));
             showToast('✅ Welcome, Admin!');
-            // ✅ Reset first-run flag so we re-sync seen items (no notifications for existing)
+            // Reset first-run flag so we re-sync silently
             try {
-                localStorage.removeItem('tradelix_notif_first_run_v5');
+                localStorage.removeItem('tradelix_rt_firstrun_v6');
             } catch(e) {}
             setTimeout(() => {
                 showScreen('dashboardScreen');
@@ -1518,7 +1517,7 @@
             if (active.length === 0) activeList.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>No active signals</h3></div>`;
             else activeList.innerHTML = active.map(s => `
                 <div class="user-card">
-                    <div class="user-header"><div><div class="user-name">${s.coin || 'BTC'}/USDT • ${s.direction}</div><div class="user-email">Entry: $${s.entry} | SL: $${s.stopLoss} | TP: $${s.takeProfit}</div></div><span class="user-status active">LIVE</span></div>
+                    <div class="user-header"><div><div class="user-name">${s.coin || 'BTC'}/USDT • ${s.direction}</div><div class="user-email">Entry: $${s.entry} | SL: $${s.stopLoss} | TP: ${s.takeProfit}</div></div><span class="user-status active">LIVE</span></div>
                     <div style="display:flex; gap: 8px; margin-top: 10px;"><button class="btn-small win" onclick="closeSignal('${s.id}', 'win')" style="flex:1;">✅ Close as WIN</button><button class="btn-small loss" onclick="closeSignal('${s.id}', 'loss')" style="flex:1;">❌ Close as LOSS</button></div>
                 </div>`).join('');
         } catch (error) { console.error(error); }
@@ -1750,221 +1749,59 @@
     })();
 </script>
 
-<!-- ================= NOTIFICATIONS POLLING v5 (COMPREHENSIVE) ================= -->
+<!-- ================= NOTIFICATIONS REALTIME v6 (FINAL) ================= -->
 <script>
 (function() {
     'use strict';
     
     const KEYS = {
-        users: 'tradelix_notif_seen_users_v5',
-        deposits: 'tradelix_notif_seen_deposits_v5',
-        courses: 'tradelix_notif_seen_courses_v5',
-        signals: 'tradelix_notif_seen_signals_v5',
-        firstRun: 'tradelix_notif_first_run_v5',
+        seenUsers: 'tradelix_rt_users_v6',
+        seenDeposits: 'tradelix_rt_deposits_v6',
+        seenCourses: 'tradelix_rt_courses_v6',
+        seenSignals: 'tradelix_rt_signals_v6',
+        firstRun: 'tradelix_rt_firstrun_v6',
         notifs: 'tradelix_admin_notifs'
     };
     
-    let seenUsers = new Set(JSON.parse(localStorage.getItem(KEYS.users) || '[]'));
-    let seenDeposits = new Set(JSON.parse(localStorage.getItem(KEYS.deposits) || '[]'));
-    let seenCourses = new Set(JSON.parse(localStorage.getItem(KEYS.courses) || '[]'));
-    let seenSignals = new Set(JSON.parse(localStorage.getItem(KEYS.signals) || '[]'));
-    let firstRunDone = localStorage.getItem(KEYS.firstRun) === '1';
-    let isRunning = false;
+    let seenUsers = new Set(JSON.parse(localStorage.getItem(KEYS.seenUsers) || '[]'));
+    let seenDeposits = new Set(JSON.parse(localStorage.getItem(KEYS.seenDeposits) || '[]'));
+    let seenCourses = new Set(JSON.parse(localStorage.getItem(KEYS.seenCourses) || '[]'));
+    let seenSignals = new Set(JSON.parse(localStorage.getItem(KEYS.seenSignals) || '[]'));
+    
+    function saveAll() {
+        try {
+            localStorage.setItem(KEYS.seenUsers, JSON.stringify([...seenUsers].slice(-1000)));
+            localStorage.setItem(KEYS.seenDeposits, JSON.stringify([...seenDeposits].slice(-1000)));
+            localStorage.setItem(KEYS.seenCourses, JSON.stringify([...seenCourses].slice(-1000)));
+            localStorage.setItem(KEYS.firstRun, '1');
+        } catch(e) {}
+    }
+    
+    function saveSignals() {
+        try {
+            localStorage.setItem(KEYS.seenSignals, JSON.stringify([...seenSignals].slice(-500)));
+        } catch(e) {}
+    }
     
     function waitFirebase() {
         return new Promise((resolve) => {
             const check = () => {
                 if (window.firebaseDB) return resolve(window.firebaseDB);
-                setTimeout(check, 500);
+                setTimeout(check, 400);
             };
             check();
         });
     }
     
-    async function fetchCollection(name, limitN) {
-        const db = await waitFirebase();
-        const fs = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
-        const { collection, getDocs, query, orderBy, limit } = fs;
-        try {
-            const q = query(collection(db, name), orderBy('createdAt', 'desc'), limit(limitN || 100));
-            return await getDocs(q);
-        } catch(e) {
-            return await getDocs(collection(db, name));
-        }
-    }
-    
-    function parseUser(docSnap) {
-        const d = docSnap.data();
-        return {
-            id: docSnap.id,
-            name: d.name || '',
-            email: d.email || '',
-            status: d.status || 'inactive',
-            plan: d.plan || '',
-            txHash: d.txHash || null,
-            depositAmount: d.depositAmount || null,
-            createdMs: (d.createdAt?.seconds || 0) * 1000
-        };
-    }
-    
-    function isCourseRequest(user) {
-        return user.plan && user.plan.indexOf('Course:') === 0;
-    }
-    
-    async function checkUsers() {
-        try {
-            const snap = await fetchCollection('tradelix_users', 100);
-            const users = [];
-            snap.forEach(d => users.push(parseUser(d)));
-            
-            // First run: mark all as seen silently
-            if (!firstRunDone) {
-                users.forEach(u => {
-                    seenUsers.add(u.id);
-                    if (u.txHash) {
-                        seenDeposits.add(u.id + '|' + u.txHash);
-                        if (isCourseRequest(u)) {
-                            seenCourses.add(u.id + '|' + u.plan + '|' + u.txHash);
-                        }
-                    }
-                });
-                saveAll();
-                firstRunDone = true;
-                console.log('✅ First run: registered', seenUsers.size, 'users silently');
-                return;
-            }
-            
-            const newUsers = [];
-            const newDeposits = [];
-            const newCourses = [];
-            
-            users.forEach(u => {
-                // 1. New user?
-                if (!seenUsers.has(u.id)) {
-                    seenUsers.add(u.id);
-                    newUsers.push(u);
-                    if (u.txHash) {
-                        seenDeposits.add(u.id + '|' + u.txHash);
-                        if (isCourseRequest(u)) {
-                            seenCourses.add(u.id + '|' + u.plan + '|' + u.txHash);
-                        }
-                    }
-                    return;
-                }
-                
-                // 2. New deposit or course request?
-                if (u.txHash && u.status === 'pending') {
-                    if (isCourseRequest(u)) {
-                        const sig = u.id + '|' + u.plan + '|' + u.txHash;
-                        if (!seenCourses.has(sig)) {
-                            seenCourses.add(sig);
-                            newCourses.push(u);
-                        }
-                    } else {
-                        const sig = u.id + '|' + u.txHash;
-                        if (!seenDeposits.has(sig)) {
-                            seenDeposits.add(sig);
-                            newDeposits.push(u);
-                        }
-                    }
-                }
-            });
-            
-            // Send notifications
-            newUsers.sort((a, b) => a.createdMs - b.createdMs);
-            newUsers.forEach(u => {
-                triggerNotif('👤 New user: ' + (u.name || u.email || 'Unknown'));
-            });
-            
-            newDeposits.forEach(u => {
-                const amount = u.depositAmount ? ' $' + u.depositAmount : '';
-                const plan = u.plan ? ' (' + u.plan + ')' : '';
-                triggerNotif('💰 Deposit: ' + (u.name || u.email || 'Unknown') + amount + plan);
-            });
-            
-            newCourses.forEach(u => {
-                const course = u.plan.replace('Course: ', '');
-                triggerNotif('🎓 Course request: ' + (u.name || u.email || 'Unknown') + ' - ' + course);
-            });
-            
-            if (newUsers.length + newDeposits.length + newCourses.length > 0) {
-                console.log('✅ Notifications:', { users: newUsers.length, deposits: newDeposits.length, courses: newCourses.length });
-            }
-            
-            saveAll();
-        } catch(e) {
-            console.warn('checkUsers error:', e.message);
-        }
-    }
-    
-    async function checkSignals() {
-        try {
-            const snap = await fetchCollection('tradelix_signals', 30);
-            const signals = [];
-            snap.forEach(d => {
-                const s = d.data();
-                signals.push({
-                    id: d.id,
-                    coin: s.coin || 'BTC',
-                    direction: s.direction || 'BUY',
-                    status: s.status || 'active',
-                    createdMs: (s.createdAt?.seconds || 0) * 1000
-                });
-            });
-            
-            if (!firstRunDone) {
-                signals.forEach(s => seenSignals.add(s.id));
-                return;
-            }
-            
-            const newSignals = [];
-            signals.forEach(s => {
-                if (!seenSignals.has(s.id)) {
-                    seenSignals.add(s.id);
-                    newSignals.push(s);
-                }
-            });
-            
-            newSignals.sort((a, b) => a.createdMs - b.createdMs);
-            newSignals.forEach(s => {
-                triggerNotif('📊 New signal: ' + s.coin + '/USDT ' + s.direction);
-            });
-            
-            if (newSignals.length > 0) {
-                localStorage.setItem(KEYS.signals, JSON.stringify([...seenSignals].slice(-500)));
-                console.log('✅ Signal notifications:', newSignals.length);
-            }
-        } catch(e) {
-            console.warn('checkSignals error:', e.message);
-        }
-    }
-    
-    function saveAll() {
-        try {
-            localStorage.setItem(KEYS.users, JSON.stringify([...seenUsers].slice(-1000)));
-            localStorage.setItem(KEYS.deposits, JSON.stringify([...seenDeposits].slice(-1000)));
-            localStorage.setItem(KEYS.courses, JSON.stringify([...seenCourses].slice(-1000)));
-            localStorage.setItem(KEYS.firstRun, '1');
-        } catch(e) { console.warn('Save error:', e.message); }
-    }
-    
-    async function pollCycle() {
-        if (isRunning) return;
-        isRunning = true;
-        try {
-            await checkUsers();
-            await checkSignals();
-        } catch(e) {
-            console.warn('Poll cycle error:', e.message);
-        } finally {
-            isRunning = false;
-        }
-    }
-    
     function triggerNotif(message) {
         let notifs = JSON.parse(localStorage.getItem(KEYS.notifs) || '[]');
+        const now = Date.now();
+        // Prevent duplicates within 2s
+        if (notifs.length > 0 && notifs[0].message === message && (now - notifs[0].id) < 2000) {
+            return;
+        }
         notifs.unshift({
-            id: Date.now() + Math.random(),
+            id: now,
             message: message,
             time: new Date().toLocaleString('en-GB'),
             read: false
@@ -1997,6 +1834,8 @@
         if (typeof showToast === 'function') {
             try { showToast(message); } catch(e){}
         }
+        
+        console.log('🔔 Notification:', message);
     }
     
     function updateAllBadges(notifs) {
@@ -2016,23 +1855,140 @@
         });
     }
     
-    function startPolling() {
-        console.log('🚀 Notification polling v5 started');
-        pollCycle();
-        setInterval(pollCycle, 4000);
+    async function startUsersListener() {
+        const db = await waitFirebase();
+        const fs = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+        const { collection, onSnapshot } = fs;
+        
+        console.log('🎧 Users listener starting...');
+        
+        let initialLoadDone = false;
+        
+        onSnapshot(collection(db, 'tradelix_users'), snapshot => {
+            // Initial load: mark all silently
+            if (!initialLoadDone) {
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const uid = docSnap.id;
+                    seenUsers.add(uid);
+                    if (data.txHash) {
+                        seenDeposits.add(uid + '|' + data.txHash);
+                        if (data.plan && data.plan.indexOf('Course:') === 0) {
+                            seenCourses.add(uid + '|' + data.plan + '|' + data.txHash);
+                        }
+                    }
+                });
+                saveAll();
+                initialLoadDone = true;
+                console.log('✅ Users listener active. Marked', seenUsers.size, 'users silently');
+                return;
+            }
+            
+            // Process changes
+            snapshot.docChanges().forEach(change => {
+                const data = change.doc.data();
+                const uid = change.doc.id;
+                const name = data.name || data.email || 'Unknown';
+                
+                // 1. New user added
+                if (change.type === 'added' && !seenUsers.has(uid)) {
+                    seenUsers.add(uid);
+                    triggerNotif('👤 New user: ' + name);
+                    if (data.txHash) {
+                        seenDeposits.add(uid + '|' + data.txHash);
+                        if (data.plan && data.plan.indexOf('Course:') === 0) {
+                            seenCourses.add(uid + '|' + data.plan + '|' + data.txHash);
+                        }
+                    }
+                    saveAll();
+                    return;
+                }
+                
+                // 2. Modified (deposit or course request)
+                if (change.type === 'modified') {
+                    if (!data.txHash || data.status !== 'pending') return;
+                    
+                    if (data.plan && data.plan.indexOf('Course:') === 0) {
+                        const sig = uid + '|' + data.plan + '|' + data.txHash;
+                        if (!seenCourses.has(sig)) {
+                            seenCourses.add(sig);
+                            const courseName = data.plan.replace('Course: ', '');
+                            triggerNotif('🎓 Course request: ' + name + ' - ' + courseName);
+                            saveAll();
+                        }
+                    } else {
+                        const sig = uid + '|' + data.txHash;
+                        if (!seenDeposits.has(sig)) {
+                            seenDeposits.add(sig);
+                            const amount = data.depositAmount ? ' $' + data.depositAmount : '';
+                            const plan = data.plan ? ' (' + data.plan + ')' : '';
+                            triggerNotif('💰 Deposit: ' + name + amount + plan);
+                            saveAll();
+                        }
+                    }
+                }
+            });
+        }, err => {
+            console.error('Users listener error:', err);
+        });
+    }
+    
+    async function startSignalsListener() {
+        const db = await waitFirebase();
+        const fs = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+        const { collection, onSnapshot } = fs;
+        
+        console.log('🎧 Signals listener starting...');
+        
+        let initialLoadDone = false;
+        
+        onSnapshot(collection(db, 'tradelix_signals'), snapshot => {
+            if (!initialLoadDone) {
+                snapshot.forEach(docSnap => {
+                    seenSignals.add(docSnap.id);
+                });
+                saveSignals();
+                initialLoadDone = true;
+                console.log('✅ Signals listener active. Marked', seenSignals.size, 'signals silently');
+                return;
+            }
+            
+            snapshot.docChanges().forEach(change => {
+                if (change.type !== 'added') return;
+                const id = change.doc.id;
+                if (seenSignals.has(id)) return;
+                seenSignals.add(id);
+                
+                const s = change.doc.data();
+                const coin = s.coin || 'BTC';
+                const direction = s.direction || 'BUY';
+                triggerNotif('📊 New signal: ' + coin + '/USDT ' + direction);
+                saveSignals();
+            });
+        }, err => {
+            console.error('Signals listener error:', err);
+        });
+    }
+    
+    window.updateAllBadges = updateAllBadges;
+    
+    function init() {
+        console.log('🚀 Notifications v6 initializing...');
+        startUsersListener();
+        startSignalsListener();
+        
+        // Restore badge on load
+        const notifs = JSON.parse(localStorage.getItem(KEYS.notifs) || '[]');
+        updateAllBadges(notifs);
     }
     
     if (document.readyState === 'complete') {
-        setTimeout(startPolling, 2500);
+        setTimeout(init, 2000);
     } else {
-        window.addEventListener('load', () => setTimeout(startPolling, 2500));
+        window.addEventListener('load', () => setTimeout(init, 2000));
     }
     
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) pollCycle();
-    });
-    
-    console.log('✅ Notifications Polling v5 loaded');
+    console.log('✅ Notifications v6 loaded');
 })();
 </script>
 
