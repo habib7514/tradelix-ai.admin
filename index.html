@@ -67,7 +67,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        body {
+        html, body {
             background-color: var(--bg-main);
             color: var(--text-main);
             min-height: 100vh;
@@ -165,7 +165,7 @@
             margin: 0 auto;
             padding: 20px;
             min-height: 100vh;
-            padding-bottom: 110px;
+            padding-bottom: 90px;
         }
         .screen.active { display: block; }
 
@@ -515,7 +515,7 @@
             word-break: break-all;
         }
 
-        /* ===== BOTTOM NAV - FIXED ===== */
+        /* ===== BOTTOM NAV - FIXED FULLY ===== */
         .bottom-nav {
             position: fixed;
             bottom: 0; left: 0; right: 0;
@@ -525,47 +525,71 @@
             justify-content: space-around;
             align-items: stretch;
             padding: 0;
+            margin: 0;
             z-index: 99999;
-            min-height: 62px;
+            height: 72px;
+            min-height: 72px;
+            max-height: 72px;
             touch-action: manipulation;
         }
         .nav-item {
+            flex: 1 1 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 3px;
+            gap: 4px;
             color: var(--text-muted);
-            font-size: 9px;
+            font-size: 10px;
+            font-weight: 700;
             text-decoration: none;
-            width: 20%;
-            min-height: 62px;
             cursor: pointer;
-            background: none;
+            background: transparent;
             border: none;
             font-family: inherit;
-            padding: 8px 4px;
+            padding: 0;
+            margin: 0;
+            height: 72px;
+            min-height: 72px;
+            max-height: 72px;
+            box-sizing: border-box;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
             -webkit-user-select: none;
             user-select: none;
-            transition: color 0.15s, transform 0.1s;
+            -webkit-appearance: none;
+            appearance: none;
+            transition: color 0.15s, background 0.15s;
             position: relative;
-            z-index: 1;
+            overflow: visible;
+            line-height: 1;
         }
-        .nav-item:active {
-            transform: scale(0.92);
+        .nav-item:active,
+        .nav-item:focus {
+            background: rgba(240, 185, 11, 0.08);
             color: var(--gold);
+            outline: none;
         }
         .nav-item.active { color: var(--gold); }
         .nav-item .icon {
             font-size: 22px;
-            line-height: 1;
+            line-height: 22px;
+            height: 22px;
+            width: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            user-select: none;
+        }
+        .nav-item > span:not(.icon) {
+            font-size: 10px;
+            line-height: 12px;
+            height: 12px;
             display: block;
             pointer-events: none;
-        }
-        .nav-item span {
-            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
         }
         .nav-item * {
             pointer-events: none;
@@ -1705,15 +1729,12 @@ async function activateCourse() {
         };
 
         // ✅ الإصلاح: إذا كان الطلب بسبب كورس → فعّل المستخدم تلقائياً
-        // شرط: status = pending  +  plan يبدأ بـ 'Course:'
         if (data.status === 'pending' && data.plan && data.plan.indexOf('Course:') === 0) {
             updateData.status = 'active';
             updateData.plan = 'Course Member';
             updateData.startDate = new Date().toISOString().split('T')[0];
-            // امسح بيانات الدفع القديمة
             updateData.txHash = null;
             updateData.depositAmount = null;
-            // احسب expiry سنة من الآن للكورسات
             const expiry = new Date();
             expiry.setFullYear(expiry.getFullYear() + 1);
             updateData.expiryDate = expiry.toISOString().split('T')[0];
@@ -2178,7 +2199,6 @@ async function activateCourse() {
         if (initialized) return;
 
         try {
-            // التسجيل الأولي (بدون إشعارات)
             const usersSnap = await getDocs(collection(db, 'tradelix_users'));
             usersSnap.forEach(d => {
                 seenUsers.push(d.id);
@@ -2190,7 +2210,6 @@ async function activateCourse() {
             initialized = true;
             console.log('✅ Admin listeners active');
 
-            // المستمع للإضافات
             onSnapshot(collection(db, 'tradelix_users'), s => {
                 s.docChanges().forEach(c => {
                     const uid = c.doc.id;
@@ -2246,7 +2265,6 @@ async function activateCourse() {
         await initFirebase();
         setTimeout(startAdminListeners, 2000);
 
-        // إخفاء زر الإشعارات إذا كان الإذن ممنوحاً
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
             const box = document.getElementById('notifPermissionBox');
             if (box) box.style.display = 'none';
