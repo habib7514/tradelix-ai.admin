@@ -165,7 +165,7 @@
             margin: 0 auto;
             padding: 20px;
             min-height: 100vh;
-            padding-bottom: 100px;
+            padding-bottom: 110px;
         }
         .screen.active { display: block; }
 
@@ -515,7 +515,7 @@
             word-break: break-all;
         }
 
-        /* BOTTOM NAV */
+        /* ===== BOTTOM NAV - FIXED ===== */
         .bottom-nav {
             position: fixed;
             bottom: 0; left: 0; right: 0;
@@ -523,26 +523,53 @@
             border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-around;
-            padding: 8px 0 14px 0;
-            z-index: 9999;
+            align-items: stretch;
+            padding: 0;
+            z-index: 99999;
+            min-height: 62px;
+            touch-action: manipulation;
         }
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             gap: 3px;
             color: var(--text-muted);
             font-size: 9px;
             text-decoration: none;
             width: 20%;
+            min-height: 62px;
             cursor: pointer;
             background: none;
             border: none;
             font-family: inherit;
             padding: 8px 4px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+            transition: color 0.15s, transform 0.1s;
+            position: relative;
+            z-index: 1;
+        }
+        .nav-item:active {
+            transform: scale(0.92);
+            color: var(--gold);
         }
         .nav-item.active { color: var(--gold); }
-        .nav-item .icon { font-size: 20px; }
+        .nav-item .icon {
+            font-size: 22px;
+            line-height: 1;
+            display: block;
+            pointer-events: none;
+        }
+        .nav-item span {
+            pointer-events: none;
+        }
+        .nav-item * {
+            pointer-events: none;
+        }
 
         /* MISC */
         .hidden { display: none !important; }
