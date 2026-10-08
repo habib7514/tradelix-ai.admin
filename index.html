@@ -637,6 +637,14 @@
             <div class="stat-label">PENDING</div>
         </div>
     </div>
+<!-- Notification Permission Button -->
+<div id="notifPermissionBox" class="card" style="border-color: var(--gold); text-align: center;">
+    <h3 style="color: var(--gold); margin-bottom: 8px; font-size: 15px;">🔔 Enable Notifications</h3>
+    <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px; line-height: 1.5;">
+        Get instant alerts when a new user registers or a deposit is requested.
+    </p>
+    <button class="btn-block" onclick="requestNotifPermission()">🔔 Allow Notifications</button>
+</div>
 
     <div class="section-title">⚡ QUICK ACTIONS</div>
     <div class="card" style="padding: 14px;">
@@ -2087,12 +2095,25 @@ async function activateCourse() {
 
     // ===== NOTIFICATION PERMISSION =====
     async function requestNotifPermission() {
-        if (!('Notification' in window)) return;
-        if (Notification.permission === 'default') {
-            try { await Notification.requestPermission(); } catch(e){}
+        if (!('Notification' in window)) {
+            if (typeof showToast === 'function') showToast('❌ Notifications not supported');
+            return;
         }
+        
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                if (typeof showToast === 'function') showToast('✅ Notifications enabled!');
+                const box = document.getElementById('notifPermissionBox');
+                if (box) box.style.display = 'none';
+                try {
+                    new Notification('Tradelix Admin', { body: '✅ Notifications are working!' });
+                } catch(e) {}
+            } else if (permission === 'denied') {
+                if (typeof showToast === 'function') showToast('❌ Notifications blocked in browser settings');
+            }
+        } catch(e) { console.error(e); }
     }
-
     // ===== INIT =====
     window.addEventListener('load', async () => {
         await initFirebase();
