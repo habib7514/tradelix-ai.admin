@@ -71,12 +71,12 @@
         .input-group input, .input-group select, .input-group textarea { width: 100%; background: var(--bg-card); border: 1px solid var(--border); padding: 14px; border-radius: 10px; color: var(--text-main); font-size: 15px; outline: none; transition: 0.3s; font-family: inherit; }
         .input-group textarea { resize: vertical; min-height: 60px; }
         .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(240, 185, 11, 0.1); }
-        .btn-block { width: 100%; padding: 15px; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; border: none; background: var(--btn-gold); color: #181A20; margin-top: 8px; transition: 0.2s; font-family: inherit; letter-spacing: 1px; }
+        .btn-block { width: 100%; padding: 15px; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; border: none; background: var(--btn-gold); color: #181A20; margin-top: 8px; transition: 0.2s; font-family: inherit; letter-spacing: 1px; touch-action: manipulation; }
         .btn-block:active { transform: scale(0.98); }
         .btn-block.danger { background: var(--red); color: #fff; }
         .btn-block.success { background: var(--green); color: #fff; }
         .btn-block.outline { background: transparent; border: 1px solid #444; color: #fff; }
-        .btn-small { padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; border: none; font-family: inherit; }
+        .btn-small { padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; border: none; font-family: inherit; touch-action: manipulation; }
         .btn-small.approve { background: var(--green); color: #fff; }
         .btn-small.reject { background: var(--red); color: #fff; }
         .btn-small.view { background: var(--gold); color: #000; }
@@ -122,13 +122,104 @@
         .detail-row:last-child { border-bottom: none; }
         .detail-row span:first-child { color: var(--text-muted); }
         .detail-row span:last-child { color: var(--gold-light); font-weight: 700; text-align: right; max-width: 60%; word-break: break-all; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: stretch; padding: 0; margin: 0; z-index: 99999; height: 72px; min-height: 72px; max-height: 72px; touch-action: manipulation; }
-        .nav-item { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; text-decoration: none; cursor: pointer; background: transparent; border: none; font-family: inherit; padding: 0; margin: 0; height: 72px; min-height: 72px; max-height: 72px; box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; -webkit-appearance: none; appearance: none; transition: color 0.15s, background 0.15s; position: relative; overflow: visible; line-height: 1; }
-        .nav-item:active, .nav-item:focus { background: rgba(240, 185, 11, 0.08); color: var(--gold); outline: none; }
+        
+        /* ═══════════ BOTTOM NAV — FIXED (TOUCH-FRIENDLY) v2 ═══════════ */
+        .bottom-nav { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            background: var(--bg-card); 
+            border-top: 1px solid var(--border); 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: stretch; 
+            padding: 0; 
+            margin: 0; 
+            z-index: 99999; 
+            height: 72px; 
+            min-height: 72px; 
+            max-height: 72px; 
+            touch-action: manipulation;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            isolation: isolate;
+        }
+        .nav-item { 
+            flex: 1 1 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 4px; 
+            color: var(--text-muted); 
+            font-size: 10px; 
+            font-weight: 700; 
+            text-decoration: none; 
+            cursor: pointer; 
+            background: transparent; 
+            border: none; 
+            font-family: inherit; 
+            padding: 0; 
+            margin: 0; 
+            width: 100%;
+            height: 72px; 
+            min-height: 72px; 
+            max-height: 72px; 
+            box-sizing: border-box; 
+            /* ⭐ الأهم: زر كامل يستجيب للمس */
+            pointer-events: auto !important;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(240, 185, 11, 0.18); 
+            -webkit-user-select: none; 
+            user-select: none; 
+            -webkit-appearance: none; 
+            appearance: none; 
+            -webkit-touch-callout: none;
+            outline: none; 
+            transition: color 0.15s ease, background 0.15s ease, transform 0.1s ease; 
+            position: relative; 
+            overflow: visible; 
+            line-height: 1; 
+            z-index: 10;
+        }
+        .nav-item:active, 
+        .nav-item:focus { 
+            background: rgba(240, 185, 11, 0.12); 
+            color: var(--gold); 
+            transform: scale(0.95); 
+            outline: none; 
+        }
         .nav-item.active { color: var(--gold); }
-        .nav-item .icon { font-size: 22px; line-height: 22px; height: 22px; width: 22px; display: flex; align-items: center; justify-content: center; pointer-events: none; user-select: none; }
-        .nav-item > span:not(.icon) { font-size: 10px; line-height: 12px; height: 12px; display: block; pointer-events: none; user-select: none; white-space: nowrap; }
-        .nav-item * { pointer-events: none; }
+        .nav-item .icon { 
+            font-size: 22px; 
+            line-height: 22px; 
+            height: 22px; 
+            width: 22px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            pointer-events: none; 
+            user-select: none; 
+            -webkit-user-select: none;
+            position: relative;
+            z-index: 1;
+        }
+        .nav-item > span:not(.icon) { 
+            font-size: 10px; 
+            line-height: 12px; 
+            height: 12px; 
+            display: block; 
+            pointer-events: none; 
+            user-select: none; 
+            -webkit-user-select: none;
+            white-space: nowrap; 
+            position: relative;
+            z-index: 1;
+        }
+        .nav-item * { pointer-events: none !important; user-select: none !important; -webkit-user-select: none !important; }
+        /* ═══════════ END BOTTOM NAV ═══════════ */
+        
         .hidden { display: none !important; }
         .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--gold); color: #181A20; padding: 12px 24px; border-radius: 10px; font-weight: 900; font-size: 14px; opacity: 0; transition: 0.3s; z-index: 99999; max-width: 90%; text-align: center; }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -136,6 +227,39 @@
         .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
         .empty-state h3 { color: var(--gold); margin-bottom: 6px; }
         .empty-state p { font-size: 13px; }
+        
+        /* ═══════════ ⭐ NEW: CLOSE X BUTTON IN NOTIFICATIONS MODAL ═══════════ */
+        .notif-close-top {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(240, 185, 11, 0.15);
+            border: 1.5px solid rgba(240, 185, 11, 0.6);
+            color: var(--gold);
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(240, 185, 11, 0.3);
+            -webkit-appearance: none;
+            appearance: none;
+            transition: all 0.15s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(240, 185, 11, 0.08);
+        }
+        .notif-close-top:active {
+            background: var(--gold);
+            color: #181A20;
+            transform: scale(0.9);
+            box-shadow: 0 0 18px rgba(240, 185, 11, 0.6);
+        }
+        /* ═══════════ END CLOSE X BUTTON ═══════════ */
     </style>
 </head>
 <body>
@@ -385,16 +509,23 @@
     </div>
 </div>
 
+<!-- ═══════════ ⭐ NOTIFICATIONS MODAL — NEW (مع زر X في الأعلى) ═══════════ -->
 <div id="notifModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:99999; padding:16px; overflow-y:auto;">
-    <div style="background: var(--bg-card); border: 1px solid var(--gold); border-radius: 16px; padding: 20px; max-width: 420px; margin: 40px auto;">
-        <h3 style="color: var(--gold); margin-bottom: 16px; text-align: center;">🔔 Notifications</h3>
+    <div style="background: var(--bg-card); border: 1px solid var(--gold); border-radius: 16px; padding: 20px; max-width: 420px; margin: 40px auto; position: relative;">
+        
+        <!-- ⭐ زر X في الأعلى (يمين العنوان) -->
+        <button class="notif-close-top" onclick="closeNotifModal()" aria-label="Close">✕</button>
+        
+        <h3 style="color: var(--gold); margin-bottom: 16px; text-align: center; padding-right: 40px; padding-left: 40px;">🔔 Notifications</h3>
         <div id="notifList"></div>
+        
+        <!-- زر Close السفلي (يُبقى كخيار ثاني) -->
         <button onclick="closeNotifModal()" class="btn-block outline" style="margin-top: 12px;">Close</button>
     </div>
 </div>
+<!-- ═══════════ END NOTIFICATIONS MODAL ═══════════ -->
 
 <div id="toast" class="toast">Message</div>
-
 <script>
     const ADMIN_EMAIL = "mmatrix081@gmail.com";
     let auth, db;
@@ -837,7 +968,6 @@
         } catch (error) { console.error(error); }
     }
 
-    // ===== DELETE MEETING (NEW) =====
     async function deleteMeeting(meetingId) {
         if (!meetingId) return;
         if (!confirm('⚠️ Delete this meeting permanently?\n\nIt will be removed immediately from all subscribers.')) return;
@@ -1029,9 +1159,6 @@
     })();
 </script>
 
-<!-- ═══════════════════════════════════════════════════════════ -->
-<!-- NOTIFICATIONS v12 — SNAPSHOT COMPARE (DEFINITIVE FIX)      -->
-<!-- ═══════════════════════════════════════════════════════════ -->
 <script>
 (function() {
     'use strict';
