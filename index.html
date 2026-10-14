@@ -1167,6 +1167,18 @@
     const NOTIF_KEY = 'tradelix_admin_notifs';
     let isChecking = false;
     let checkCount = 0;
+// ═══ تفعيل AudioContext ═══
+let audioCtx = null;
+function unlockAudio() {
+    if (audioCtx && audioCtx.state === 'running') return;
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        console.log('🔊 Audio Unlocked');
+    } catch(e) {}
+}
+document.addEventListener('click', unlockAudio);
+document.addEventListener('touchstart', unlockAudio);
     
     console.log('');
     console.log('%c═══════════════════════════════════════', 'color:#F0B90B;font-weight:bold');
