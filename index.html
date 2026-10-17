@@ -651,10 +651,26 @@
                 document.getElementById('detailDaysLeft').style.color = 'var(--text-muted)';
             }
             
+            // ⭐ عرض الكورسات (المفعّلة والمطلوبة)
             const coursesEl = document.getElementById('detailCourses');
             const courses = u.courses || [];
-            if (courses.length === 0) coursesEl.innerHTML = '<p style="color: var(--text-muted); font-size: 13px; text-align: center;">No courses</p>';
-            else coursesEl.innerHTML = courses.map(c => `<div style="background: #0d0d0d; border-radius: 10px; padding: 10px; margin-bottom: 8px; border-left: 3px solid var(--gold);"><div style="color: var(--gold); font-weight: 700; font-size: 13px;">📚 ${c}</div></div>`).join('');
+            const requestedCourse = u.courseRequest || null;
+            
+            let coursesHtml = '';
+            
+            if (courses.length > 0) {
+                coursesHtml += courses.map(c => `<div style="background: #0d0d0d; border-radius: 10px; padding: 10px; margin-bottom: 8px; border-left: 3px solid var(--gold);"><div style="color: var(--gold); font-weight: 700; font-size: 13px;">📚 ${c}</div></div>`).join('');
+            }
+            
+            if (requestedCourse && u.status === 'pending') {
+                coursesHtml += `<div style="background: #1a1a1a; border-radius: 10px; padding: 10px; margin-bottom: 8px; border-left: 3px solid var(--orange);"><div style="color: var(--orange); font-weight: 700; font-size: 13px;">⏳ مطلوب: ${requestedCourse}</div></div>`;
+            }
+            
+            if (coursesHtml === '') {
+                coursesEl.innerHTML = '<p style="color: var(--text-muted); font-size: 13px; text-align: center;">No courses</p>';
+            } else {
+                coursesEl.innerHTML = coursesHtml;
+            }
             
             const depositCard = document.getElementById('depositInfoCard');
             if (u.txHash) {
