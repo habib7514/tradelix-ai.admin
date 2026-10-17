@@ -123,102 +123,13 @@
         .detail-row span:first-child { color: var(--text-muted); }
         .detail-row span:last-child { color: var(--gold-light); font-weight: 700; text-align: right; max-width: 60%; word-break: break-all; }
         
-        /* ═══════════ BOTTOM NAV — FIXED (TOUCH-FRIENDLY) v2 ═══════════ */
-        .bottom-nav { 
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            right: 0; 
-            background: var(--bg-card); 
-            border-top: 1px solid var(--border); 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: stretch; 
-            padding: 0; 
-            margin: 0; 
-            z-index: 99999; 
-            height: 72px; 
-            min-height: 72px; 
-            max-height: 72px; 
-            touch-action: manipulation;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            isolation: isolate;
-        }
-        .nav-item { 
-            flex: 1 1 0; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 4px; 
-            color: var(--text-muted); 
-            font-size: 10px; 
-            font-weight: 700; 
-            text-decoration: none; 
-            cursor: pointer; 
-            background: transparent; 
-            border: none; 
-            font-family: inherit; 
-            padding: 0; 
-            margin: 0; 
-            width: 100%;
-            height: 72px; 
-            min-height: 72px; 
-            max-height: 72px; 
-            box-sizing: border-box; 
-            /* ⭐ الأهم: زر كامل يستجيب للمس */
-            pointer-events: auto !important;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: rgba(240, 185, 11, 0.18); 
-            -webkit-user-select: none; 
-            user-select: none; 
-            -webkit-appearance: none; 
-            appearance: none; 
-            -webkit-touch-callout: none;
-            outline: none; 
-            transition: color 0.15s ease, background 0.15s ease, transform 0.1s ease; 
-            position: relative; 
-            overflow: visible; 
-            line-height: 1; 
-            z-index: 10;
-        }
-        .nav-item:active, 
-        .nav-item:focus { 
-            background: rgba(240, 185, 11, 0.12); 
-            color: var(--gold); 
-            transform: scale(0.95); 
-            outline: none; 
-        }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: stretch; padding: 0; margin: 0; z-index: 99999; height: 72px; min-height: 72px; max-height: 72px; touch-action: manipulation; -webkit-transform: translateZ(0); transform: translateZ(0); isolation: isolate; }
+        .nav-item { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; text-decoration: none; cursor: pointer; background: transparent; border: none; font-family: inherit; padding: 0; margin: 0; width: 100%; height: 72px; min-height: 72px; max-height: 72px; box-sizing: border-box; pointer-events: auto !important; touch-action: manipulation; -webkit-tap-highlight-color: rgba(240, 185, 11, 0.18); -webkit-user-select: none; user-select: none; -webkit-appearance: none; appearance: none; -webkit-touch-callout: none; outline: none; transition: color 0.15s ease, background 0.15s ease, transform 0.1s ease; position: relative; overflow: visible; line-height: 1; z-index: 10; }
+        .nav-item:active, .nav-item:focus { background: rgba(240, 185, 11, 0.12); color: var(--gold); transform: scale(0.95); outline: none; }
         .nav-item.active { color: var(--gold); }
-        .nav-item .icon { 
-            font-size: 22px; 
-            line-height: 22px; 
-            height: 22px; 
-            width: 22px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            pointer-events: none; 
-            user-select: none; 
-            -webkit-user-select: none;
-            position: relative;
-            z-index: 1;
-        }
-        .nav-item > span:not(.icon) { 
-            font-size: 10px; 
-            line-height: 12px; 
-            height: 12px; 
-            display: block; 
-            pointer-events: none; 
-            user-select: none; 
-            -webkit-user-select: none;
-            white-space: nowrap; 
-            position: relative;
-            z-index: 1;
-        }
+        .nav-item .icon { font-size: 22px; line-height: 22px; height: 22px; width: 22px; display: flex; align-items: center; justify-content: center; pointer-events: none; user-select: none; -webkit-user-select: none; position: relative; z-index: 1; }
+        .nav-item > span:not(.icon) { font-size: 10px; line-height: 12px; height: 12px; display: block; pointer-events: none; user-select: none; -webkit-user-select: none; white-space: nowrap; position: relative; z-index: 1; }
         .nav-item * { pointer-events: none !important; user-select: none !important; -webkit-user-select: none !important; }
-        /* ═══════════ END BOTTOM NAV ═══════════ */
         
         .hidden { display: none !important; }
         .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--gold); color: #181A20; padding: 12px 24px; border-radius: 10px; font-weight: 900; font-size: 14px; opacity: 0; transition: 0.3s; z-index: 99999; max-width: 90%; text-align: center; }
@@ -228,38 +139,8 @@
         .empty-state h3 { color: var(--gold); margin-bottom: 6px; }
         .empty-state p { font-size: 13px; }
         
-        /* ═══════════ ⭐ NEW: CLOSE X BUTTON IN NOTIFICATIONS MODAL ═══════════ */
-        .notif-close-top {
-            position: absolute;
-            top: 14px;
-            right: 14px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(240, 185, 11, 0.15);
-            border: 1.5px solid rgba(240, 185, 11, 0.6);
-            color: var(--gold);
-            font-size: 18px;
-            font-weight: 900;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: rgba(240, 185, 11, 0.3);
-            -webkit-appearance: none;
-            appearance: none;
-            transition: all 0.15s ease;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(240, 185, 11, 0.08);
-        }
-        .notif-close-top:active {
-            background: var(--gold);
-            color: #181A20;
-            transform: scale(0.9);
-            box-shadow: 0 0 18px rgba(240, 185, 11, 0.6);
-        }
-        /* ═══════════ END CLOSE X BUTTON ═══════════ */
+        .notif-close-top { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%; background: rgba(240, 185, 11, 0.15); border: 1.5px solid rgba(240, 185, 11, 0.6); color: var(--gold); font-size: 18px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; touch-action: manipulation; -webkit-tap-highlight-color: rgba(240, 185, 11, 0.3); -webkit-appearance: none; appearance: none; transition: all 0.15s ease; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(240, 185, 11, 0.08); }
+        .notif-close-top:active { background: var(--gold); color: #181A20; transform: scale(0.9); box-shadow: 0 0 18px rgba(240, 185, 11, 0.6); }
     </style>
 </head>
 <body>
@@ -353,7 +234,7 @@
         <div class="detail-row"><span>Joined</span><span id="detailCreated">-</span></div>
     </div>
     <div class="card">
-        <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💎 Subscription</h3>
+        <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💎 Subscription (Signals)</h3>
         <div class="detail-row"><span>Status</span><span id="detailStatus">-</span></div>
         <div class="detail-row"><span>Plan</span><span id="detailPlan">-</span></div>
         <div class="detail-row"><span>Start Date</span><span id="detailStart">-</span></div>
@@ -509,21 +390,14 @@
     </div>
 </div>
 
-<!-- ═══════════ ⭐ NOTIFICATIONS MODAL — NEW (مع زر X في الأعلى) ═══════════ -->
 <div id="notifModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:99999; padding:16px; overflow-y:auto;">
     <div style="background: var(--bg-card); border: 1px solid var(--gold); border-radius: 16px; padding: 20px; max-width: 420px; margin: 40px auto; position: relative;">
-        
-        <!-- ⭐ زر X في الأعلى (يمين العنوان) -->
         <button class="notif-close-top" onclick="closeNotifModal()" aria-label="Close">✕</button>
-        
         <h3 style="color: var(--gold); margin-bottom: 16px; text-align: center; padding-right: 40px; padding-left: 40px;">🔔 Notifications</h3>
         <div id="notifList"></div>
-        
-        <!-- زر Close السفلي (يُبقى كخيار ثاني) -->
         <button onclick="closeNotifModal()" class="btn-block outline" style="margin-top: 12px;">Close</button>
     </div>
 </div>
-<!-- ═══════════ END NOTIFICATIONS MODAL ═══════════ -->
 
 <div id="toast" class="toast">Message</div>
 <script>
@@ -736,26 +610,36 @@
             } else {
                 document.getElementById('detailCreated').textContent = '-';
             }
+            
+            // عرض تفاصيل الاشتراك فقط إذا لم يكن كورساً
+            const isCourse = u.plan && u.plan.toLowerCase().includes('course');
             document.getElementById('detailStatus').textContent = (u.status || 'inactive').toUpperCase();
             document.getElementById('detailPlan').textContent = u.plan || 'No Active Plan';
             document.getElementById('detailStart').textContent = u.startDate || '-';
             document.getElementById('detailExpiry').textContent = u.expiryDate || '-';
+            
             const daysLeft = calculateDaysLeft(u.expiryDate);
             const daysEl = document.getElementById('detailDaysLeft');
-            if (daysLeft !== null) {
+            if (!isCourse && daysLeft !== null) {
                 if (daysLeft > 0) { daysEl.textContent = `${daysLeft} days`; daysEl.style.color = 'var(--green)'; }
                 else { daysEl.textContent = `Expired`; daysEl.style.color = 'var(--red)'; }
-            } else { daysEl.textContent = '-'; daysEl.style.color = 'var(--text-muted)'; }
+            } else { 
+                daysEl.textContent = isCourse ? 'Lifetime Access' : '-'; 
+                daysEl.style.color = isCourse ? 'var(--gold)' : 'var(--text-muted)'; 
+            }
+            
             const coursesEl = document.getElementById('detailCourses');
             const courses = u.courses || [];
             if (courses.length === 0) coursesEl.innerHTML = '<p style="color: var(--text-muted); font-size: 13px; text-align: center;">No courses</p>';
             else coursesEl.innerHTML = courses.map(c => `<div style="background: #0d0d0d; border-radius: 10px; padding: 10px; margin-bottom: 8px; border-left: 3px solid var(--gold);"><div style="color: var(--gold); font-weight: 700; font-size: 13px;">📚 ${c}</div></div>`).join('');
+            
             const depositCard = document.getElementById('depositInfoCard');
             if (u.txHash) {
                 depositCard.classList.remove('hidden');
                 document.getElementById('detailAmount').textContent = u.depositAmount ? `$${u.depositAmount}` : '-';
                 document.getElementById('detailTxHash').textContent = u.txHash;
             } else depositCard.classList.add('hidden');
+            
             const activateBtn = document.getElementById('activateBtn');
             if (u.status === 'active') activateBtn.textContent = '🔄 Renew Subscription';
             else activateBtn.textContent = '✅ Activate Subscription';
@@ -777,18 +661,25 @@
         const plan = document.getElementById('activatePlan').value;
         const startDate = document.getElementById('activateStartDate').value;
         if (!startDate) { showToast('Please select start date'); return; }
+        
+        let days = 30;
+        if (plan === 'Weekly') days = 7;
+        else if (plan === 'Monthly') days = 30;
+        else if (plan === 'Quarterly') days = 90;
+        else if (plan === 'Lifetime') days = 36500;
+        
         try {
             const start = new Date(startDate);
-            let days = 30;
-            if (plan === 'Weekly') days = 7;
-            else if (plan === 'Monthly') days = 30;
-            else if (plan === 'Quarterly') days = 90;
-            else if (plan === 'Lifetime') days = 36500;
             const expiry = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
+            
             await updateDoc(doc(db, 'tradelix_users', currentUserUID), {
-                status: 'active', plan: 'VIP ' + plan, startDate: startDate,
-                expiryDate: expiry.toISOString().split('T')[0], activatedAt: serverTimestamp()
+                status: 'active', 
+                plan: 'VIP ' + plan, 
+                startDate: startDate,
+                expiryDate: expiry.toISOString().split('T')[0], 
+                activatedAt: serverTimestamp()
             });
+            
             showToast('✅ Subscription activated!');
             closeActivateModal();
             setTimeout(() => { openUserDetail(currentUserUID); loadDashboard(); }, 1000);
@@ -1411,4 +1302,3 @@
 
 </body>
 </html>
-
