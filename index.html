@@ -728,11 +728,11 @@
             existing.push(courseName);
             const updateData = { courses: existing, courseRequest: null };
             
-            // ⭐ التعديل الجوهري: لا نغير الـ plan إذا كان المستخدم لديه اشتراك صفقات
+            // ⭐ التعديل الجوهري: التحقق مما إذا كان المستخدم لديه اشتراك صفقات
             const hasSignalSub = data.plan && (data.plan.includes('VIP') || data.plan.includes('Weekly') || data.plan.includes('Monthly') || data.plan.includes('Quarterly') || data.plan.includes('15Days'));
             
+            // إذا لم يكن لديه اشتراك صفقات، نجعله Course Member
             if (!hasSignalSub && data.status === 'pending') {
-                // إذا لم يكن لديه اشتراك صفقات، نجعله Course Member
                 updateData.status = 'active';
                 updateData.plan = 'Course Member';
                 updateData.startDate = new Date().toISOString().split('T')[0];
