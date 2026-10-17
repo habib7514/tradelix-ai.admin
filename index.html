@@ -611,20 +611,25 @@
                 document.getElementById('detailCreated').textContent = '-';
             }
             
-            // ⭐ فصل الصفقات عن الكورسات
-            const isCourse = u.plan && u.plan.toLowerCase().includes('course');
-            document.getElementById('detailStatus').textContent = (u.status || 'inactive').toUpperCase();
+            // ⭐ فصل الصفقات عن الكورسات (المنطق الصحيح)
+            const isCoursePlan = u.plan && u.plan.toLowerCase().includes('course');
+            const hasSignalSub = u.plan && (u.plan.includes('VIP') || u.plan.includes('Weekly') || u.plan.includes('Monthly') || u.plan.includes('Quarterly') || u.plan.includes('15Days'));
             
-            if (isCourse) {
-                // إذا كان كورس، نخفي تفاصيل الصفقات
-                document.getElementById('detailPlan').textContent = 'No Signal Subscription';
-                document.getElementById('detailStart').textContent = '-';
-                document.getElementById('detailExpiry').textContent = '-';
-                document.getElementById('detailDaysLeft').textContent = '-';
-                document.getElementById('detailDaysLeft').style.color = 'var(--text-muted)';
+            // تحديث الحالة (Status)
+            if (u.status === 'active') {
+                document.getElementById('detailStatus').textContent = 'ACTIVE';
+                document.getElementById('detailStatus').style.color = 'var(--green)';
+            } else if (u.status === 'pending') {
+                document.getElementById('detailStatus').textContent = 'PENDING';
+                document.getElementById('detailStatus').style.color = 'var(--orange)';
             } else {
-                // إذا كان اشتراك صفقات، نعرض التفاصيل
-                document.getElementById('detailPlan').textContent = u.plan || 'No Active Plan';
+                document.getElementById('detailStatus').textContent = 'INACTIVE';
+                document.getElementById('detailStatus').style.color = 'var(--red)';
+            }
+
+            // عرض تفاصيل الصفقات فقط إذا كان لديه اشتراك حقيقي
+            if (hasSignalSub) {
+                document.getElementById('detailPlan').textContent = u.plan;
                 document.getElementById('detailStart').textContent = u.startDate || '-';
                 document.getElementById('detailExpiry').textContent = u.expiryDate || '-';
                 
@@ -637,6 +642,13 @@
                     daysEl.textContent = '-'; 
                     daysEl.style.color = 'var(--text-muted)'; 
                 }
+            } else {
+                // إذا لم يكن لديه اشتراك صفقات (مثلاً كورس فقط)
+                document.getElementById('detailPlan').textContent = 'No Signal Subscription';
+                document.getElementById('detailStart').textContent = '-';
+                document.getElementById('detailExpiry').textContent = '-';
+                document.getElementById('detailDaysLeft').textContent = '-';
+                document.getElementById('detailDaysLeft').style.color = 'var(--text-muted)';
             }
             
             const coursesEl = document.getElementById('detailCourses');
@@ -707,10 +719,20 @@
             const userDoc = await getDoc(doc(db, 'tradelix_users', currentUserUID));
             const data = userDoc.data();
             const existing = data.courses || [];
-            if (existing.includes(courseName)) { showToast('⚠️ Course already activated'); return; }
+            
+            if (existing.includes(courseName)) { 
+                showToast('⚠️ Course already activated'); 
+                return; 
+            }
+            
             existing.push(courseName);
             const updateData = { courses: existing, courseRequest: null };
-            if (data.status === 'pending' && data.plan && data.plan.indexOf('Course:') === 0) {
+            
+            // ⭐ التعديل الجوهري: لا نغير الـ plan إذا كان المستخدم لديه اشتراك صفقات
+            const hasSignalSub = data.plan && (data.plan.includes('VIP') || data.plan.includes('Weekly') || data.plan.includes('Monthly') || data.plan.includes('Quarterly') || data.plan.includes('15Days'));
+            
+            if (!hasSignalSub && data.status === 'pending') {
+                // إذا لم يكن لديه اشتراك صفقات، نجعله Course Member
                 updateData.status = 'active';
                 updateData.plan = 'Course Member';
                 updateData.startDate = new Date().toISOString().split('T')[0];
@@ -720,6 +742,7 @@
                 expiry.setFullYear(expiry.getFullYear() + 1);
                 updateData.expiryDate = expiry.toISOString().split('T')[0];
             }
+            
             await updateDoc(doc(db, 'tradelix_users', currentUserUID), updateData);
             showToast('✅ Course activated!');
             closeCourseModal();
@@ -810,7 +833,7 @@
             if (active.length === 0) activeList.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>No active signals</h3></div>`;
             else activeList.innerHTML = active.map(s => `
                 <div class="user-card">
-                    <div class="user-header"><div><div class="user-name">${s.coin || 'BTC'}/USDT • ${s.direction}</div><div class="user-email">Entry: $${s.entry} | SL: $${s.stopLoss} | TP: $${s.takeProfit}</div></div><span class="user-status active">LIVE</span></div>
+                    <div class="user-header"><div><div class="user-name">${s.coin || 'BTC'}/USDT • ${s.direction}</div><div class="user-email">Entry: $${s.entry} | SL: $${s.stopLoss} | TP: ${s.takeProfit}</div></div><span class="user-status active">LIVE</span></div>
                     <div style="display:flex; gap: 8px; margin-top: 10px;"><button class="btn-small win" onclick="closeSignal('${s.id}', 'win')" style="flex:1;">✅ Close as WIN</button><button class="btn-small loss" onclick="closeSignal('${s.id}', 'loss')" style="flex:1;">❌ Close as LOSS</button></div>
                 </div>`).join('');
         } catch (error) { console.error(error); }
