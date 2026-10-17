@@ -742,22 +742,14 @@
             }
             
             existing.push(courseName);
-            const updateData = { courses: existing, courseRequest: null };
             
-            // ⭐ التعديل الجوهري: التحقق مما إذا كان المستخدم لديه اشتراك صفقات
-            const hasSignalSub = data.plan && (data.plan.includes('VIP') || data.plan.includes('Weekly') || data.plan.includes('Monthly') || data.plan.includes('Quarterly') || data.plan.includes('15Days'));
-            
-            // إذا لم يكن لديه اشتراك صفقات، نجعله Course Member
-            if (!hasSignalSub && data.status === 'pending') {
-                updateData.status = 'active';
-                updateData.plan = 'Course Member';
-                updateData.startDate = new Date().toISOString().split('T')[0];
-                updateData.txHash = null;
-                updateData.depositAmount = null;
-                const expiry = new Date();
-                expiry.setFullYear(expiry.getFullYear() + 1);
-                updateData.expiryDate = expiry.toISOString().split('T')[0];
-            }
+            // ⭐ التعديل الجوهري: لا نمسح بيانات الصفقات إطلاقاً
+            const updateData = { 
+                courses: existing, 
+                courseRequest: null,
+                status: 'active' // ⭐ التأكد من أن الحالة ACTIVE
+                // لا نغير plan، ولا expiryDate، ولا txHash
+            };
             
             await updateDoc(doc(db, 'tradelix_users', currentUserUID), updateData);
             showToast('✅ Course activated!');
