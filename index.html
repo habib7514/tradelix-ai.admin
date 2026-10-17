@@ -365,10 +365,10 @@
     <div style="background: var(--bg-card); border: 1px solid var(--gold); border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
         <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">✅ Activate Subscription</h3>
         <div class="input-group"><label>Plan Type</label><select id="activatePlan">
-            <option value="Weekly">Weekly - $15 (7 days)</option>
-            <option value="Monthly">Monthly - $45 (30 days)</option>
-            <option value="Quarterly">Quarterly - $125 (90 days)</option>
-            <option value="Lifetime">Lifetime VIP - $400 (Unlimited)</option>
+            <option value="Weekly">Weekly - $10 (7 days)</option>
+            <option value="15Days">15 Days - $20 (15 days)</option>
+            <option value="Monthly">Monthly - $30 (30 days)</option>
+            <option value="Quarterly">3 Months - $70 (90 days)</option>
         </select></div>
         <div class="input-group"><label>Start Date</label><input type="date" id="activateStartDate"></div>
         <button class="btn-block success" onclick="activateSubscription()" style="margin-bottom: 8px;">✅ Confirm Activation</button>
@@ -611,21 +611,32 @@
                 document.getElementById('detailCreated').textContent = '-';
             }
             
-            // عرض تفاصيل الاشتراك فقط إذا لم يكن كورساً
+            // ⭐ فصل الصفقات عن الكورسات
             const isCourse = u.plan && u.plan.toLowerCase().includes('course');
             document.getElementById('detailStatus').textContent = (u.status || 'inactive').toUpperCase();
-            document.getElementById('detailPlan').textContent = u.plan || 'No Active Plan';
-            document.getElementById('detailStart').textContent = u.startDate || '-';
-            document.getElementById('detailExpiry').textContent = u.expiryDate || '-';
             
-            const daysLeft = calculateDaysLeft(u.expiryDate);
-            const daysEl = document.getElementById('detailDaysLeft');
-            if (!isCourse && daysLeft !== null) {
-                if (daysLeft > 0) { daysEl.textContent = `${daysLeft} days`; daysEl.style.color = 'var(--green)'; }
-                else { daysEl.textContent = `Expired`; daysEl.style.color = 'var(--red)'; }
-            } else { 
-                daysEl.textContent = isCourse ? 'Lifetime Access' : '-'; 
-                daysEl.style.color = isCourse ? 'var(--gold)' : 'var(--text-muted)'; 
+            if (isCourse) {
+                // إذا كان كورس، نخفي تفاصيل الصفقات
+                document.getElementById('detailPlan').textContent = 'No Signal Subscription';
+                document.getElementById('detailStart').textContent = '-';
+                document.getElementById('detailExpiry').textContent = '-';
+                document.getElementById('detailDaysLeft').textContent = '-';
+                document.getElementById('detailDaysLeft').style.color = 'var(--text-muted)';
+            } else {
+                // إذا كان اشتراك صفقات، نعرض التفاصيل
+                document.getElementById('detailPlan').textContent = u.plan || 'No Active Plan';
+                document.getElementById('detailStart').textContent = u.startDate || '-';
+                document.getElementById('detailExpiry').textContent = u.expiryDate || '-';
+                
+                const daysLeft = calculateDaysLeft(u.expiryDate);
+                const daysEl = document.getElementById('detailDaysLeft');
+                if (daysLeft !== null) {
+                    if (daysLeft > 0) { daysEl.textContent = `${daysLeft} days`; daysEl.style.color = 'var(--green)'; }
+                    else { daysEl.textContent = `Expired`; daysEl.style.color = 'var(--red)'; }
+                } else { 
+                    daysEl.textContent = '-'; 
+                    daysEl.style.color = 'var(--text-muted)'; 
+                }
             }
             
             const coursesEl = document.getElementById('detailCourses');
@@ -664,9 +675,9 @@
         
         let days = 30;
         if (plan === 'Weekly') days = 7;
+        else if (plan === '15Days') days = 15;
         else if (plan === 'Monthly') days = 30;
         else if (plan === 'Quarterly') days = 90;
-        else if (plan === 'Lifetime') days = 36500;
         
         try {
             const start = new Date(startDate);
