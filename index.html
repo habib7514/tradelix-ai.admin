@@ -254,10 +254,15 @@
     <div class="card" style="padding: 14px;">
         <button class="btn-block success" onclick="openActivateModal()" id="activateBtn" style="margin-bottom: 8px;">✅ Activate Subscription</button>
         
-        <!-- ⭐ زر إلغاء تفعيل الاشتراك الجديد -->
+        <!-- ⭐ زر إلغاء تفعيل الاشتراك -->
         <button class="btn-block danger" onclick="deactivateUserSubscription()" style="margin-bottom: 8px; background: var(--red);">🚫 Deactivate Subscription</button>
         
+        <!-- ⭐ زر تفعيل الكورسات -->
         <button class="btn-block" style="background: var(--blue); color: #fff; margin-bottom: 8px;" onclick="openCourseModal()">🎓 Activate Course</button>
+        
+        <!-- ⭐ زر إلغاء تفعيل الكورسات (جديد) -->
+        <button class="btn-block danger" onclick="openDeactivateCourseModal()" style="margin-bottom: 8px;">🚫 Deactivate Course</button>
+        
         <button class="btn-block danger" onclick="confirmDeleteUser()" style="margin-bottom: 8px;">🗑️ Delete User</button>
         <button class="btn-block outline" onclick="showScreen('usersScreen')">← Back to Users</button>
     </div>
@@ -391,6 +396,18 @@
         </select></div>
         <button class="btn-block success" onclick="activateCourse()" style="margin-bottom: 8px;">✅ Confirm Course</button>
         <button class="btn-block outline" onclick="closeCourseModal()">Cancel</button>
+    </div>
+</div>
+
+<!-- ⭐ نافذة إلغاء تفعيل الكورسات (جديدة) -->
+<div id="deactivateCourseModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:99998; align-items:center; justify-content:center; padding:20px;">
+    <div style="background: var(--bg-card); border: 1px solid var(--red); border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
+        <h3 style="color: var(--red); margin-bottom: 20px; text-align: center; font-size: 18px;">🚫 Deactivate Course</h3>
+        <div class="input-group"><label>Select Course to Remove</label><select id="deactivateCourseSelect">
+            <!-- سيتم ملء الخيارات هنا برمجياً -->
+        </select></div>
+        <button class="btn-block danger" onclick="confirmDeactivateCourse()" style="margin-bottom: 8px;">🚫 Confirm Deactivation</button>
+        <button class="btn-block outline" onclick="closeDeactivateCourseModal()">Cancel</button>
     </div>
 </div>
 
@@ -615,11 +632,9 @@
                 document.getElementById('detailCreated').textContent = '-';
             }
             
-            // ⭐ فصل الصفقات عن الكورسات (المنطق الصحيح)
             const isCoursePlan = u.plan && u.plan.toLowerCase().includes('course');
             const hasSignalSub = u.plan && (u.plan.includes('VIP') || u.plan.includes('Weekly') || u.plan.includes('Monthly') || u.plan.includes('Quarterly') || u.plan.includes('15Days'));
             
-            // تحديث الحالة (Status)
             if (u.status === 'active') {
                 document.getElementById('detailStatus').textContent = 'ACTIVE';
                 document.getElementById('detailStatus').style.color = 'var(--green)';
@@ -631,7 +646,6 @@
                 document.getElementById('detailStatus').style.color = 'var(--red)';
             }
 
-            // عرض تفاصيل الصفقات فقط إذا كان لديه اشتراك حقيقي
             if (hasSignalSub) {
                 document.getElementById('detailPlan').textContent = u.plan;
                 document.getElementById('detailStart').textContent = u.startDate || '-';
@@ -647,7 +661,6 @@
                     daysEl.style.color = 'var(--text-muted)'; 
                 }
             } else {
-                // إذا لم يكن لديه اشتراك صفقات (مثلاً كورس فقط)
                 document.getElementById('detailPlan').textContent = 'No Signal Subscription';
                 document.getElementById('detailStart').textContent = '-';
                 document.getElementById('detailExpiry').textContent = '-';
@@ -655,7 +668,6 @@
                 document.getElementById('detailDaysLeft').style.color = 'var(--text-muted)';
             }
             
-            // ⭐ عرض الكورسات (المفعّلة والمطلوبة)
             const coursesEl = document.getElementById('detailCourses');
             const courses = u.courses || [];
             const requestedCourse = u.courseRequest || null;
@@ -729,7 +741,6 @@
         } catch (error) { console.error(error); showToast('Error activating'); }
     }
 
-    // ⭐ الدالة الجديدة لإلغاء تفعيل الاشتراك
     async function deactivateUserSubscription() {
         if (!currentUserUID) return;
         if (!confirm('⚠️ Are you sure you want to DEACTIVATE this subscription?\n\nThis will immediately block the user from receiving signals.')) return;
@@ -774,12 +785,10 @@
             
             existing.push(courseName);
             
-            // ⭐ التعديل الجوهري: لا نمسح بيانات الصفقات إطلاقاً
             const updateData = { 
                 courses: existing, 
                 courseRequest: null,
-                status: 'active' // ⭐ التأكد من أن الحالة ACTIVE
-                // لا نغير plan، ولا expiryDate، ولا txHash
+                status: 'active'
             };
             
             await updateDoc(doc(db, 'tradelix_users', currentUserUID), updateData);
@@ -787,6 +796,68 @@
             closeCourseModal();
             setTimeout(() => { openUserDetail(currentUserUID); }, 1000);
         } catch (error) { console.error(error); showToast('Error activating course'); }
+    }
+
+    // ⭐ الدوال الجديدة لإلغاء تفعيل الكورسات
+    async function openDeactivateCourseModal() {
+        if (!currentUserUID) return;
+        
+        try {
+            const userDoc = await getDoc(doc(db, 'tradelix_users', currentUserUID));
+            if (!userDoc.exists()) return;
+            
+            const u = userDoc.data();
+            const courses = u.courses || [];
+            
+            if (courses.length === 0) {
+                showToast('⚠️ This user has no active courses');
+                return;
+            }
+            
+            const select = document.getElementById('deactivateCourseSelect');
+            select.innerHTML = courses.map(c => `<option value="${c}">${c}</option>`).join('');
+            
+            document.getElementById('deactivateCourseModal').style.display = 'flex';
+        } catch (error) {
+            console.error(error);
+            showToast('❌ Error loading courses');
+        }
+    }
+
+    function closeDeactivateCourseModal() {
+        document.getElementById('deactivateCourseModal').style.display = 'none';
+    }
+
+    async function confirmDeactivateCourse() {
+        if (!currentUserUID) return;
+        
+        const courseToRemove = document.getElementById('deactivateCourseSelect').value;
+        if (!courseToRemove) return;
+        
+        if (!confirm(`⚠️ Are you sure you want to remove "${courseToRemove}" from this user?`)) return;
+        
+        try {
+            showToast('⏳ Removing course...');
+            
+            const userDoc = await getDoc(doc(db, 'tradelix_users', currentUserUID));
+            const u = userDoc.data();
+            let courses = u.courses || [];
+            
+            courses = courses.filter(c => c !== courseToRemove);
+            
+            await updateDoc(doc(db, 'tradelix_users', currentUserUID), {
+                courses: courses
+            });
+            
+            showToast('✅ Course deactivated successfully');
+            closeDeactivateCourseModal();
+            
+            setTimeout(() => { openUserDetail(currentUserUID); }, 1000);
+            
+        } catch (error) {
+            console.error(error);
+            showToast('❌ Error deactivating course');
+        }
     }
 
     async function confirmDeleteUser() {
