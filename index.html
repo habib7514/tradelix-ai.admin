@@ -301,6 +301,7 @@
         
         <div class="input-group" id="coinSelectGroup">
             <label>Coin</label>
+            <!-- ✅ تم إضافة جميع العملات هنا -->
             <select id="signalCoin">
                 <option value="BTC">Bitcoin (BTC)</option>
                 <option value="ETH">Ethereum (ETH)</option>
@@ -309,6 +310,49 @@
                 <option value="XRP">XRP</option>
                 <option value="ADA">Cardano (ADA)</option>
                 <option value="DOGE">Dogecoin (DOGE)</option>
+                <option value="DOT">Polkadot (DOT)</option>
+                <option value="AVAX">Avalanche (AVAX)</option>
+                <option value="LINK">Chainlink (LINK)</option>
+                <option value="POL">Polygon (POL)</option>
+                <option value="LTC">Litecoin (LTC)</option>
+                <option value="TRX">TRON (TRX)</option>
+                <option value="ATOM">Cosmos (ATOM)</option>
+                <option value="UNI">Uniswap (UNI)</option>
+                <option value="SHIB">Shiba Inu (SHIB)</option>
+                <option value="APT">Aptos (APT)</option>
+                <option value="ARB">Arbitrum (ARB)</option>
+                <option value="OP">Optimism (OP)</option>
+                <option value="NEAR">NEAR (NEAR)</option>
+                <option value="INJ">Injective (INJ)</option>
+                <option value="SUI">Sui (SUI)</option>
+                <option value="FIL">Filecoin (FIL)</option>
+                <option value="ETC">Ethereum Classic (ETC)</option>
+                <option value="TON">Toncoin (TON)</option>
+                <option value="ICP">Internet Computer (ICP)</option>
+                <option value="RENDER">Render (RENDER)</option>
+                <option value="FET">Fetch.ai (FET)</option>
+                <option value="SEI">Sei (SEI)</option>
+                <option value="TIA">Celestia (TIA)</option>
+                <option value="STX">Stacks (STX)</option>
+                <option value="IMX">Immutable (IMX)</option>
+                <option value="GRT">The Graph (GRT)</option>
+                <option value="SAND">The Sandbox (SAND)</option>
+                <option value="MANA">Decentraland (MANA)</option>
+                <option value="AAVE">Aave (AAVE)</option>
+                <option value="MKR">Maker (MKR)</option>
+                <option value="CRV">Curve DAO (CRV)</option>
+                <option value="ALGO">Algorand (ALGO)</option>
+                <option value="VET">VeChain (VET)</option>
+                <option value="HBAR">Hedera (HBAR)</option>
+                <option value="EOS">EOS (EOS)</option>
+                <option value="XLM">Stellar (XLM)</option>
+                <option value="THETA">Theta Network (THETA)</option>
+                <option value="RUNE">THORChain (RUNE)</option>
+                <option value="KAS">Kaspa (KAS)</option>
+                <option value="TAO">Bittensor (TAO)</option>
+                <option value="WIF">dogwifhat (WIF)</option>
+                <option value="PEPE">Pepe (PEPE)</option>
+                <option value="BONK">Bonk (BONK)</option>
             </select>
         </div>
         
@@ -430,7 +474,7 @@
             orderBy = fsModule.orderBy;
             limit = fsModule.limit;
             onSnapshot = fsModule.onSnapshot;
-            startRealtimeListeners(); // ✅ تشغيل الاستماع المباشر للإشعارات
+            startRealtimeListeners();
         } else {
             setTimeout(initFirebase, 500);
         }
@@ -450,12 +494,10 @@
     }, 3000);
 
     function enableAlerts() {
-        // تفعيل الصوت
         const c = getAudioContext();
         if (c && c.state === 'suspended') c.resume();
         playNotifSound('default');
         
-        // طلب إذن الإشعارات
         if ('Notification' in window) {
             Notification.requestPermission().then(perm => {
                 if (perm === 'granted') {
@@ -514,7 +556,7 @@
             const userCredential = await signInWithEmailAndPassword(auth, email, pass);
             localStorage.setItem('tradelix_admin', JSON.stringify({ uid: userCredential.user.uid, email: email }));
             showToast('✅ Welcome, Admin!');
-            enableAlerts(); // تنبيهات تلقائية عند الدخول
+            enableAlerts();
             setTimeout(() => { showScreen('dashboardScreen'); loadDashboard(); }, 1000);
         } catch (error) {
             console.error(error);
@@ -1042,7 +1084,6 @@
 
                 if (change.type === "added") {
                     // مستخدم جديد
-                    // نتأكد أن المستخدم لم يُضف منذ أكثر من 10 ثوانٍ (لتجنب الإشعارات القديمة عند تحميل الصفحة)
                     if (data.createdAt && (Date.now() - (data.createdAt.seconds * 1000) < 10000)) {
                         triggerNotif('👤 New user: ' + name);
                         if (data.txHash && data.status === 'pending') {
@@ -1053,11 +1094,7 @@
                 
                 if (change.type === "modified") {
                     // تحديث (طلب إيداع جديد)
-                    const before = change.oldIndex !== undefined ? change.doc.data() : {}; // Not reliable for deep compare in docChanges
-                    // نعتمد على وجود txHash وحالة pending
                     if (data.txHash && data.status === 'pending') {
-                        // نتحقق من أن هذا الإيداع لم يمر عليه وقت طويل (مثلاً 1 دقيقة) لتجنب التكرار عند تحديث الصفحة
-                        // لا يمكننا مقارنة الـ txHash القديم بسهولة هنا، لذا سنستخدم منع التكرار في دالة triggerNotif
                         triggerNotif(`💰 Deposit: ${name} — ${data.plan} (${notifPlanLabel(data.planType)})`);
                     }
                 }
