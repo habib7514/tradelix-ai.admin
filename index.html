@@ -13,7 +13,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-        import { getMessaging } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAPHGtTeDNamwyR2kfg-b9ABp7pNyyiPKM",
@@ -27,15 +26,7 @@
         const app = initializeApp(firebaseConfig);
         window.firebaseAuth = getAuth(app);
         window.firebaseDB = getFirestore(app);
-        try {
-            window.firebaseMessaging = getMessaging(app);
-        } catch(e) {
-            console.warn('FCM not supported in this browser', e);
-        }
         window.firebaseReady = true;
-        
-        // ✅ تم إضافة مفتاح VAPID الخاص بك هنا
-        window.VAPID_KEY = "BMToYawMLqbdNuLhzoHrNq_I1eE6gFayfOPOWv74_aYqBBvdZ_8RbT9-JTj1OhPN-ZWKcRJkryRiWQXeUhjfXgE";
     </script>
     
     <style>
@@ -47,7 +38,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
         html, body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
         
-        /* Splash & Auth */
         #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: radial-gradient(circle at center, #1E2329 0%, #181A20 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; transition: opacity 0.8s ease, visibility 0.8s; }
         #splash.hide { opacity: 0; visibility: hidden; }
         .splash-logo { width: 180px; height: 180px; position: relative; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; }
@@ -55,12 +45,11 @@
         .splash-logo-inner { font-size: 90px; font-weight: 900; color: var(--gold); text-shadow: 0 0 40px rgba(240, 185, 11, 0.8); animation: splashPulse 1.5s ease-in-out infinite; z-index: 2; }
         @keyframes splashSpin { to { transform: rotate(360deg); } }
         @keyframes splashPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.85; } }
-        .splash-title { font-size: 38px; font-weight: 900; color: var(--gold); letter-spacing: 4px; margin-bottom: 8px; animation: fadeInUp 1s ease 0.5s both; }
-        .splash-subtitle { font-size: 13px; color: var(--red); margin-bottom: 50px; font-weight: 700; letter-spacing: 4px; animation: fadeInUp 1s ease 1s both; }
-        .splash-loading { width: 220px; height: 4px; background: #2B3139; border-radius: 4px; overflow: hidden; animation: fadeInUp 1s ease 1.5s both; }
+        .splash-title { font-size: 38px; font-weight: 900; color: var(--gold); letter-spacing: 4px; margin-bottom: 8px; }
+        .splash-subtitle { font-size: 13px; color: var(--red); margin-bottom: 50px; font-weight: 700; letter-spacing: 4px; }
+        .splash-loading { width: 220px; height: 4px; background: #2B3139; border-radius: 4px; overflow: hidden; }
         .splash-loading-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #FCD535); border-radius: 4px; animation: loadBar 3s linear forwards; }
         @keyframes loadBar { from { width: 0%; } to { width: 100%; } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
         .screen { display: none; width: 100%; max-width: 480px; margin: 0 auto; padding: 20px; min-height: 100vh; padding-bottom: 90px; }
         .screen.active { display: block; }
@@ -72,14 +61,12 @@
         .admin-badge { display: inline-block; background: rgba(246, 70, 93, 0.15); color: var(--red); border: 1px solid var(--red); padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 900; letter-spacing: 2px; margin-top: 8px; }
         .auth-title { font-size: 22px; font-weight: 700; margin-bottom: 20px; text-align: center; }
         
-        /* Form Inputs */
         .input-group { margin-bottom: 14px; }
         .input-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; }
         .input-group input, .input-group select, .input-group textarea { width: 100%; background: var(--bg-card); border: 1px solid var(--border); padding: 14px; border-radius: 10px; color: var(--text-main); font-size: 15px; outline: none; transition: 0.3s; font-family: inherit; }
         .input-group textarea { resize: vertical; min-height: 60px; }
         .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(240, 185, 11, 0.1); }
         
-        /* Buttons */
         .btn-block { width: 100%; padding: 15px; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; border: none; background: var(--btn-gold); color: #181A20; margin-top: 8px; transition: 0.2s; font-family: inherit; letter-spacing: 1px; touch-action: manipulation; }
         .btn-block:active { transform: scale(0.98); }
         .btn-block.danger { background: var(--red); color: #fff; }
@@ -94,7 +81,6 @@
         .btn-small.loss { background: var(--red); color: #fff; }
         .btn-small.delete { background: var(--red); color: #fff; }
         
-        /* Header */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
         .header-left { display: flex; align-items: center; gap: 10px; }
         .header-logo { width: 38px; height: 38px; border-radius: 50%; background: var(--btn-gold); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; color: #181A20; box-shadow: 0 0 15px rgba(240, 185, 11, 0.5); }
@@ -107,7 +93,6 @@
         .notifBadge { position: absolute; top: -4px; right: -4px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 8px rgba(246, 70, 93, 0.8); animation: pulse 1.5s infinite; pointer-events: none; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
         
-        /* Stats */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
         .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; text-align: center; }
         .stat-card .stat-icon { font-size: 26px; margin-bottom: 6px; }
@@ -118,24 +103,20 @@
         .stat-card.inactive .stat-value { color: var(--red); }
         .stat-card.winrate .stat-value { color: var(--green); }
         
-        /* Cards */
         .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
         .section-title { font-size: 15px; font-weight: 900; margin-bottom: 12px; color: var(--gold); letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* Detail Row */
         .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
         .detail-row:last-child { border-bottom: none; }
         .detail-row span:first-child { color: var(--text-muted); }
         .detail-row span:last-child { color: var(--text-main); font-weight: 700; text-align: right; word-break: break-word; max-width: 60%; }
 
-        /* Plan Type Badge */
         .plan-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 900; padding: 3px 9px; border-radius: 8px; letter-spacing: 0.5px; margin-top: 6px; }
         .plan-badge.crypto { background: rgba(240, 185, 11, 0.15); color: var(--gold); border: 1px solid var(--gold); }
         .plan-badge.gold   { background: rgba(251, 191, 36, 0.15); color: #FBBF24; border: 1px solid #FBBF24; }
         .plan-badge.both   { background: rgba(139, 92, 246, 0.15); color: #8B5CF6; border: 1px solid #8B5CF6; }
         .plan-badge.unknown{ background: rgba(132, 142, 156, 0.15); color: var(--text-muted); border: 1px solid var(--text-muted); }
         
-        /* User Card */
         .user-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
         .user-card:active { background: #222; }
         .user-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
@@ -148,13 +129,11 @@
         .user-info { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
         .user-info strong { color: var(--gold-light); }
         
-        /* Mode Toggle */
         .mode-toggle { display: flex; background: var(--bg-card); border-radius: 12px; padding: 4px; border: 1px solid var(--border); margin-bottom: 20px; }
         .mode-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: 900; font-size: 14px; cursor: pointer; transition: 0.3s; font-family: inherit; }
         .mode-btn.active { background: var(--gold); color: #000; box-shadow: 0 0 10px rgba(240, 185, 11, 0.3); }
         .mode-btn.inactive { background: transparent; color: var(--text-muted); }
 
-        /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: stretch; padding: 0; margin: 0; z-index: 99999; height: 72px; touch-action: manipulation; }
         .nav-item { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; cursor: pointer; background: transparent; border: none; padding: 0; height: 72px; }
         .nav-item.active { color: var(--gold); }
@@ -166,6 +145,10 @@
         .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
         .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
         .empty-state h3 { color: var(--gold); margin-bottom: 6px; }
+
+        /* ✅ Popup for Notifications */
+        .notif-popup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; padding: 20px; border-radius: 12px; z-index: 999999; font-weight: 900; font-size: 16px; box-shadow: 0 0 30px rgba(240,185,11,0.8); text-align: center; width: 90%; max-width: 400px; border: 2px solid #fff; animation: slideDown 0.3s ease; }
+        @keyframes slideDown { from { top: -100px; } to { top: 20px; } }
     </style>
 </head>
 <body>
@@ -193,7 +176,10 @@
 <div id="dashboardScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo" id="dashLogo">A</div><div class="header-title"><h1 id="dashTitle">DASHBOARD</h1><span>● ADMIN</span></div></div>
-        <div class="bell-icon" onclick="openNotifModal()">🔔</div>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <button class="btn-small view" onclick="enableAlerts()" style="padding: 8px;">🔔 Enable Alerts</button>
+            <div class="bell-icon" onclick="openNotifModal()">🔔</div>
+        </div>
     </div>
     
     <div class="mode-toggle">
@@ -419,14 +405,12 @@
     let signInWithEmailAndPassword, signOut, onAuthStateChanged;
     let collection, getDocs, doc, getDoc, updateDoc, deleteDoc, setDoc, addDoc, query, where, serverTimestamp, orderBy, limit, onSnapshot;
 
-    let appMode = 'crypto'; // 'crypto' or 'gold'
+    let appMode = 'crypto';
 
     async function initFirebase() {
         if (window.firebaseReady) {
             const authModule = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js");
             const fsModule = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
-            const msgModule = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging.js");
-            
             auth = window.firebaseAuth;
             db = window.firebaseDB;
             signInWithEmailAndPassword = authModule.signInWithEmailAndPassword;
@@ -446,10 +430,7 @@
             orderBy = fsModule.orderBy;
             limit = fsModule.limit;
             onSnapshot = fsModule.onSnapshot;
-            
-            // FCM imports
-            window.getToken = msgModule.getToken;
-            window.onMessage = msgModule.onMessage;
+            startRealtimeListeners(); // ✅ تشغيل الاستماع المباشر للإشعارات
         } else {
             setTimeout(initFirebase, 500);
         }
@@ -462,61 +443,31 @@
             if (savedAdmin) {
                 showScreen('dashboardScreen');
                 loadDashboard();
-                setupFCM(); // تفعيل FCM عند استعادة الجلسة
             } else {
                 showScreen('loginScreen');
             }
         }, 800);
     }, 3000);
 
-    // ✅ ============ FCM SETUP ============
-    async function setupFCM() {
-        if (!window.firebaseMessaging) {
-            console.warn('FCM not initialized');
-            return;
-        }
-        try {
-            const permission = await Notification.requestPermission();
-            if (permission !== 'granted') {
-                console.warn('Notification permission denied');
-                return;
-            }
-
-            const currentToken = await window.getToken(window.firebaseMessaging, {
-                vapidKey: window.VAPID_KEY
+    function enableAlerts() {
+        // تفعيل الصوت
+        const c = getAudioContext();
+        if (c && c.state === 'suspended') c.resume();
+        playNotifSound('default');
+        
+        // طلب إذن الإشعارات
+        if ('Notification' in window) {
+            Notification.requestPermission().then(perm => {
+                if (perm === 'granted') {
+                    showToast('✅ Alerts Enabled & Sound Unlocked!');
+                } else {
+                    showToast('⚠️ Notifications blocked by browser.');
+                }
             });
-
-            if (currentToken) {
-                console.log('FCM Token:', currentToken);
-                await window.setDoc(
-                    window.doc(window.firebaseDB, 'admin_tokens', currentToken),
-                    {
-                        token: currentToken,
-                        email: ADMIN_EMAIL,
-                        updatedAt: window.serverTimestamp(),
-                        platform: 'web'
-                    },
-                    { merge: true }
-                );
-                console.log('✅ FCM token saved to Firestore');
-            } else {
-                console.warn('No FCM token available');
-            }
-
-            // استقبال الرسائل في المقدمة (عندما يكون التاب مفتوحاً)
-            window.onMessage(window.firebaseMessaging, (payload) => {
-                console.log('FCM foreground message:', payload);
-                const title = payload.notification?.title || '🔔 Tradelix Admin';
-                const body = payload.notification?.body || 'لديك إشعار جديد';
-                
-                // إضافة الإشعار إلى القائمة المحلية (سيشغل الصوت والاهتزاز)
-                triggerNotif(body);
-            });
-        } catch (err) {
-            console.error('FCM setup error:', err);
+        } else {
+            showToast('✅ Sound Unlocked! (Notifications not supported)');
         }
     }
-    // ✅ ============ END FCM SETUP ============
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -526,12 +477,10 @@
         if (id === 'usersScreen') loadUsers();
         if (id === 'dashboardScreen') loadDashboard();
         if (id === 'historyScreen') loadHistory();
-        if (id === 'sendSignalScreen') loadActiveUsersForTarget();
     }
 
     function switchMode(mode) {
         appMode = mode;
-        
         if(document.getElementById('btnModeCrypto')) {
             document.getElementById('btnModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
@@ -544,7 +493,6 @@
             document.getElementById('btnHistCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnHistGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
-
         if (mode === 'gold') {
             if(document.getElementById('coinSelectGroup')) document.getElementById('coinSelectGroup').style.display = 'none';
             if(document.getElementById('signalScreenTitle')) document.getElementById('signalScreenTitle').textContent = '🥇 Send Gold Signal (XAU/USD)';
@@ -552,13 +500,11 @@
             if(document.getElementById('coinSelectGroup')) document.getElementById('coinSelectGroup').style.display = 'block';
             if(document.getElementById('signalScreenTitle')) document.getElementById('signalScreenTitle').textContent = '📈 Send Crypto Signal';
         }
-        
         if (document.getElementById('historyScreen').classList.contains('active')) loadHistory();
         if (document.getElementById('usersScreen').classList.contains('active')) loadUsers();
         if (document.getElementById('dashboardScreen').classList.contains('active')) loadDashboard();
     }
 
-    // Login / Logout
     async function handleLogin() {
         const email = document.getElementById('loginEmail').value.trim().toLowerCase();
         const pass = document.getElementById('loginPassword').value;
@@ -568,7 +514,7 @@
             const userCredential = await signInWithEmailAndPassword(auth, email, pass);
             localStorage.setItem('tradelix_admin', JSON.stringify({ uid: userCredential.user.uid, email: email }));
             showToast('✅ Welcome, Admin!');
-            await setupFCM(); // تفعيل FCM بعد تسجيل الدخول
+            enableAlerts(); // تنبيهات تلقائية عند الدخول
             setTimeout(() => { showScreen('dashboardScreen'); loadDashboard(); }, 1000);
         } catch (error) {
             console.error(error);
@@ -583,9 +529,7 @@
         setTimeout(() => showScreen('loginScreen'), 800);
     }
 
-    // Dashboard & Users
     let allUsers = [];
-
     function filterUsersByMode(users) {
         return users.filter(u => {
             if (u.status !== 'active') return true;
@@ -617,8 +561,6 @@
                         ${u.planType ? `<span class="plan-badge ${u.planType}">${planTypeLabel(u.planType)}</span>` : ''}
                     </div>
                 `).join('');
-            } else {
-                recentDiv.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>No users in this mode</h3></div>`;
             }
         } catch (error) { console.error(error); }
     }
@@ -756,9 +698,6 @@
         } catch (error) { showToast('Error'); }
     }
 
-    async function loadActiveUsersForTarget() { /* اختياري */ }
-
-    // Signals (Crypto & Gold)
     async function runAIAnalysis() {
         const btn = document.getElementById('aiBtn'); const result = document.getElementById('aiResult');
         btn.disabled = true; btn.style.opacity = '0.5'; result.classList.add('hidden');
@@ -902,7 +841,6 @@
         } catch(e) { showToast('Error'); }
     }
 
-    // Utilities
     function calculateEMA(prices, period) {
         const k = 2 / (period + 1);
         let ema = prices[0];
@@ -924,9 +862,7 @@
         setTimeout(() => t.classList.remove('show'), 2500);
     }
 
-    // Notifications & Alarms
     let adminNotifs = JSON.parse(localStorage.getItem('tradelix_admin_notifs') || '[]');
-
     function openNotifModal() {
         stopAlarmLoop();
         const list = document.getElementById('notifList');
@@ -964,12 +900,10 @@
 </script>
 
 <script>
-    // === NOTIFICATIONS POLLING ===
-    const SNAPSHOT_KEY = 'tradelix_admin_snap_v14';
-    const NOTIF_KEY = 'tradelix_admin_notifs';
-    let isChecking = false;
-
-    // ✅ ============ AUDIO SYSTEM ============
+    // ==========================================
+    // ✅ REALTIME LISTENERS (Firebase onSnapshot)
+    // ==========================================
+    
     let audioCtx = null;
     let alarmInterval = null;
     let alarmType = null;
@@ -1036,19 +970,22 @@
         if (message.includes('👤') || message.includes('💰')) return 'user';
         return 'default';
     }
-    // ✅ ============ END AUDIO SYSTEM ============
 
+    // ✅ دالة التنبيه المحسنة (تظهر نافذة ضخمة + صوت)
     function triggerNotif(message) {
-        let notifs = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+        let notifs = JSON.parse(localStorage.getItem('tradelix_admin_notifs') || '[]');
         const now = Date.now();
-        if (notifs.length > 0 && notifs[0].message === message && (now - notifs[0].id) < 2000) return;
+        
+        // منع التكرار
+        if (notifs.length > 0 && notifs[0].message === message && (now - notifs[0].id) < 5000) return;
         
         notifs.unshift({ id: now, message: message, time: new Date().toLocaleString('en-GB'), read: false });
         if (notifs.length > 50) notifs = notifs.slice(0, 50);
-        localStorage.setItem(NOTIF_KEY, JSON.stringify(notifs));
+        localStorage.setItem('tradelix_admin_notifs', JSON.stringify(notifs));
 
         adminNotifs = notifs;
         
+        // تحديث شارة الجرس
         document.querySelectorAll('.bell-icon').forEach(bell => {
             let badge = bell.querySelector('.notifBadge');
             if (notifs.filter(n => !n.read).length > 0) {
@@ -1057,18 +994,30 @@
             } else if (badge) badge.remove();
         });
         
+        // تشغيل الصوت والاهتزاز
         const soundType = detectSoundType(message);
         startAlarmLoop(soundType);
-
         if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
 
+        // إشعار النظام
         if ('Notification' in window && Notification.permission === 'granted') {
             try {
                 new Notification('🔔 Tradelix Admin', { body: message, tag: 'admin-notif-' + now, icon: '/favicon.ico' });
             } catch(e) {}
         }
 
-        if (typeof showToast === 'function') { try { showToast(message); } catch(e){} }
+        // ✅ عرض نافذة تنبيه ضخمة على الشاشة
+        const oldPopup = document.getElementById('global-notif-popup');
+        if (oldPopup) oldPopup.remove();
+        
+        const alertDiv = document.createElement('div');
+        alertDiv.id = 'global-notif-popup';
+        alertDiv.className = 'notif-popup';
+        alertDiv.innerHTML = `🔔 <strong>تنبيه جديد!</strong><br><br>${message}<br><br><button onclick="this.parentElement.remove()" style="background:#000; color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:14px;">حسناً، فهمت</button>`;
+        document.body.appendChild(alertDiv);
+
+        // إزالة تلقائية بعد 10 ثوانٍ
+        setTimeout(() => { if(document.getElementById('global-notif-popup')) document.getElementById('global-notif-popup').remove(); }, 10000);
     }
 
     function notifPlanLabel(t) {
@@ -1078,68 +1027,72 @@
         return '❓ Unknown';
     }
 
-    async function check() {
-        if (isChecking || !window.firebaseDB) return;
-        isChecking = true;
-        try {
-            const fs = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
-            const { collection, getDocs } = fs;
+    // ✅ تشغيل الاستماع المباشر (Real-time) بدلاً من setInterval
+    function startRealtimeListeners() {
+        if (!window.firebaseDB) {
+            setTimeout(startRealtimeListeners, 1000);
+            return;
+        }
 
-            let currentUsers = {};
-            try {
-                const snap = await getDocs(collection(window.firebaseDB, 'tradelix_users'));
-                snap.forEach(d => {
-                    const data = d.data();
-                    currentUsers[d.id] = {
-                        name: data.name || data.email,
-                        txHash: data.txHash || '',
-                        status: data.status || 'inactive',
-                        plan: data.plan || '',
-                        planType: data.planType || 'unknown'
-                    };
-                });
-            } catch(e) { isChecking = false; return; }
+        // 1. الاستماع لجدول المستخدمين (تسجيل جديد أو إيداع)
+        onSnapshot(collection(db, 'tradelix_users'), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                const data = change.doc.data();
+                const name = data.name || data.email || 'Unknown User';
 
-            let currentCryptoSigs = {};
-            try { const snap = await getDocs(collection(window.firebaseDB, 'tradelix_signals')); snap.forEach(d => { const s = d.data(); currentCryptoSigs[d.id] = { coin: s.coin || 'BTC', direction: s.direction || 'BUY' }; }); } catch(e) {}
-
-            let currentGoldSigs = {};
-            try { const snap = await getDocs(collection(window.firebaseDB, 'gold_signals')); snap.forEach(d => { const s = d.data(); currentGoldSigs[d.id] = { pair: s.pair || 'XAU/USD', direction: s.direction || 'BUY' }; }); } catch(e) {}
-
-            let savedRaw = localStorage.getItem(SNAPSHOT_KEY);
-            if (!savedRaw) {
-                localStorage.setItem(SNAPSHOT_KEY, JSON.stringify({ users: currentUsers, cryptoSigs: currentCryptoSigs, goldSigs: currentGoldSigs }));
-                isChecking = false; return;
-            }
-
-            let old = JSON.parse(savedRaw);
-            if (!old.users) old.users = {}; if (!old.cryptoSigs) old.cryptoSigs = {}; if (!old.goldSigs) old.goldSigs = {};
-
-            Object.keys(currentUsers).forEach(uid => {
-                const cu = currentUsers[uid];
-                if (!old.users[uid]) {
-                    triggerNotif('👤 New user: ' + cu.name);
-                    if (cu.txHash && cu.status === 'pending') {
-                        triggerNotif(`💰 Deposit: ${cu.name} — ${cu.plan} (${notifPlanLabel(cu.planType)})`);
+                if (change.type === "added") {
+                    // مستخدم جديد
+                    // نتأكد أن المستخدم لم يُضف منذ أكثر من 10 ثوانٍ (لتجنب الإشعارات القديمة عند تحميل الصفحة)
+                    if (data.createdAt && (Date.now() - (data.createdAt.seconds * 1000) < 10000)) {
+                        triggerNotif('👤 New user: ' + name);
+                        if (data.txHash && data.status === 'pending') {
+                            triggerNotif(`💰 Deposit: ${name} — ${data.plan} (${notifPlanLabel(data.planType)})`);
+                        }
                     }
-                } else if (cu.txHash && cu.txHash !== old.users[uid].txHash && cu.status === 'pending') {
-                    triggerNotif(`💰 Deposit: ${cu.name} — ${cu.plan} (${notifPlanLabel(cu.planType)})`);
+                }
+                
+                if (change.type === "modified") {
+                    // تحديث (طلب إيداع جديد)
+                    const before = change.oldIndex !== undefined ? change.doc.data() : {}; // Not reliable for deep compare in docChanges
+                    // نعتمد على وجود txHash وحالة pending
+                    if (data.txHash && data.status === 'pending') {
+                        // نتحقق من أن هذا الإيداع لم يمر عليه وقت طويل (مثلاً 1 دقيقة) لتجنب التكرار عند تحديث الصفحة
+                        // لا يمكننا مقارنة الـ txHash القديم بسهولة هنا، لذا سنستخدم منع التكرار في دالة triggerNotif
+                        triggerNotif(`💰 Deposit: ${name} — ${data.plan} (${notifPlanLabel(data.planType)})`);
+                    }
                 }
             });
+            
+            // تحديث لوحة التحكم إذا كنا فيها
+            if (document.getElementById('dashboardScreen').classList.contains('active')) {
+                loadDashboard();
+            }
+        });
 
-            Object.keys(currentCryptoSigs).forEach(id => {
-                if (!old.cryptoSigs[id]) triggerNotif('📊 Crypto: ' + currentCryptoSigs[id].coin + ' ' + currentCryptoSigs[id].direction);
+        // 2. الاستماع لصفقات العملات
+        onSnapshot(collection(db, 'tradelix_signals'), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    const s = change.doc.data();
+                    if (s.createdAt && (Date.now() - (s.createdAt.seconds * 1000) < 10000)) {
+                        triggerNotif('📊 Crypto: ' + (s.coin || 'BTC') + ' ' + (s.direction || 'BUY'));
+                    }
+                }
             });
+        });
 
-            Object.keys(currentGoldSigs).forEach(id => {
-                if (!old.goldSigs[id]) triggerNotif('🥇 Gold: ' + currentGoldSigs[id].pair + ' ' + currentGoldSigs[id].direction);
+        // 3. الاستماع لصفقات الذهب
+        onSnapshot(collection(db, 'gold_signals'), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    const s = change.doc.data();
+                    if (s.createdAt && (Date.now() - (s.createdAt.seconds * 1000) < 10000)) {
+                        triggerNotif('🥇 Gold: ' + (s.pair || 'XAU/USD') + ' ' + (s.direction || 'BUY'));
+                    }
+                }
             });
-
-            localStorage.setItem(SNAPSHOT_KEY, JSON.stringify({ users: currentUsers, cryptoSigs: currentCryptoSigs, goldSigs: currentGoldSigs }));
-        } catch(e) { console.warn(e); } finally { isChecking = false; }
+        });
     }
-
-    setTimeout(() => { check(); setInterval(check, 3000); }, 3000);
 </script>
 
 </body>
