@@ -138,11 +138,13 @@
         .mode-btn.active { background: var(--gold); color: #000; box-shadow: 0 0 10px rgba(240, 185, 11, 0.3); }
         .mode-btn.inactive { background: transparent; color: var(--text-muted); }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: stretch; padding: 0; margin: 0; z-index: 99999; height: 72px; touch-action: manipulation; }
-        .nav-item { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; cursor: pointer; background: transparent; border: none; padding: 0; height: 72px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-appearance: none; appearance: none; outline: none; position: relative; z-index: 10; }
+        /* ✅ إصلاح أزرار الشريط السفلي */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: stretch; padding: 0; margin: 0; z-index: 99999; height: 72px; touch-action: manipulation; padding-bottom: env(safe-area-inset-bottom, 0); }
+        .nav-item { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; cursor: pointer; background: transparent; border: none; padding: 8px 2px; height: 100%; touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-appearance: none; appearance: none; outline: none; position: relative; z-index: 50; user-select: none; -webkit-user-select: none; }
         .nav-item.active { color: var(--gold); }
-        .nav-item .icon { font-size: 22px; line-height: 22px; pointer-events: none; }
-        .nav-item * { pointer-events: none !important; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+        .nav-item .icon-svg { width: 24px; height: 24px; pointer-events: none; transition: transform 0.2s; }
+        .nav-item.active .icon-svg { color: var(--gold); }
+        .nav-item * { pointer-events: none !important; user-select: none !important; -webkit-user-select: none !important; -webkit-touch-callout: none !important; }
         
         .hidden { display: none !important; }
         .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--gold); color: #181A20; padding: 12px 24px; border-radius: 10px; font-weight: 900; font-size: 14px; opacity: 0; transition: 0.3s; z-index: 99999; max-width: 90%; text-align: center; }
@@ -221,11 +223,26 @@
     <div id="recentActivity"><div class="empty-state"><div class="icon">📭</div><h3>Loading...</h3></div></div>
     
     <div class="bottom-nav">
-        <button class="nav-item active" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
-        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item" onclick="showScreen('historyScreen')"><span class="icon">📜</span><span>History</span></button>
-        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+        <button class="nav-item active" onclick="showScreen('dashboardScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Dashboard</span>
+        </button>
+        <button class="nav-item" onclick="showScreen('usersScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>Users</span>
+        </button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+            <span>Signal</span>
+        </button>
+        <button class="nav-item" onclick="showScreen('historyScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="10"></circle></svg>
+            <span>History</span>
+        </button>
+        <button class="nav-item" onclick="handleLogout()">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>Logout</span>
+        </button>
     </div>
 </div>
 
@@ -248,11 +265,26 @@
     </div>
     <div id="usersList"><div class="empty-state"><div class="icon">⏳</div><h3>Loading users...</h3></div></div>
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
-        <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item" onclick="showScreen('historyScreen')"><span class="icon">📜</span><span>History</span></button>
-        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Dashboard</span>
+        </button>
+        <button class="nav-item active" onclick="showScreen('usersScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>Users</span>
+        </button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+            <span>Signal</span>
+        </button>
+        <button class="nav-item" onclick="showScreen('historyScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="10"></circle></svg>
+            <span>History</span>
+        </button>
+        <button class="nav-item" onclick="handleLogout()">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>Logout</span>
+        </button>
     </div>
 </div>
 
@@ -296,11 +328,26 @@
         <button class="btn-block outline" onclick="showScreen('usersScreen')">← Back to Users</button>
     </div>
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
-        <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item" onclick="showScreen('historyScreen')"><span class="icon">📜</span><span>History</span></button>
-        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Dashboard</span>
+        </button>
+        <button class="nav-item active" onclick="showScreen('usersScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>Users</span>
+        </button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+            <span>Signal</span>
+        </button>
+        <button class="nav-item" onclick="showScreen('historyScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="10"></circle></svg>
+            <span>History</span>
+        </button>
+        <button class="nav-item" onclick="handleLogout()">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>Logout</span>
+        </button>
     </div>
 </div>
 
@@ -396,11 +443,26 @@
     </div>
     
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
-        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item active" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item" onclick="showScreen('historyScreen')"><span class="icon">📜</span><span>History</span></button>
-        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Dashboard</span>
+        </button>
+        <button class="nav-item" onclick="showScreen('usersScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>Users</span>
+        </button>
+        <button class="nav-item active" onclick="showScreen('sendSignalScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+            <span>Signal</span>
+        </button>
+        <button class="nav-item" onclick="showScreen('historyScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="10"></circle></svg>
+            <span>History</span>
+        </button>
+        <button class="nav-item" onclick="handleLogout()">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>Logout</span>
+        </button>
     </div>
 </div>
 
@@ -434,11 +496,26 @@
     <button class="btn-block danger" onclick="deleteAllSignals()" style="margin-top: 20px;">🗑️ Delete All Signals (Current Mode)</button>
 
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
-        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item active" onclick="showScreen('historyScreen')"><span class="icon">📜</span><span>History</span></button>
-        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Dashboard</span>
+        </button>
+        <button class="nav-item" onclick="showScreen('usersScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>Users</span>
+        </button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+            <span>Signal</span>
+        </button>
+        <button class="nav-item active" onclick="showScreen('historyScreen')">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="10"></circle></svg>
+            <span>History</span>
+        </button>
+        <button class="nav-item" onclick="handleLogout()">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>Logout</span>
+        </button>
     </div>
 </div>
 
