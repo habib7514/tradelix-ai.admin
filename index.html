@@ -538,6 +538,17 @@
     </div>
 </div>
 
+<div id="closeTradeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:99998; align-items:center; justify-content:center; padding:20px;">
+    <div style="background: var(--bg-card); border: 1px solid var(--gold); border-radius: 16px; padding: 24px; width: 100%; max-width: 400px; text-align: center;">
+        <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 18px;">Close Trade</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">How did the trade for <strong id="closeTradePair" style="color: var(--text-main);"></strong> close?</p>
+        <input type="hidden" id="closeTradeId">
+        <button class="btn-block success" onclick="submitCloseTrade('win')" style="margin-bottom: 8px;">✅ Close as WIN</button>
+        <button class="btn-block danger" onclick="submitCloseTrade('loss')" style="margin-bottom: 8px;">❌ Close as LOSS</button>
+        <button class="btn-block outline" onclick="document.getElementById('closeTradeModal').style.display='none'">Cancel</button>
+    </div>
+</div>
+
 <div id="notifModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:99999; padding:16px; overflow-y:auto;">
     <div style="background: var(--bg-card); border: 1px solid var(--gold); border-radius: 16px; padding: 20px; max-width: 420px; margin: 40px auto; position: relative;">
         <button onclick="closeNotifModal()" aria-label="Close" style="position:absolute; top:14px; right:14px; width:40px; height:40px; border-radius:50%; background:rgba(240, 185, 11, 0.15); border:1.5px solid rgba(240, 185, 11, 0.6); color:var(--gold); font-size:18px; font-weight:900; cursor:pointer; display:flex; align-items: center; justify-content: center; z-index:10;">✕</button>
@@ -999,9 +1010,8 @@
                         <span class="user-status active">LIVE</span>
                     </div>
                     <div style="display:flex; gap: 8px; margin-top: 10px;">
-                        <button class="btn-small win" onclick="closeSignal('${s.id}', 'win')" style="flex:1;">✅ WIN</button>
-                        <button class="btn-small loss" onclick="closeSignal('${s.id}', 'loss')" style="flex:1;">❌ LOSS</button>
-                        <button class="btn-small delete" onclick="deleteSingleSignal('${s.id}')" title="Delete">🗑️</button>
+                        <button class="btn-small" onclick="openCloseModal('${s.id}', '${pairName}')" style="flex:2; background:var(--gold); color:#000; font-weight:900;">🔒 Close Trade</button>
+                        <button class="btn-small delete" onclick="deleteSingleSignal('${s.id}')" style="flex:1; border: 1px solid var(--red); background: transparent; color: var(--red);">🗑️</button>
                     </div>
                 </div>`;
             }).join('');
@@ -1025,8 +1035,19 @@
         } catch (error) { console.error(error); }
     }
 
+    function openCloseModal(id, pair) {
+        document.getElementById('closeTradeId').value = id;
+        document.getElementById('closeTradePair').textContent = pair;
+        document.getElementById('closeTradeModal').style.display = 'flex';
+    }
+
+    async function submitCloseTrade(result) {
+        const id = document.getElementById('closeTradeId').value;
+        document.getElementById('closeTradeModal').style.display = 'none';
+        await closeSignal(id, result);
+    }
+
     async function closeSignal(signalId, result) {
-        if (!confirm(`Close as ${result.toUpperCase()}?`)) return;
         try {
             const collName = appMode === 'gold' ? 'gold_signals' : 'tradelix_signals';
             await updateDoc(doc(db, collName, signalId), { status: 'closed', result: result, closedAt: serverTimestamp() });
