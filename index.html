@@ -327,12 +327,14 @@
             <input type="text" id="signalPairGold" value="XAU/USD">
         </div>
 
+        <!-- ✅ أزرار الشراء والبيع الواضحة -->
         <div class="input-group">
             <label>Direction (Buy/Sell)</label>
-            <select id="signalDirection">
-                <option value="BUY">BUY (Long)</option>
-                <option value="SELL">SELL (Short)</option>
-            </select>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" id="btnDirBuy" class="btn-block success" onclick="setDirection('BUY')" style="margin-top:0;">BUY (Long)</button>
+                <button type="button" id="btnDirSell" class="btn-block danger" onclick="setDirection('SELL')" style="margin-top:0; opacity: 0.5;">SELL (Short)</button>
+            </div>
+            <input type="hidden" id="signalDirection" value="BUY">
         </div>
         
         <div class="input-group"><label>Entry Price</label><input type="text" id="signalEntry"></div>
@@ -362,7 +364,6 @@
         <button id="btnAiModeGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Tradix Gold</button>
     </div>
 
-    <!-- ✅ قائمة اختيار العملة للذكاء الاصطناعي -->
     <div class="input-group" id="aiCoinSelectGroup">
         <label>Select Coin to Analyze</label>
         <select id="aiCoinSelect">
@@ -460,26 +461,33 @@
         window.scrollTo(0, 0);
     }
 
+    // ✅ دالة تغيير اتجاه الصفقة
+    function setDirection(dir) {
+        document.getElementById('signalDirection').value = dir;
+        const btnBuy = document.getElementById('btnDirBuy');
+        const btnSell = document.getElementById('btnDirSell');
+        if (btnBuy && btnSell) {
+            btnBuy.style.opacity = dir === 'BUY' ? '1' : '0.5';
+            btnSell.style.opacity = dir === 'SELL' ? '1' : '0.5';
+        }
+    }
+
     function switchMode(mode) {
         appMode = mode;
         
-        // Dashboard Toggle
         if(document.getElementById('btnModeCrypto')) {
             document.getElementById('btnModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
-        // Signal Toggle
         if(document.getElementById('btnSignalCrypto')) {
             document.getElementById('btnSignalCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnSignalGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
-        // AI Toggle
         if(document.getElementById('btnAiModeCrypto')) {
             document.getElementById('btnAiModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnAiModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
         
-        // Show/Hide Coin Selectors
         if (mode === 'gold') {
             if(document.getElementById('coinSelectGroup')) document.getElementById('coinSelectGroup').style.display = 'none';
             if(document.getElementById('signalPairGold')) document.getElementById('signalPairGold').style.display = 'block';
@@ -824,7 +832,6 @@
         loading.classList.remove('hidden'); result.classList.add('hidden'); empty.classList.add('hidden');
 
         try {
-            // ✅ تحديد العملة من القائمة الخاصة بصفحة الذكاء الاصطناعي
             let symbol = 'PAXGUSDT';
             let coinName = 'XAU/USD';
             
@@ -939,13 +946,15 @@
     function applyAITrade() {
         if (!currentAITrade) return;
         showScreen('sendSignalScreen');
-        // إذا كانت العملة مختارة في الذكاء الاصطناعي، انقلها إلى صفحة الإرسال
+        
         if (appMode === 'crypto') {
             const selectedCoin = document.getElementById('aiCoinSelect').value;
             document.getElementById('signalCoin').value = selectedCoin;
         }
         
-        document.getElementById('signalDirection').value = currentAITrade.direction === 'WAIT' ? 'BUY' : currentAITrade.direction;
+        // ✅ تحديث أزرار الشراء والبيع
+        setDirection(currentAITrade.direction === 'WAIT' ? 'BUY' : currentAITrade.direction);
+        
         document.getElementById('signalEntry').value = currentAITrade.entry;
         document.getElementById('signalSL').value = currentAITrade.sl;
         document.getElementById('signalTP').value = currentAITrade.tp;
