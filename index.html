@@ -69,8 +69,6 @@
         .header-logo { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #d4af37, #f4d03f); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #000; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
         .header-title h1 { font-size: 16px; font-weight: 900; color: var(--gold); letter-spacing: 1px; }
         .header-title span { font-size: 9px; color: var(--red); font-weight: 700; letter-spacing: 2px; }
-        
-        /* ✅ تصميم الجرس والإشعارات */
         .bell-icon { background: #1a1a1a; border: 1px solid #333; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--gold); cursor: pointer; position: relative; }
         .bell-icon.alarm { animation: bellShake 0.5s ease-in-out infinite; border-color: var(--red); }
         @keyframes bellShake { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-15deg); } 75% { transform: rotate(15deg); } }
@@ -163,7 +161,6 @@
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
             <div class="bell-icon" onclick="openNotifModal()">🔔</div>
-            <!-- ✅ تمت إضافة زر الذكاء الاصطناعي هنا -->
             <div class="bell-icon" onclick="showScreen('aiAnalysisScreen')" style="font-size:20px;">🤖</div>
         </div>
     </div>
@@ -267,7 +264,69 @@
     
     <div class="card">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">📈 Signal Details</h3>
-        <div class="input-group"><label>Pair / Coin</label><input type="text" id="signalPair" value="XAU/USD"></div>
+        
+        <!-- ✅ تم إرجاع العملات الرقمية هنا -->
+        <div class="input-group" id="coinSelectGroup">
+            <label>Coin (Crypto)</label>
+            <select id="signalCoin">
+                <option value="BTC">Bitcoin (BTC)</option>
+                <option value="ETH">Ethereum (ETH)</option>
+                <option value="BNB">BNB</option>
+                <option value="SOL">Solana (SOL)</option>
+                <option value="XRP">XRP</option>
+                <option value="ADA">Cardano (ADA)</option>
+                <option value="DOGE">Dogecoin (DOGE)</option>
+                <option value="DOT">Polkadot (DOT)</option>
+                <option value="AVAX">Avalanche (AVAX)</option>
+                <option value="LINK">Chainlink (LINK)</option>
+                <option value="POL">Polygon (POL)</option>
+                <option value="LTC">Litecoin (LTC)</option>
+                <option value="TRX">TRON (TRX)</option>
+                <option value="ATOM">Cosmos (ATOM)</option>
+                <option value="UNI">Uniswap (UNI)</option>
+                <option value="SHIB">Shiba Inu (SHIB)</option>
+                <option value="APT">Aptos (APT)</option>
+                <option value="ARB">Arbitrum (ARB)</option>
+                <option value="OP">Optimism (OP)</option>
+                <option value="NEAR">NEAR (NEAR)</option>
+                <option value="INJ">Injective (INJ)</option>
+                <option value="SUI">Sui (SUI)</option>
+                <option value="FIL">Filecoin (FIL)</option>
+                <option value="ETC">Ethereum Classic (ETC)</option>
+                <option value="TON">Toncoin (TON)</option>
+                <option value="ICP">Internet Computer (ICP)</option>
+                <option value="RENDER">Render (RENDER)</option>
+                <option value="FET">Fetch.ai (FET)</option>
+                <option value="SEI">Sei (SEI)</option>
+                <option value="TIA">Celestia (TIA)</option>
+                <option value="STX">Stacks (STX)</option>
+                <option value="IMX">Immutable (IMX)</option>
+                <option value="GRT">The Graph (GRT)</option>
+                <option value="SAND">The Sandbox (SAND)</option>
+                <option value="MANA">Decentraland (MANA)</option>
+                <option value="AAVE">Aave (AAVE)</option>
+                <option value="MKR">Maker (MKR)</option>
+                <option value="CRV">Curve DAO (CRV)</option>
+                <option value="ALGO">Algorand (ALGO)</option>
+                <option value="VET">VeChain (VET)</option>
+                <option value="HBAR">Hedera (HBAR)</option>
+                <option value="EOS">EOS (EOS)</option>
+                <option value="XLM">Stellar (XLM)</option>
+                <option value="THETA">Theta Network (THETA)</option>
+                <option value="RUNE">THORChain (RUNE)</option>
+                <option value="KAS">Kaspa (KAS)</option>
+                <option value="TAO">Bittensor (TAO)</option>
+                <option value="WIF">dogwifhat (WIF)</option>
+                <option value="PEPE">Pepe (PEPE)</option>
+                <option value="BONK">Bonk (BONK)</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Pair (Gold)</label>
+            <input type="text" id="signalPairGold" value="XAU/USD">
+        </div>
+
         <div class="input-group"><label>Direction</label><select id="signalDirection"><option value="BUY">BUY (Long)</option><option value="SELL">SELL (Short)</option></select></div>
         <div class="input-group"><label>Entry Price</label><input type="text" id="signalEntry"></div>
         <div class="input-group"><label>Stop Loss</label><input type="text" id="signalSL"></div>
@@ -283,7 +342,6 @@
     </div>
 </div>
 
-<!-- ✅ تمت إضافة صفحة الذكاء الاصطناعي هنا -->
 <div id="aiAnalysisScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>AI ANALYSIS</h1><span>● MARKET SCANNER</span></div></div>
@@ -378,10 +436,14 @@
             document.getElementById('btnSignalCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnSignalGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
+        
+        // ✅ إظهار وإخفاء العملات حسب الوضع
         if (mode === 'gold') {
-            if(document.getElementById('signalPair')) document.getElementById('signalPair').value = 'XAU/USD';
+            if(document.getElementById('coinSelectGroup')) document.getElementById('coinSelectGroup').style.display = 'none';
+            if(document.getElementById('signalPairGold')) document.getElementById('signalPairGold').style.display = 'block';
         } else {
-            if(document.getElementById('signalPair')) document.getElementById('signalPair').value = 'BTC/USDT';
+            if(document.getElementById('coinSelectGroup')) document.getElementById('coinSelectGroup').style.display = 'block';
+            if(document.getElementById('signalPairGold')) document.getElementById('signalPairGold').style.display = 'none';
         }
     }
 
@@ -416,6 +478,7 @@
                         </div>`).join('');
                 }
 
+                // ✅ إشعارات المستخدمين والدفع
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
                         const data = change.doc.data();
@@ -583,15 +646,27 @@
 
     async function sendSignal() {
         const col = appMode === 'gold' ? 'gold_signals' : 'tradelix_signals';
-        const pair = document.getElementById('signalPair').value.trim();
+        let pair = '';
+        let coin = '';
+        
+        if (appMode === 'gold') {
+            pair = document.getElementById('signalPairGold').value.trim();
+            coin = 'XAU';
+        } else {
+            coin = document.getElementById('signalCoin').value;
+            pair = coin + '/USDT';
+        }
+
         const dir = document.getElementById('signalDirection').value;
         const entry = document.getElementById('signalEntry').value.trim();
         const sl = document.getElementById('signalSL').value.trim();
         const tp = document.getElementById('signalTP').value.trim();
         const notes = document.getElementById('signalNotes').value.trim();
         
+        if(!entry || !sl || !tp) { showToast('Please fill all fields'); return; }
+
         await addDoc(collection(db, col), {
-            pair: pair, coin: pair.replace('/USDT', ''), direction: dir, entry: entry, stopLoss: sl, takeProfit: tp,
+            pair: pair, coin: coin, direction: dir, entry: entry, stopLoss: sl, takeProfit: tp,
             entryPrice: entry, sl: sl, tp: tp, price: entry, notes: notes, status: 'active', createdAt: serverTimestamp()
         });
         showToast('✅ Signal sent!');
@@ -692,7 +767,7 @@
     }
 
     /* ==========================================
-       ✅ AI ANALYSIS LOGIC (تمت إضافته هنا)
+       ✅ AI ANALYSIS LOGIC
        ========================================== */
     let currentAITrade = null;
 
@@ -706,7 +781,13 @@
         loading.classList.remove('hidden'); result.classList.add('hidden'); empty.classList.add('hidden');
 
         try {
-            const symbol = appMode === 'gold' ? 'PAXGUSDT' : 'BTCUSDT';
+            // ✅ التحقق من العملة المختارة
+            let symbol = 'PAXGUSDT';
+            if (appMode === 'crypto') {
+                const coin = document.getElementById('signalCoin').value;
+                symbol = coin + 'USDT';
+            }
+
             const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=100`;
             const res = await fetch(url);
             if (!res.ok) throw new Error('API Error');
@@ -741,7 +822,7 @@
             result.innerHTML = `
                 <div class="card" style="border-color: ${dirColor};">
                     <div style="text-align: center; margin-bottom: 20px;">
-                        <div style="font-size: 11px; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 8px;">AI SUGGESTION</div>
+                        <div style="font-size: 11px; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 8px;">AI SUGGESTION FOR ${symbol}</div>
                         <div style="font-size: 36px; font-weight: 900; color: ${dirColor}; letter-spacing: 3px;">${direction}</div>
                         <div style="margin-top: 8px;"><span style="background: rgba(212,175,55,0.15); color: var(--gold); padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1px solid var(--gold);">🎯 Confidence: ${confidence}%</span></div>
                     </div>
@@ -788,10 +869,17 @@
         let direction = currentAITrade.direction === 'WAIT' ? 'BUY' : currentAITrade.direction;
         const col = appMode === 'gold' ? 'gold_signals' : 'tradelix_signals';
         
+        let pair = 'XAU/USD';
+        let coin = 'XAU';
+        if (appMode === 'crypto') {
+            coin = document.getElementById('signalCoin').value;
+            pair = coin + '/USDT';
+        }
+
         try {
             await addDoc(collection(db, col), {
-                pair: appMode === 'gold' ? 'XAU/USD' : 'BTC/USDT',
-                coin: appMode === 'gold' ? 'XAU' : 'BTC',
+                pair: pair,
+                coin: coin,
                 direction: direction,
                 entry: currentAITrade.entry, stopLoss: currentAITrade.sl, takeProfit: currentAITrade.tp,
                 entryPrice: currentAITrade.entry, sl: currentAITrade.sl, tp: currentAITrade.tp,
