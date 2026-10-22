@@ -163,6 +163,8 @@
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
             <div class="bell-icon" onclick="openNotifModal()">🔔</div>
+            <!-- ✅ تمت إضافة زر الذكاء الاصطناعي هنا -->
+            <div class="bell-icon" onclick="showScreen('aiAnalysisScreen')" style="font-size:20px;">🤖</div>
         </div>
     </div>
 
@@ -281,6 +283,38 @@
     </div>
 </div>
 
+<!-- ✅ تمت إضافة صفحة الذكاء الاصطناعي هنا -->
+<div id="aiAnalysisScreen" class="screen">
+    <div class="header">
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>AI ANALYSIS</h1><span>● MARKET SCANNER</span></div></div>
+        <div class="bell-icon" onclick="openNotifModal()">🔔</div>
+    </div>
+
+    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Analyze live market data with AI-powered indicators (EMA, RSI, Trend) and get a suggested trade.</p>
+
+    <button class="btn-block" onclick="runAIAnalysis()" id="aiAnalyzeBtn" style="margin-bottom: 20px;">🤖 Analyze Market Now</button>
+
+    <div id="aiLoading" class="hidden" style="text-align: center; padding: 30px;">
+        <div style="font-size: 40px; margin-bottom: 12px;">⏳</div>
+        <p style="color: var(--gold); font-weight: 700;">Analyzing...</p>
+    </div>
+
+    <div id="aiResult" class="hidden"></div>
+
+    <div id="aiEmpty" class="empty-state">
+        <div class="icon">🤖</div>
+        <h3>Ready to Analyze</h3>
+        <p>Press the button above to get an AI trade suggestion.</p>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item active" onclick="showScreen('aiAnalysisScreen')"><span class="icon">🤖</span><span>AI</span></button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
+    </div>
+</div>
+
 <div id="activateModal" class="screen" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99998; display: none; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
         <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">✅ Activate Subscription</h3>
@@ -292,7 +326,6 @@
     </div>
 </div>
 
-<!-- ✅ نافذة الإشعارات -->
 <div id="notifModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:99999; padding:16px; overflow-y:auto;">
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 20px; max-width: 420px; margin: 40px auto; position: relative;">
         <button class="notif-close-top" onclick="closeNotifModal()" aria-label="Close">✕</button>
@@ -363,7 +396,6 @@
             updateDoc = fsModule.updateDoc; deleteDoc = fsModule.deleteDoc; addDoc = fsModule.addDoc; serverTimestamp = fsModule.serverTimestamp;
             onSnapshot = fsModule.onSnapshot;
             
-            // ✅ مستمع المستخدمين والإحصائيات
             onSnapshot(collection(db, 'tradelix_users'), (snapshot) => {
                 allUsers = [];
                 snapshot.forEach(docSnap => allUsers.push({ uid: docSnap.id, ...docSnap.data() }));
@@ -384,7 +416,6 @@
                         </div>`).join('');
                 }
 
-                // ✅ إشعارات المستخدمين والدفع
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
                         const data = change.doc.data();
@@ -400,7 +431,6 @@
                 });
             });
 
-            // ✅ مستمع إشارات الكريبتو
             onSnapshot(collection(db, 'tradelix_signals'), (snapshot) => {
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
@@ -412,7 +442,6 @@
                 });
             });
 
-            // ✅ مستمع إشارات الذهب
             onSnapshot(collection(db, 'gold_signals'), (snapshot) => {
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
@@ -435,7 +464,6 @@
             const userCredential = await signInWithEmailAndPassword(auth, email, pass);
             localStorage.setItem('tradix_admin', JSON.stringify({ uid: userCredential.user.uid }));
             showToast('✅ Welcome!'); setTimeout(() => showScreen('dashboardScreen'), 1000);
-            // Unlock Audio
             const c = getAudioContext(); if(c) c.resume();
         } catch (error) { showToast('❌ Login failed'); }
     }
@@ -661,6 +689,127 @@
         adminNotifs = [];
         saveNotifs();
         openNotifModal();
+    }
+
+    /* ==========================================
+       ✅ AI ANALYSIS LOGIC (تمت إضافته هنا)
+       ========================================== */
+    let currentAITrade = null;
+
+    async function runAIAnalysis() {
+        const btn = document.getElementById('aiAnalyzeBtn');
+        const loading = document.getElementById('aiLoading');
+        const result = document.getElementById('aiResult');
+        const empty = document.getElementById('aiEmpty');
+
+        btn.disabled = true; btn.style.opacity = '0.5';
+        loading.classList.remove('hidden'); result.classList.add('hidden'); empty.classList.add('hidden');
+
+        try {
+            const symbol = appMode === 'gold' ? 'PAXGUSDT' : 'BTCUSDT';
+            const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=100`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('API Error');
+            const candles = await res.json();
+            if (!candles || candles.length < 50) throw new Error('Not enough data');
+
+            const currentPrice = parseFloat(candles[candles.length - 1][4]);
+            const closes = candles.map(c => parseFloat(c[4]));
+            const ema20 = calculateEMA(closes, 20);
+            const ema50 = calculateEMA(closes, 50);
+            const rsi = calculateRSI(closes, 14);
+            
+            const trend = ema20 > ema50 ? 'UP' : 'DOWN';
+            let direction = 'WAIT'; let confidence = 50;
+            
+            if (rsi < 30 && trend === 'UP') { direction = 'BUY'; confidence = 75 + Math.min(20, (30 - rsi)); }
+            else if (rsi < 40 && trend === 'UP') { direction = 'BUY'; confidence = 60 + Math.min(15, (40 - rsi)); }
+            else if (rsi > 70 && trend === 'DOWN') { direction = 'SELL'; confidence = 75 + Math.min(20, (rsi - 70)); }
+            else if (rsi > 60 && trend === 'DOWN') { direction = 'SELL'; confidence = 60 + Math.min(15, (rsi - 60)); }
+            else if (trend === 'UP' && rsi > 40 && rsi < 65) { direction = 'BUY'; confidence = 55; }
+            else if (trend === 'DOWN' && rsi > 35 && rsi < 60) { direction = 'SELL'; confidence = 55; }
+
+            confidence = Math.min(95, Math.round(confidence));
+
+            let entry = currentPrice, sl = currentPrice * 0.995, tp = currentPrice * 1.01;
+            if (direction === 'SELL') { sl = currentPrice * 1.005; tp = currentPrice * 0.99; }
+
+            currentAITrade = { direction, entry: entry.toFixed(2), sl: sl.toFixed(2), tp: tp.toFixed(2), confidence };
+
+            const dirColor = direction === 'BUY' ? 'var(--green)' : (direction === 'SELL' ? 'var(--red)' : 'var(--gold)');
+
+            result.innerHTML = `
+                <div class="card" style="border-color: ${dirColor};">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 11px; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 8px;">AI SUGGESTION</div>
+                        <div style="font-size: 36px; font-weight: 900; color: ${dirColor}; letter-spacing: 3px;">${direction}</div>
+                        <div style="margin-top: 8px;"><span style="background: rgba(212,175,55,0.15); color: var(--gold); padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1px solid var(--gold);">🎯 Confidence: ${confidence}%</span></div>
+                    </div>
+                    <div class="detail-row"><span>Current Price</span><span>$${currentPrice.toFixed(2)}</span></div>
+                    <div class="detail-row"><span>RSI (14)</span><span>${rsi.toFixed(1)}</span></div>
+                    <div class="detail-row"><span>Trend</span><span>${trend === 'UP' ? '📈 Uptrend' : '📉 Downtrend'}</span></div>
+                </div>
+                <div class="card">
+                    <div class="detail-row"><span>Entry</span><span>$${entry.toFixed(2)}</span></div>
+                    <div class="detail-row"><span>Stop Loss</span><span style="color: var(--red);">$${sl.toFixed(2)}</span></div>
+                    <div class="detail-row"><span>Take Profit</span><span style="color: var(--green);">$${tp.toFixed(2)}</span></div>
+                </div>
+                <button class="btn-block success" onclick="sendAISignal()" style="margin-bottom: 8px; font-size: 16px; padding: 16px;">📤 Send to Subscribers</button>
+                <button class="btn-block outline" onclick="applyAITrade()" style="margin-bottom: 8px;">📝 Edit Before Sending</button>
+                <button class="btn-block outline" onclick="runAIAnalysis()">🔄 Analyze Again</button>
+            `;
+            result.classList.remove('hidden');
+        } catch (error) {
+            empty.classList.remove('hidden');
+            empty.innerHTML = `<div class="icon">⚠️</div><h3>Analysis Failed</h3><p>Could not fetch market data. Try again.</p>`;
+        } finally {
+            btn.disabled = false; btn.style.opacity = '1'; loading.classList.add('hidden');
+        }
+    }
+
+    function calculateEMA(prices, period) {
+        const k = 2 / (period + 1); let ema = prices[0];
+        for (let i = 1; i < prices.length; i++) ema = prices[i] * k + ema * (1 - k);
+        return ema;
+    }
+
+    function calculateRSI(prices, period) {
+        let gains = 0, losses = 0;
+        for (let i = prices.length - period; i < prices.length; i++) {
+            const diff = prices[i] - prices[i - 1];
+            if (diff >= 0) gains += diff; else losses -= diff;
+        }
+        const rs = (gains / period) / (losses / period || 1);
+        return 100 - (100 / (1 + rs));
+    }
+
+    async function sendAISignal() {
+        if (!currentAITrade) return;
+        let direction = currentAITrade.direction === 'WAIT' ? 'BUY' : currentAITrade.direction;
+        const col = appMode === 'gold' ? 'gold_signals' : 'tradelix_signals';
+        
+        try {
+            await addDoc(collection(db, col), {
+                pair: appMode === 'gold' ? 'XAU/USD' : 'BTC/USDT',
+                coin: appMode === 'gold' ? 'XAU' : 'BTC',
+                direction: direction,
+                entry: currentAITrade.entry, stopLoss: currentAITrade.sl, takeProfit: currentAITrade.tp,
+                entryPrice: currentAITrade.entry, sl: currentAITrade.sl, tp: currentAITrade.tp,
+                price: currentAITrade.entry, confidence: currentAITrade.confidence,
+                notes: `AI ${direction} signal`, status: 'active', createdAt: serverTimestamp()
+            });
+            showToast('✅ AI Signal sent!');
+        } catch (error) { showToast('Error sending signal'); }
+    }
+
+    function applyAITrade() {
+        if (!currentAITrade) return;
+        showScreen('sendSignalScreen');
+        document.getElementById('signalDirection').value = currentAITrade.direction === 'WAIT' ? 'BUY' : currentAITrade.direction;
+        document.getElementById('signalEntry').value = currentAITrade.entry;
+        document.getElementById('signalSL').value = currentAITrade.sl;
+        document.getElementById('signalTP').value = currentAITrade.tp;
+        document.getElementById('signalNotes').value = `AI suggested (Confidence: ${currentAITrade.confidence}%)`;
     }
 
     window.addEventListener('load', () => {
