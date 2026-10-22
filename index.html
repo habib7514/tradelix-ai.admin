@@ -9,6 +9,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -265,7 +266,6 @@
     <div class="card">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">📈 Signal Details</h3>
         
-        <!-- ✅ تم إرجاع العملات الرقمية هنا -->
         <div class="input-group" id="coinSelectGroup">
             <label>Coin (Crypto)</label>
             <select id="signalCoin">
@@ -327,7 +327,14 @@
             <input type="text" id="signalPairGold" value="XAU/USD">
         </div>
 
-        <div class="input-group"><label>Direction</label><select id="signalDirection"><option value="BUY">BUY (Long)</option><option value="SELL">SELL (Short)</option></select></div>
+        <div class="input-group">
+            <label>Direction (Buy/Sell)</label>
+            <select id="signalDirection">
+                <option value="BUY">BUY (Long)</option>
+                <option value="SELL">SELL (Short)</option>
+            </select>
+        </div>
+        
         <div class="input-group"><label>Entry Price</label><input type="text" id="signalEntry"></div>
         <div class="input-group"><label>Stop Loss</label><input type="text" id="signalSL"></div>
         <div class="input-group"><label>Take Profit</label><input type="text" id="signalTP"></div>
@@ -350,6 +357,33 @@
 
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Analyze live market data with AI-powered indicators (EMA, RSI, Trend) and get a suggested trade.</p>
 
+    <div class="mode-toggle">
+        <button id="btnAiModeCrypto" class="mode-btn active" onclick="switchMode('crypto')">🪙 Tradelix</button>
+        <button id="btnAiModeGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Tradix Gold</button>
+    </div>
+
+    <!-- ✅ قائمة اختيار العملة للذكاء الاصطناعي -->
+    <div class="input-group" id="aiCoinSelectGroup">
+        <label>Select Coin to Analyze</label>
+        <select id="aiCoinSelect">
+            <option value="BTC">Bitcoin (BTC)</option>
+            <option value="ETH">Ethereum (ETH)</option>
+            <option value="BNB">BNB</option>
+            <option value="SOL">Solana (SOL)</option>
+            <option value="XRP">XRP</option>
+            <option value="ADA">Cardano (ADA)</option>
+            <option value="DOGE">Dogecoin (DOGE)</option>
+            <option value="DOT">Polkadot (DOT)</option>
+            <option value="AVAX">Avalanche (AVAX)</option>
+            <option value="LINK">Chainlink (LINK)</option>
+            <option value="POL">Polygon (POL)</option>
+            <option value="LTC">Litecoin (LTC)</option>
+            <option value="TRX">TRON (TRX)</option>
+            <option value="ATOM">Cosmos (ATOM)</option>
+            <option value="UNI">Uniswap (UNI)</option>
+        </select>
+    </div>
+
     <button class="btn-block" onclick="runAIAnalysis()" id="aiAnalyzeBtn" style="margin-bottom: 20px;">🤖 Analyze Market Now</button>
 
     <div id="aiLoading" class="hidden" style="text-align: center; padding: 30px;">
@@ -362,7 +396,7 @@
     <div id="aiEmpty" class="empty-state">
         <div class="icon">🤖</div>
         <h3>Ready to Analyze</h3>
-        <p>Press the button above to get an AI trade suggestion.</p>
+        <p>Select a coin and press the button above.</p>
     </div>
 
     <div class="bottom-nav">
@@ -428,22 +462,32 @@
 
     function switchMode(mode) {
         appMode = mode;
+        
+        // Dashboard Toggle
         if(document.getElementById('btnModeCrypto')) {
             document.getElementById('btnModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
+        // Signal Toggle
         if(document.getElementById('btnSignalCrypto')) {
             document.getElementById('btnSignalCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnSignalGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
+        // AI Toggle
+        if(document.getElementById('btnAiModeCrypto')) {
+            document.getElementById('btnAiModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
+            document.getElementById('btnAiModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
+        }
         
-        // ✅ إظهار وإخفاء العملات حسب الوضع
+        // Show/Hide Coin Selectors
         if (mode === 'gold') {
             if(document.getElementById('coinSelectGroup')) document.getElementById('coinSelectGroup').style.display = 'none';
             if(document.getElementById('signalPairGold')) document.getElementById('signalPairGold').style.display = 'block';
+            if(document.getElementById('aiCoinSelectGroup')) document.getElementById('aiCoinSelectGroup').style.display = 'none';
         } else {
             if(document.getElementById('coinSelectGroup')) document.getElementById('coinSelectGroup').style.display = 'block';
             if(document.getElementById('signalPairGold')) document.getElementById('signalPairGold').style.display = 'none';
+            if(document.getElementById('aiCoinSelectGroup')) document.getElementById('aiCoinSelectGroup').style.display = 'block';
         }
     }
 
@@ -478,7 +522,6 @@
                         </div>`).join('');
                 }
 
-                // ✅ إشعارات المستخدمين والدفع
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
                         const data = change.doc.data();
@@ -781,11 +824,14 @@
         loading.classList.remove('hidden'); result.classList.add('hidden'); empty.classList.add('hidden');
 
         try {
-            // ✅ التحقق من العملة المختارة
+            // ✅ تحديد العملة من القائمة الخاصة بصفحة الذكاء الاصطناعي
             let symbol = 'PAXGUSDT';
+            let coinName = 'XAU/USD';
+            
             if (appMode === 'crypto') {
-                const coin = document.getElementById('signalCoin').value;
-                symbol = coin + 'USDT';
+                const selectedCoin = document.getElementById('aiCoinSelect').value;
+                symbol = selectedCoin + 'USDT';
+                coinName = selectedCoin + '/USDT';
             }
 
             const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=100`;
@@ -822,7 +868,7 @@
             result.innerHTML = `
                 <div class="card" style="border-color: ${dirColor};">
                     <div style="text-align: center; margin-bottom: 20px;">
-                        <div style="font-size: 11px; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 8px;">AI SUGGESTION FOR ${symbol}</div>
+                        <div style="font-size: 11px; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 8px;">AI SUGGESTION FOR ${coinName}</div>
                         <div style="font-size: 36px; font-weight: 900; color: ${dirColor}; letter-spacing: 3px;">${direction}</div>
                         <div style="margin-top: 8px;"><span style="background: rgba(212,175,55,0.15); color: var(--gold); padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1px solid var(--gold);">🎯 Confidence: ${confidence}%</span></div>
                     </div>
@@ -872,7 +918,7 @@
         let pair = 'XAU/USD';
         let coin = 'XAU';
         if (appMode === 'crypto') {
-            coin = document.getElementById('signalCoin').value;
+            coin = document.getElementById('aiCoinSelect').value;
             pair = coin + '/USDT';
         }
 
@@ -884,7 +930,7 @@
                 entry: currentAITrade.entry, stopLoss: currentAITrade.sl, takeProfit: currentAITrade.tp,
                 entryPrice: currentAITrade.entry, sl: currentAITrade.sl, tp: currentAITrade.tp,
                 price: currentAITrade.entry, confidence: currentAITrade.confidence,
-                notes: `AI ${direction} signal`, status: 'active', createdAt: serverTimestamp()
+                notes: `AI ${direction} signal for ${pair}`, status: 'active', createdAt: serverTimestamp()
             });
             showToast('✅ AI Signal sent!');
         } catch (error) { showToast('Error sending signal'); }
@@ -893,6 +939,12 @@
     function applyAITrade() {
         if (!currentAITrade) return;
         showScreen('sendSignalScreen');
+        // إذا كانت العملة مختارة في الذكاء الاصطناعي، انقلها إلى صفحة الإرسال
+        if (appMode === 'crypto') {
+            const selectedCoin = document.getElementById('aiCoinSelect').value;
+            document.getElementById('signalCoin').value = selectedCoin;
+        }
+        
         document.getElementById('signalDirection').value = currentAITrade.direction === 'WAIT' ? 'BUY' : currentAITrade.direction;
         document.getElementById('signalEntry').value = currentAITrade.entry;
         document.getElementById('signalSL').value = currentAITrade.sl;
