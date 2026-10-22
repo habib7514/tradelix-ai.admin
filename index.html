@@ -56,7 +56,7 @@
         .splash-loading-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #FCD535); border-radius: 4px; animation: loadBar 3s linear forwards; }
         @keyframes loadBar { from { width: 0%; } to { width: 100%; } }
         
-        .screen { display: none; width: 100%; max-width: 480px; margin: 0 auto; padding: 20px; min-height: 100vh; padding-bottom: 90px; }
+        .screen { display: none; width: 100%; max-width: 480px; margin: 0 auto; padding: 20px; min-height: 100vh; padding-bottom: 100px; /* زيادة المساحة السفلية */ }
         .screen.active { display: block; }
         
         .auth-container { display: flex; flex-direction: column; justify-content: center; min-height: 100vh; padding: 20px; max-width: 420px; margin: 0 auto; }
@@ -140,11 +140,55 @@
         .mode-btn.active { background: var(--gold); color: #000; box-shadow: 0 0 10px rgba(240, 185, 11, 0.3); }
         .mode-btn.inactive { background: transparent; color: var(--text-muted); }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: stretch; padding: 0; margin: 0; z-index: 99999; height: 72px; touch-action: manipulation; padding-bottom: env(safe-area-inset-bottom, 0); }
-        .nav-item { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; cursor: pointer; background: transparent; border: none; padding: 8px 2px; height: 100%; touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-appearance: none; appearance: none; outline: none; position: relative; z-index: 50; user-select: none; -webkit-user-select: none; }
+        /* ✅ تم إصلاح الشريط السفلي هنا */
+        .bottom-nav { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            background: var(--bg-card); 
+            border-top: 1px solid var(--border); 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: stretch; 
+            padding: 0; 
+            margin: 0; 
+            z-index: 99999; 
+            min-height: 65px; 
+            padding-bottom: env(safe-area-inset-bottom, 0); 
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+        }
+        .nav-item { 
+            flex: 1 1 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 4px; 
+            color: var(--text-muted); 
+            font-size: 10px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            background: transparent; 
+            border: none; 
+            padding: 10px 0; 
+            margin: 0;
+            width: 100%;
+            touch-action: manipulation; 
+            -webkit-tap-highlight-color: transparent; 
+            -webkit-appearance: none; 
+            appearance: none; 
+            outline: none; 
+            position: relative; 
+            z-index: 50; 
+            user-select: none; 
+            -webkit-user-select: none; 
+        }
         .nav-item.active { color: var(--gold); }
-        .nav-item .icon-svg { width: 24px; height: 24px; pointer-events: none; transition: transform 0.2s; }
-        .nav-item.active .icon-svg { color: var(--gold); }
+        .nav-item .icon-svg { width: 24px; height: 24px; pointer-events: none !important; transition: transform 0.2s; }
+        .nav-item.active .icon-svg { color: var(--gold); transform: translateY(-2px); }
+        
+        /* ✅ هذا هو السطر السحري الذي يجعل اللمسة تخترق الأيقونة والنص وتصل للزر مباشرة */
         .nav-item * { pointer-events: none !important; user-select: none !important; -webkit-user-select: none !important; -webkit-touch-callout: none !important; }
         
         .hidden { display: none !important; }
