@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,6 +9,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -94,7 +95,7 @@
         .user-status.pending { background: rgba(245, 158, 11, 0.15); color: var(--orange); border: 1px solid var(--orange); }
         .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 13px; }
         .detail-row span:first-child { color: var(--text-muted); }
-        .detail-row span:last-child { color: var(--gold-light); font-weight: 700; text-align: left; max-width: 60%; word-break: break-all; }
+        .detail-row span:last-child { color: var(--gold-light); font-weight: 700; text-align: right; max-width: 60%; word-break: break-all; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d0d0d; border-top: 1px solid #222; display: flex; justify-content: space-around; padding: 10px 0 18px 0; z-index: 9999; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 9px; text-decoration: none; width: 25%; cursor: pointer; background: none; border: none; font-family: inherit; padding: 4px 0; }
         .nav-item.active { color: var(--gold); }
@@ -159,7 +160,7 @@
     <div id="recentActivity"><div class="empty-state"><div class="icon">📭</div><h3>No Activity Yet</h3></div></div>
 
     <div class="bottom-nav">
-        <button class="nav-item active" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
@@ -422,7 +423,6 @@
         document.getElementById('activateModal').style.display = 'flex'; 
         document.getElementById('activateStartDate').value = new Date().toISOString().split('T')[0]; 
         
-        // ✅ تحديد نوع الخدمة تلقائياً بناءً على حالة المستخدم الحالية
         if (currentUserData && currentUserData.planType) {
             document.getElementById('activatePlanType').value = currentUserData.planType;
         }
@@ -442,7 +442,6 @@
             const days = plan === 'Weekly' ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : 90));
             const expiry = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
 
-            // ✅ إصلاح الخلل الجوهري: دمج النوع الحالي مع النوع الجديد
             let currentPlanType = currentUserData?.planType || 'none';
             let finalPlanType = selectedPlanType;
 
@@ -457,7 +456,7 @@
             await updateDoc(doc(db, 'tradelix_users', currentUserUID), {
                 status: 'active',
                 plan: 'VIP ' + plan,
-                planType: finalPlanType, // ✅ استخدام النوع المدمج
+                planType: finalPlanType,
                 startDate: startDate,
                 expiryDate: expiry.toISOString().split('T')[0]
             });
