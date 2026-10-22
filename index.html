@@ -93,6 +93,10 @@
         .user-status.inactive { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid var(--red); }
         .user-status.active { background: rgba(34, 197, 94, 0.15); color: var(--green); border: 1px solid var(--green); }
         .user-status.pending { background: rgba(245, 158, 11, 0.15); color: var(--orange); border: 1px solid var(--orange); }
+        .plan-badge { display: inline-block; font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 6px; margin-left: 8px; }
+        .plan-badge.crypto { background: rgba(240, 185, 11, 0.15); color: var(--gold); border: 1px solid var(--gold); }
+        .plan-badge.gold   { background: rgba(251, 191, 36, 0.15); color: #FBBF24; border: 1px solid #FBBF24; }
+        .plan-badge.both   { background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid #A78BFA; }
         .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 13px; }
         .detail-row span:first-child { color: var(--text-muted); }
         .detail-row span:last-child { color: var(--gold-light); font-weight: 700; text-align: right; max-width: 60%; word-break: break-all; }
@@ -173,10 +177,7 @@
         <div class="bell-icon" onclick="openNotifModal()">🔔</div>
     </div>
     
-    <div class="mode-toggle">
-        <button id="btnUserModeCrypto" class="mode-btn active" onclick="switchMode('crypto')">🪙 Tradelix</button>
-        <button id="btnUserModeGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Tradix Gold</button>
-    </div>
+    <!-- ✅ تم إزالة أزرار التبديل من هنا لتجنب إخفاء المستخدمين -->
 
     <div class="input-group"><input type="text" id="searchUsers" placeholder="🔍 Search by name or email..." oninput="filterUsers()"></div>
     <div style="display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;">
@@ -210,6 +211,7 @@
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💎 Subscription</h3>
         <div class="detail-row"><span>Status</span><span id="detailStatus">-</span></div>
         <div class="detail-row"><span>Plan</span><span id="detailPlan">-</span></div>
+        <div class="detail-row"><span>Type</span><span id="detailType">-</span></div>
         <div class="detail-row"><span>Expiry Date</span><span id="detailExpiry">-</span></div>
     </div>
     <div class="section-title">⚡ ACTIONS</div>
@@ -303,10 +305,6 @@
             document.getElementById('btnModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
-        if(document.getElementById('btnUserModeCrypto')) {
-            document.getElementById('btnUserModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
-            document.getElementById('btnUserModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
-        }
         if(document.getElementById('btnSignalCrypto')) {
             document.getElementById('btnSignalCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnSignalGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
@@ -316,16 +314,6 @@
         } else {
             if(document.getElementById('signalPair')) document.getElementById('signalPair').value = 'BTC/USDT';
         }
-        if (document.getElementById('usersScreen').classList.contains('active')) {
-            renderUsers();
-        }
-    }
-
-    function filterUsersByMode(users) {
-        return users.filter(u => {
-            if (u.status !== 'active' && u.status !== 'pending') return true;
-            return u.planType === appMode || u.planType === 'both' || !u.planType;
-        });
     }
 
     async function initFirebase() {
@@ -387,21 +375,35 @@
         renderUsers();
     }
 
+    // ✅ الآن يتم عرض كل المستخدمين بدون أي فلترة بناءً على الوضع
     function renderUsers() {
-        let base = filterUsersByMode(allUsers);
-        let filtered = base.filter(u => {
+        let filtered = allUsers.filter(u => {
             if (searchQuery && !((u.name||'').toLowerCase().includes(searchQuery) || (u.email||'').toLowerCase().includes(searchQuery))) return false;
             if (currentFilter !== 'all' && (u.status || 'inactive') !== currentFilter) return false;
             return true;
         });
         filtered.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         const list = document.getElementById('usersList');
-        if (filtered.length === 0) { list.innerHTML = `<div class="empty-state"><h3>No Users Found in this mode</h3></div>`; return; }
-        list.innerHTML = filtered.map(u => `
+        if (filtered.length === 0) { list.innerHTML = `<div class="empty-state"><h3>No Users Found</h3></div>`; return; }
+        
+        list.innerHTML = filtered.map(u => {
+            let typeBadge = '';
+            if (u.planType === 'crypto') typeBadge = '<span class="plan-badge crypto">🪙 Crypto</span>';
+            else if (u.planType === 'gold') typeBadge = '<span class="plan-badge gold">🥇 Gold</span>';
+            else if (u.planType === 'both') typeBadge = '<span class="plan-badge both">⭐ Both</span>';
+
+            return `
             <div class="user-card" onclick="openUserDetail('${u.uid}')">
-                <div class="user-header"><div><div class="user-name">${u.name || 'Unknown'}</div><div class="user-email">${u.email || ''}</div></div><span class="user-status ${u.status || 'inactive'}">${(u.status || 'inactive').toUpperCase()}</span></div>
+                <div class="user-header">
+                    <div>
+                        <div class="user-name">${u.name || 'Unknown'} ${typeBadge}</div>
+                        <div class="user-email">${u.email || ''}</div>
+                    </div>
+                    <span class="user-status ${u.status || 'inactive'}">${(u.status || 'inactive').toUpperCase()}</span>
+                </div>
                 <div class="user-info">${u.plan ? `💎 ${u.plan}` : '💎 No Plan'}</div>
-            </div>`).join('');
+            </div>`;
+        }).join('');
     }
 
     async function openUserDetail(uid) {
@@ -415,6 +417,7 @@
         document.getElementById('detailCreated').textContent = u.createdAt ? new Date(u.createdAt.seconds * 1000).toLocaleDateString('en-GB') : '-';
         document.getElementById('detailStatus').textContent = (u.status || 'inactive').toUpperCase();
         document.getElementById('detailPlan').textContent = u.plan || 'No Plan';
+        document.getElementById('detailType').textContent = u.planType ? u.planType.toUpperCase() : 'N/A';
         document.getElementById('detailExpiry').textContent = u.expiryDate || '-';
         showScreen('userDetailScreen');
     }
@@ -469,14 +472,34 @@
 
     async function deactivateUserSubscription() {
         if (!currentUserUID || !confirm('Deactivate?')) return;
-        await updateDoc(doc(db, 'tradelix_users', currentUserUID), { status: 'inactive', plan: null, planType: null });
-        showToast('✅ Deactivated'); setTimeout(() => openUserDetail(currentUserUID), 1000);
+        try {
+            await updateDoc(doc(db, 'tradelix_users', currentUserUID), { status: 'inactive', plan: null, planType: null });
+            showToast('✅ Deactivated'); setTimeout(() => openUserDetail(currentUserUID), 1000);
+        } catch(e) { showToast('Error'); }
     }
 
     async function confirmDeleteUser() {
-        if (!currentUserUID || !confirm('Delete user permanently?')) return;
-        await deleteDoc(doc(db, 'tradelix_users', currentUserUID));
-        showToast('✅ Deleted'); setTimeout(() => showScreen('usersScreen'), 1000);
+        if (!currentUserUID) return;
+        if (!confirm('⚠️ Are you sure you want to delete this user permanently?')) return;
+        
+        try {
+            allUsers = allUsers.filter(u => u.uid !== currentUserUID);
+            renderUsers(); 
+            showScreen('usersScreen');
+
+            await deleteDoc(doc(db, 'tradelix_users', currentUserUID));
+            
+            showToast('✅ User Deleted');
+            
+            document.getElementById('statTotalUsers').textContent = allUsers.length;
+            document.getElementById('statActiveUsers').textContent = allUsers.filter(u => u.status === 'active').length;
+            document.getElementById('statPendingUsers').textContent = allUsers.filter(u => u.status === 'pending').length;
+            document.getElementById('statInactiveUsers').textContent = allUsers.filter(u => u.status === 'inactive' || !u.status).length;
+
+        } catch (error) {
+            console.error(error);
+            showToast('❌ Error deleting user');
+        }
     }
 
     async function sendSignal() {
