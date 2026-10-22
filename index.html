@@ -8,7 +8,12 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23181A20' stroke='%23F0B90B' stroke-width='3'/%3E%3Ctext x='50' y='68' font-family='Arial' font-size='44' font-weight='900' fill='%23F0B90B' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
-    
+    <!-- ✅ إضافة 1: كود الـ PWA Manifest -->
+<link rel="manifest" href="manifest-admin.json">
+<meta name="theme-color" content="#F0B90B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- ============================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -159,6 +164,18 @@
     </style>
 </head>
 <body>
+    <!-- PWA Install Banner -->
+<div id="pwaInstallBanner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:999999; padding:12px 16px; background:linear-gradient(135deg, #1E2329 0%, #181A20 100%); border-bottom:2px solid #F0B90B; box-shadow:0 4px 20px rgba(240,185,11,0.3); animation:slideDown 0.5s ease;">
+    <div style="display:flex; align-items:center; gap:12px; max-width:480px; margin:0 auto;">
+        <img src="https://raw.githubusercontent.com/habib7514/tradelix-ai/main/icons/IMG-20261016-WA0000.jpg" alt="Admin" style="width:50px; height:50px; border-radius:12px; border:1.5px solid #F0B90B; flex-shrink:0; box-shadow:0 0 15px rgba(240,185,11,0.4);">
+        <div style="flex:1; min-width:0;">
+            <div style="color:#ffffff; font-weight:900; font-size:14px; margin-bottom:2px; font-family:Tajawal,sans-serif;">📲 Install Admin App</div>
+            <div style="color:#848E9C; font-size:11px; font-family:Tajawal,sans-serif;">Faster access & notifications</div>
+        </div>
+        <button onclick="installPWA()" style="background:linear-gradient(135deg, #F0B90B, #d4af37); color:#000000; border:none; padding:12px 20px; border-radius:12px; font-weight:900; font-size:14px; cursor:pointer; font-family:Tajawal,sans-serif; letter-spacing:0.5px; box-shadow:0 4px 15px rgba(240,185,11,0.5); touch-action:manipulation; white-space:nowrap;">Install</button>
+        <button onclick="closePWABanner()" aria-label="Close" style="background:transparent; border:none; color:#848E9C; font-size:20px; cursor:pointer; padding:4px 8px; flex-shrink:0; touch-action:manipulation;">✕</button>
+    </div>
+</div>
 <div id="splash">
     <div class="splash-logo">
         <div class="splash-logo-circle"></div>
@@ -575,7 +592,64 @@
 </div>
 
 <div id="toast" class="toast">Message</div>
+<script>
+    // === PWA INSTALL LOGIC ===
+    let deferredPrompt = null;
+    const PWA_BANNER_KEY = 'tradelix_admin_pwa_banner_dismissed';
 
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('✅ Admin PWA: Install prompt ready');
+        
+        const dismissed = localStorage.getItem(PWA_BANNER_KEY);
+        if (dismissed) {
+            const daysSince = (Date.now() - parseInt(dismissed)) / (1000 * 60 * 60 * 24);
+            if (daysSince < 7) return;
+        }
+        if (window.matchMedia('(display-mode: standalone)').matches) return;
+        
+        const banner = document.getElementById('pwaInstallBanner');
+        if (banner) banner.style.display = 'block';
+    });
+
+    async function installPWA() {
+        if (!deferredPrompt) {
+            alert('📲 To install on iPhone:\n\n1. Tap "Share" in Safari\n2. Choose "Add to Home Screen"\n3. Tap "Add"');
+            return;
+        }
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            console.log('✅ Admin PWA: User accepted install');
+            closePWABanner(true);
+        } else {
+            closePWABanner();
+        }
+        deferredPrompt = null;
+    }
+
+    function closePWABanner(installed = false) {
+        const banner = document.getElementById('pwaInstallBanner');
+        if (banner) {
+            banner.style.animation = 'slideUp 0.4s ease forwards';
+            setTimeout(() => {
+                banner.style.display = 'none';
+            }, 400);
+        }
+        if (!installed) localStorage.setItem(PWA_BANNER_KEY, Date.now().toString());
+    }
+
+    // ✅ تسجيل Service Worker (ضروري جداً لعمل الإشعارات في الخلفية)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('firebase-messaging-sw.js')
+                .then(reg => console.log('✅ Admin SW registered'))
+                .catch(err => console.log('❌ Admin SW error:', err));
+        });
+    }
+</script>
+    
 <script>
     const ADMIN_EMAIL = "mmatrix081@gmail.com";
     let auth, db;
