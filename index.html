@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -71,14 +71,81 @@
         .header-title h1 { font-size: 16px; font-weight: 900; color: var(--gold); letter-spacing: 1px; }
         .header-title span { font-size: 9px; color: var(--red); font-weight: 700; letter-spacing: 2px; }
         .bell-icon { background: #1a1a1a; border: 1px solid #333; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--gold); cursor: pointer; position: relative; }
-        .bell-icon.alarm { animation: bellShake 0.5s ease-in-out infinite; border-color: var(--red); }
-        @keyframes bellShake { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-15deg); } 75% { transform: rotate(15deg); } }
         .notifBadge { position: absolute; top: -4px; right: -4px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 8px rgba(246, 70, 93, 0.8); animation: pulse 1.5s infinite; pointer-events: none; }
+
+        /* ✅ التصميم الجديد لزر التوصيات (أزرق، لامع، يتحرك) */
+        .recommendation-blue-btn {
+            font-family: 'Tajawal', sans-serif;
+            font-size: 17px;
+            font-weight: 900;
+            color: #FFFFFF;
+            letter-spacing: 0.5px;
+            padding: 16px 26px;
+            background: linear-gradient(180deg, #0099FF 0%, #0066FF 50%, #0044CC 100%);
+            border-radius: 50px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 20px;
+            box-shadow: 
+                0 0 12px rgba(0, 150, 255, 0.9),
+                0 0 25px rgba(0, 150, 255, 0.7),
+                0 0 40px rgba(0, 150, 255, 0.5),
+                inset 0 0 15px rgba(255, 255, 255, 0.15),
+                inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            border: 1.5px solid rgba(255, 255, 255, 0.4);
+            text-shadow: 
+                0 0 6px rgba(255, 255, 255, 0.9),
+                0 0 12px rgba(0, 150, 255, 1);
+            animation: join-pulse 2s ease-in-out infinite;
+            overflow: hidden;
+            white-space: nowrap;
+            cursor: pointer;
+            z-index: 999;
+        }
+        .recommendation-blue-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, transparent 40%, rgba(255, 255, 255, 0.6) 50%, transparent 60%, transparent 100%);
+            animation: join-shine 2.5s infinite;
+            pointer-events: none;
+        }
+        @keyframes join-shine {
+            0% { left: -100%; }
+            50%, 100% { left: 100%; }
+        }
+        @keyframes join-pulse {
+            0%, 100% {
+                box-shadow: 
+                    0 0 12px rgba(0, 150, 255, 0.9),
+                    0 0 25px rgba(0, 150, 255, 0.7),
+                    0 0 40px rgba(0, 150, 255, 0.5),
+                    inset 0 0 15px rgba(255, 255, 255, 0.15),
+                    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 
+                    0 0 18px rgba(0, 150, 255, 1),
+                    0 0 35px rgba(0, 150, 255, 0.9),
+                    0 0 55px rgba(0, 150, 255, 0.7),
+                    inset 0 0 20px rgba(255, 255, 255, 0.25),
+                    inset 0 2px 4px rgba(255, 255, 255, 0.5);
+                transform: scale(1.03);
+            }
+        }
 
         .mode-toggle { display: flex; background: var(--card-bg); border-radius: 12px; padding: 4px; border: 1px solid var(--card-border); margin-bottom: 20px; }
         .mode-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: 900; font-size: 14px; cursor: pointer; transition: 0.3s; font-family: inherit; }
         .mode-btn.active { background: var(--gold); color: #000; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
         .mode-btn.inactive { background: transparent; color: var(--text-muted); }
+
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
         .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 16px; text-align: center; }
         .stat-card .stat-icon { font-size: 26px; margin-bottom: 6px; }
@@ -97,19 +164,15 @@
         .user-status.inactive { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid var(--red); }
         .user-status.active { background: rgba(34, 197, 94, 0.15); color: var(--green); border: 1px solid var(--green); }
         .user-status.pending { background: rgba(245, 158, 11, 0.15); color: var(--orange); border: 1px solid var(--orange); }
-        .plan-badge { display: inline-block; font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 6px; margin-left: 8px; }
-        .plan-badge.crypto { background: rgba(240, 185, 11, 0.15); color: var(--gold); border: 1px solid var(--gold); }
-        .plan-badge.gold   { background: rgba(251, 191, 36, 0.15); color: #FBBF24; border: 1px solid #FBBF24; }
-        .plan-badge.both   { background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid #A78BFA; }
         .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 13px; }
         .detail-row span:first-child { color: var(--text-muted); }
-        .detail-row span:last-child { color: var(--gold-light); font-weight: 700; text-align: right; max-width: 60%; word-break: break-all; }
+        .detail-row span:last-child { color: var(--gold-light); font-weight: 700; text-align: left; max-width: 60%; word-break: break-all; }
         
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d0d0d; border-top: 1px solid #222; display: flex; justify-content: space-around; padding: 10px 0 18px 0; z-index: 9999; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 9px; text-decoration: none; width: 20%; cursor: pointer; background: none; border: none; font-family: inherit; padding: 4px 0; }
         .nav-item.active { color: var(--gold); }
         .nav-item .icon { font-size: 20px; }
-
+        
         .hidden { display: none !important; }
         .toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--gold); color: #000; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; opacity: 0; transition: 0.3s; z-index: 99999; text-align: center; }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -117,30 +180,26 @@
         .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
         .empty-state h3 { color: var(--gold); margin-bottom: 6px; }
 
-        .notif-close-top {
-            position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(212, 175, 55, 0.15); border: 1.5px solid rgba(212, 175, 55, 0.6);
-            color: #d4af37; font-size: 18px; font-weight: 900; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; z-index: 10;
-        }
-
-        /* Trade Card Styles */
-        .trade-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+        .trade-card, .rec-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
         .trade-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .trade-pair { font-size: 15px; font-weight: 900; color: var(--gold-light); display: flex; align-items: center; gap: 8px;}
         .trade-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 12px; }
         .trade-dir { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 6px; }
         .trade-dir.buy { background: rgba(34, 197, 94, 0.15); color: var(--green); border: 1px solid var(--green); }
-        .trade-dir.sell { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid var(--red); }
         .trade-details { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; background: #111; padding: 10px; border-radius: 8px; }
         .trade-details div { text-align: center; }
         .trade-details span { display: block; font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
         .trade-details strong { font-size: 12px; color: #fff; }
         .trade-actions { display: flex; gap: 8px; }
         .trade-actions button { flex: 1; padding: 10px; font-size: 12px; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; }
-        .btn-close-trade { background: var(--orange); color: #fff; }
         .btn-delete-trade { background: var(--red); color: #fff; }
-        .trade-status-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 900; background: rgba(136, 136, 136, 0.2); color: #aaa; border: 1px solid #555; margin-bottom: 10px; }
+        .rec-notes { font-size: 12px; color: #ccc; background: rgba(212, 175, 55, 0.1); padding: 8px; border-radius: 6px; margin-bottom: 12px; border-left: 2px solid var(--gold); }
+        .notif-close-top {
+            position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(212, 175, 55, 0.15); border: 1.5px solid rgba(212, 175, 55, 0.6);
+            color: #d4af37; font-size: 18px; font-weight: 900; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; z-index: 10;
+        }
     </style>
 </head>
 <body>
@@ -162,6 +221,7 @@
     </div>
 </div>
 
+<!-- DASHBOARD -->
 <div id="dashboardScreen" class="screen">
     <div class="header">
         <div class="header-left">
@@ -170,8 +230,12 @@
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
             <div class="bell-icon" onclick="openNotifModal()">🔔</div>
-            <div class="bell-icon" onclick="showScreen('aiAnalysisScreen')" style="font-size:20px;">🤖</div>
         </div>
+    </div>
+
+    <!-- ✅ الزر الأزرق المتحرك للتوصيات في أعلى الصفحة فقط -->
+    <div class="recommendation-blue-btn" onclick="showScreen('recommendationsScreen')">
+        💡 Recommendations
     </div>
 
     <div class="mode-toggle">
@@ -195,8 +259,9 @@
     <div class="section-title">🔔 RECENT ACTIVITY</div>
     <div id="recentActivity"><div class="empty-state"><div class="icon">📭</div><h3>No Activity Yet</h3></div></div>
 
+    <!-- Bottom Nav (5 أزرار فقط كما كانت) -->
     <div class="bottom-nav">
-        <button class="nav-item active" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item active" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
         <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
@@ -204,6 +269,7 @@
     </div>
 </div>
 
+<!-- USERS -->
 <div id="usersScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>USERS</h1><span>● MANAGEMENT</span></div></div>
@@ -220,7 +286,7 @@
     <div id="usersList"><div class="empty-state"><div class="icon">⏳</div><h3>Loading users...</h3></div></div>
 
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
         <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
@@ -228,6 +294,7 @@
     </div>
 </div>
 
+<!-- USER DETAIL -->
 <div id="userDetailScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>USER DETAIL</h1><span>● PROFILE</span></div></div>
@@ -243,7 +310,6 @@
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💎 Subscription</h3>
         <div class="detail-row"><span>Status</span><span id="detailStatus">-</span></div>
         <div class="detail-row"><span>Plan</span><span id="detailPlan">-</span></div>
-        <div class="detail-row"><span>Type</span><span id="detailType">-</span></div>
         <div class="detail-row"><span>Expiry Date</span><span id="detailExpiry">-</span></div>
     </div>
     <div class="section-title">⚡ ACTIONS</div>
@@ -253,7 +319,7 @@
         <button class="btn-block" style="background: var(--red); color: #fff;" onclick="confirmDeleteUser()">🗑️ Delete User</button>
     </div>
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
         <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
@@ -261,26 +327,22 @@
     </div>
 </div>
 
-<!-- ✅ شاشة الصفقات -->
+<!-- TRADES SCREEN -->
 <div id="tradesScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>ACTIVE TRADES</h1><span>● MANAGEMENT</span></div></div>
         <div class="bell-icon" onclick="openNotifModal()">🔔</div>
     </div>
-
     <div class="mode-toggle">
         <button id="btnTradesCrypto" class="mode-btn active" onclick="switchMode('crypto')">🪙 Crypto Trades</button>
         <button id="btnTradesGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Gold Trades</button>
     </div>
-
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">إدارة الصفقات المفتوحة. إغلاق أو حذف الصفقة سيؤثر فوراً على حسابات المشتركين.</p>
-
     <div id="tradesList">
         <div class="empty-state"><div class="icon">⏳</div><h3>Loading trades...</h3></div>
     </div>
-
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
         <button class="nav-item active" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
@@ -288,42 +350,61 @@
     </div>
 </div>
 
+<!-- RECOMMENDATIONS SCREEN -->
+<div id="recommendationsScreen" class="screen">
+    <div class="header">
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>RECOMMENDATIONS</h1><span>● INVESTMENTS</span></div></div>
+        <div class="bell-icon" onclick="openNotifModal()">🔔</div>
+    </div>
+
+    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Send buy & hold recommendations to subscribers' portfolios.</p>
+
+    <div class="card">
+        <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💡 New Recommendation</h3>
+        <div class="input-group">
+            <label>Select Coin</label>
+            <select id="recCoin"></select>
+        </div>
+        <div class="input-group">
+            <label>Current Price (Optional)</label>
+            <input type="text" id="recPrice" placeholder="e.g. 1.25">
+        </div>
+        <div class="input-group">
+            <label>Notes / Reason</label>
+            <textarea id="recNotes" placeholder="Why buy now? e.g. Strong support level..."></textarea>
+        </div>
+        <button class="btn-block success" onclick="sendRecommendation()">🚀 Send Recommendation</button>
+    </div>
+
+    <div class="section-title" style="margin-top: 30px;">📋 Active Recommendations</div>
+    <div id="recsList">
+        <div class="empty-state"><div class="icon">⏳</div><h3>Loading...</h3></div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
+        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
+        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+    </div>
+</div>
+
+<!-- SEND SIGNAL -->
 <div id="sendSignalScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>SEND SIGNAL</h1><span>● TRADING</span></div></div>
         <div class="bell-icon" onclick="openNotifModal()">🔔</div>
     </div>
-    
     <div class="mode-toggle">
         <button id="btnSignalCrypto" class="mode-btn active" onclick="switchMode('crypto')">🪙 Tradelix</button>
         <button id="btnSignalGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Tradix Gold</button>
     </div>
-
-    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Send a new signal. Based on the mode selected above, the signal will go to the correct app.</p>
-    
+    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Send a new signal. Based on the mode selected above.</p>
     <div class="card">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">📈 Signal Details</h3>
-        
-        <!-- سيتم تعبئة هذه القائمة تلقائياً بالـ 50 عملة من الجافاسكريبت -->
-        <div class="input-group" id="coinSelectGroup">
-            <label>Coin (Crypto)</label>
-            <select id="signalCoin"></select>
-        </div>
-
-        <div class="input-group">
-            <label>Pair (Gold)</label>
-            <input type="text" id="signalPairGold" value="XAU/USD">
-        </div>
-
-        <div class="input-group">
-            <label>Direction (Buy/Sell)</label>
-            <div style="display: flex; gap: 10px;">
-                <button type="button" id="btnDirBuy" class="btn-block success" onclick="setDirection('BUY')" style="margin-top:0;">BUY (Long)</button>
-                <button type="button" id="btnDirSell" class="btn-block danger" onclick="setDirection('SELL')" style="margin-top:0; opacity: 0.5;">SELL (Short)</button>
-            </div>
-            <input type="hidden" id="signalDirection" value="BUY">
-        </div>
-        
+        <div class="input-group"><label>Pair / Coin</label><input type="text" id="signalPair" value="XAU/USD"></div>
+        <div class="input-group"><label>Direction</label><select id="signalDirection"><option value="BUY">BUY (Long)</option><option value="SELL">SELL (Short)</option></select></div>
         <div class="input-group"><label>Entry Price</label><input type="text" id="signalEntry"></div>
         <div class="input-group"><label>Stop Loss</label><input type="text" id="signalSL"></div>
         <div class="input-group"><label>Take Profit</label><input type="text" id="signalTP"></div>
@@ -331,54 +412,11 @@
         <button class="btn-block" onclick="sendSignal()">📤 Send Signal</button>
     </div>
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
         <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item active" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
-    </div>
-</div>
-
-<div id="aiAnalysisScreen" class="screen">
-    <div class="header">
-        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>AI ANALYSIS</h1><span>● MARKET SCANNER</span></div></div>
-        <div class="bell-icon" onclick="openNotifModal()">🔔</div>
-    </div>
-
-    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Analyze live market data with AI-powered indicators (EMA, RSI, Trend) and get a suggested trade.</p>
-
-    <div class="mode-toggle">
-        <button id="btnAiModeCrypto" class="mode-btn active" onclick="switchMode('crypto')">🪙 Tradelix</button>
-        <button id="btnAiModeGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Tradix Gold</button>
-    </div>
-
-    <!-- سيتم تعبئة هذه القائمة تلقائياً بالـ 50 عملة من الجافاسكريبت -->
-    <div class="input-group" id="aiCoinSelectGroup">
-        <label>Select Coin to Analyze</label>
-        <select id="aiCoinSelect"></select>
-    </div>
-
-    <button class="btn-block" onclick="runAIAnalysis()" id="aiAnalyzeBtn" style="margin-bottom: 20px;">🤖 Analyze Market Now</button>
-
-    <div id="aiLoading" class="hidden" style="text-align: center; padding: 30px;">
-        <div style="font-size: 40px; margin-bottom: 12px;">⏳</div>
-        <p style="color: var(--gold); font-weight: 700;">Analyzing...</p>
-    </div>
-
-    <div id="aiResult" class="hidden"></div>
-
-    <div id="aiEmpty" class="empty-state">
-        <div class="icon">🤖</div>
-        <h3>Ready to Analyze</h3>
-        <p>Select a coin and press the button above.</p>
-    </div>
-
-    <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
-        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
-        <button class="nav-item active" onclick="showScreen('aiAnalysisScreen')"><span class="icon">🤖</span><span>AI</span></button>
-        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
     </div>
 </div>
 
@@ -393,13 +431,13 @@
     </div>
 </div>
 
+<!-- NOTIFICATIONS MODAL -->
 <div id="notifModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:99999; padding:16px; overflow-y:auto;">
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 20px; max-width: 420px; margin: 40px auto; position: relative;">
         <button class="notif-close-top" onclick="closeNotifModal()" aria-label="Close">✕</button>
         <h3 style="color: #d4af37; margin-bottom: 16px; text-align: center; padding-right: 40px; padding-left: 40px;">🔔 Notifications</h3>
         <div style="display:flex; gap:8px; margin-bottom:12px;">
             <button onclick="clearAllNotifs()" class="btn-small reject" style="flex:1;">🗑️ Clear All</button>
-            <button onclick="stopAlarmLoop()" class="btn-small view" style="flex:1;">🔇 Stop Sound</button>
         </div>
         <div id="notifList"></div>
         <button onclick="closeNotifModal()" class="btn-block outline" style="margin-top: 12px;">Close</button>
@@ -409,12 +447,6 @@
 <div id="toast" class="toast">Message</div>
 
 <script>
-    const ADMIN_EMAIL = "mmatrix081@gmail.com";
-    let auth, db;
-    let signInWithEmailAndPassword, signOut;
-    let collection, getDocs, doc, getDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot;
-
-    // ✅ قائمة العملات الخاصة بالمشتركين (تمت إضافتها هنا)
     const COIN_INFO = {
         BTC: { name: 'Bitcoin', color: '#F7931A', letter: '₿' }, ETH: { name: 'Ethereum', color: '#627EEA', letter: 'Ξ' },
         BNB: { name: 'BNB', color: '#F3BA2F', letter: 'B' }, SOL: { name: 'Solana', color: '#14F195', letter: 'S' },
@@ -443,14 +475,18 @@
         PEPE: { name: 'Pepe', color: '#3D8B37', letter: 'P' }, BONK: { name: 'Bonk', color: '#FC8C1C', letter: 'B' }
     };
 
+    const ADMIN_EMAIL = "mmatrix081@gmail.com";
+    let auth, db;
+    let signInWithEmailAndPassword, signOut;
+    let collection, getDocs, doc, getDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot;
+
     let appMode = 'crypto';
-    let allUsers = [];
+    let allUsers = []; 
     let allCryptoSignals = [];
     let allGoldSignals = [];
-    let currentFilter = 'all';
+    let allRecommendations = [];
+    let currentFilter = 'all'; 
     let searchQuery = '';
-    let currentUserUID = null;
-    let currentUserData = null;
 
     setTimeout(() => {
         document.getElementById('splash').classList.add('hide');
@@ -460,20 +496,6 @@
         }, 800);
     }, 3500);
 
-    // ✅ توليد قوائم العملات ديناميكياً
-    function populateCoinSelects() {
-        const signalSelect = document.getElementById('signalCoin');
-        const aiSelect = document.getElementById('aiCoinSelect');
-        
-        let optionsHtml = '';
-        for (const [symbol, info] of Object.entries(COIN_INFO)) {
-            optionsHtml += `<option value="${symbol}">${info.name} (${symbol})</option>`;
-        }
-        
-        if(signalSelect) signalSelect.innerHTML = optionsHtml;
-        if(aiSelect) aiSelect.innerHTML = optionsHtml;
-    }
-
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -482,18 +504,9 @@
         const activeBtn = Array.from(document.querySelectorAll(`#${id} .bottom-nav .nav-item`)).find(btn => btn.getAttribute('onclick')?.includes(id));
         if(activeBtn) activeBtn.classList.add('active');
 
+        if(id === 'recommendationsScreen') renderRecommendations();
         if(id === 'tradesScreen') renderTrades();
         window.scrollTo(0, 0);
-    }
-
-    function setDirection(dir) {
-        document.getElementById('signalDirection').value = dir;
-        const btnBuy = document.getElementById('btnDirBuy');
-        const btnSell = document.getElementById('btnDirSell');
-        if (btnBuy && btnSell) {
-            btnBuy.style.opacity = dir === 'BUY' ? '1' : '0.5';
-            btnSell.style.opacity = dir === 'SELL' ? '1' : '0.5';
-        }
     }
 
     function switchMode(mode) {
@@ -503,29 +516,47 @@
             document.getElementById('btnModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
+        if(document.getElementById('btnUserModeCrypto')) {
+            document.getElementById('btnUserModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
+            document.getElementById('btnUserModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
+        }
         if(document.getElementById('btnSignalCrypto')) {
             document.getElementById('btnSignalCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnSignalGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
-        }
-        if(document.getElementById('btnAiModeCrypto')) {
-            document.getElementById('btnAiModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
-            document.getElementById('btnAiModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
         if(document.getElementById('btnTradesCrypto')) {
             document.getElementById('btnTradesCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnTradesGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
             renderTrades();
         }
-        
+
         if (mode === 'gold') {
-            if(document.getElementById('coinSelectGroup')) document.getElementById('coinSelectGroup').style.display = 'none';
-            if(document.getElementById('signalPairGold')) document.getElementById('signalPairGold').style.display = 'block';
-            if(document.getElementById('aiCoinSelectGroup')) document.getElementById('aiCoinSelectGroup').style.display = 'none';
+            if(document.getElementById('signalPair')) document.getElementById('signalPair').value = 'XAU/USD';
         } else {
-            if(document.getElementById('coinSelectGroup')) document.getElementById('coinSelectGroup').style.display = 'block';
-            if(document.getElementById('signalPairGold')) document.getElementById('signalPairGold').style.display = 'none';
-            if(document.getElementById('aiCoinSelectGroup')) document.getElementById('aiCoinSelectGroup').style.display = 'block';
+            if(document.getElementById('signalPair')) document.getElementById('signalPair').value = 'BTC/USDT';
         }
+
+        if (document.getElementById('usersScreen').classList.contains('active')) {
+            renderUsers();
+        }
+    }
+
+    function filterUsersByMode(users) {
+        return users.filter(u => {
+            if (u.status !== 'active' && u.status !== 'pending') return true; 
+            return u.planType === appMode || u.planType === 'both' || !u.planType;
+        });
+    }
+
+    function populateCoinSelects() {
+        const recSelect = document.getElementById('recCoin');
+        if(!recSelect) return;
+        
+        let optionsHtml = '';
+        for (const [symbol, info] of Object.entries(COIN_INFO)) {
+            optionsHtml += `<option value="${symbol}">${info.name} (${symbol})</option>`;
+        }
+        recSelect.innerHTML = optionsHtml;
     }
 
     async function initFirebase() {
@@ -539,7 +570,6 @@
             updateDoc = fsModule.updateDoc; deleteDoc = fsModule.deleteDoc; addDoc = fsModule.addDoc; serverTimestamp = fsModule.serverTimestamp;
             onSnapshot = fsModule.onSnapshot;
             
-            // Users Snapshot
             onSnapshot(collection(db, 'tradelix_users'), (snapshot) => {
                 allUsers = [];
                 snapshot.forEach(docSnap => allUsers.push({ uid: docSnap.id, ...docSnap.data() }));
@@ -559,131 +589,47 @@
                             <div class="user-header"><div><div class="user-name">${u.name || 'Unknown'}</div><div class="user-email">${u.email}</div></div><span class="user-status ${u.status || 'inactive'}">${(u.status || 'inactive').toUpperCase()}</span></div>
                         </div>`).join('');
                 }
-
+                
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
                         const data = change.doc.data();
                         if (Date.now() - (data.createdAt?.seconds * 1000) < 60000) {
                             triggerNotif('👤 New user: ' + (data.name || data.email));
                         }
-                    } else if (change.type === "modified") {
-                        const data = change.doc.data();
-                        if (data.txHash && data.status === 'pending') {
-                            triggerNotif(`💰 Deposit: ${data.name || data.email} - $${data.depositAmount || '?'}`);
-                        }
                     }
                 });
             });
 
-            // Crypto Signals Snapshot
+            // Trades Signals Snapshot
             onSnapshot(collection(db, 'tradelix_signals'), (snapshot) => {
                 allCryptoSignals = [];
                 snapshot.forEach(docSnap => allCryptoSignals.push({ id: docSnap.id, ...docSnap.data() }));
-                
                 if (document.getElementById('tradesScreen').classList.contains('active')) renderTrades();
-
-                snapshot.docChanges().forEach(change => {
-                    if (change.type === "added") {
-                        const s = change.doc.data();
-                        if (Date.now() - (s.createdAt?.seconds * 1000) < 60000) {
-                            triggerNotif('📊 Crypto: ' + (s.coin || 'BTC') + ' ' + (s.direction || 'BUY'));
-                        }
-                    }
-                });
             });
 
-            // Gold Signals Snapshot
             onSnapshot(collection(db, 'gold_signals'), (snapshot) => {
                 allGoldSignals = [];
                 snapshot.forEach(docSnap => allGoldSignals.push({ id: docSnap.id, ...docSnap.data() }));
-                
                 if (document.getElementById('tradesScreen').classList.contains('active')) renderTrades();
+            });
+
+            // Recommendations Snapshot
+            onSnapshot(collection(db, 'tradelix_recommendations'), (snapshot) => {
+                allRecommendations = [];
+                snapshot.forEach(docSnap => allRecommendations.push({ id: docSnap.id, ...docSnap.data() }));
+                if (document.getElementById('recommendationsScreen').classList.contains('active')) renderRecommendations();
 
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
-                        const s = change.doc.data();
-                        if (Date.now() - (s.createdAt?.seconds * 1000) < 60000) {
-                            triggerNotif('🥇 Gold: ' + (s.pair || 'XAU/USD') + ' ' + (s.direction || 'BUY'));
+                        const data = change.doc.data();
+                        if (Date.now() - (data.createdAt?.seconds * 1000) < 60000) {
+                            triggerNotif('💡 New Recommendation: ' + (data.coin || '') + ' (Sent)');
                         }
                     }
                 });
             });
 
         } else { setTimeout(initFirebase, 500); }
-    }
-
-    // ==========================================
-    // ✅ TRADES MANAGEMENT LOGIC
-    // ==========================================
-    function renderTrades() {
-        const listDiv = document.getElementById('tradesList');
-        let signals = appMode === 'crypto' ? allCryptoSignals : allGoldSignals;
-        
-        signals.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-
-        if (signals.length === 0) {
-            listDiv.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>No Trades Found</h3><p>No signals sent for ${appMode === 'crypto' ? 'Crypto' : 'Gold'} yet.</p></div>`;
-            return;
-        }
-
-        listDiv.innerHTML = signals.map(s => {
-            const isBuy = s.direction === 'BUY';
-            const dirClass = isBuy ? 'buy' : 'sell';
-            const status = s.status || 'active';
-            const isActive = status === 'active';
-            const colName = appMode === 'crypto' ? 'tradelix_signals' : 'gold_signals';
-
-            // ✅ استخدام COIN_INFO لعرض الأيقونة واللون
-            let pairHtml = s.pair || (s.coin ? s.coin + '/USDT' : 'XAU/USD');
-            if (appMode === 'crypto' && s.coin && COIN_INFO[s.coin]) {
-                const info = COIN_INFO[s.coin];
-                pairHtml = `<div class="trade-icon" style="background:${info.color}">${info.letter}</div> ${s.pair || s.coin + '/USDT'}`;
-            }
-
-            return `
-                <div class="trade-card">
-                    <div class="trade-header">
-                        <div class="trade-pair">${pairHtml}</div>
-                        <div class="trade-dir ${dirClass}">${s.direction || 'BUY'}</div>
-                    </div>
-                    
-                    ${!isActive ? `<div class="trade-status-badge">STATUS: ${status.toUpperCase()}</div>` : ''}
-                    
-                    <div class="trade-details">
-                        <div><span>Entry</span><strong>${s.entry || s.entryPrice || '-'}</strong></div>
-                        <div><span>SL</span><strong>${s.stopLoss || s.sl || '-'}</strong></div>
-                        <div><span>TP</span><strong>${s.takeProfit || s.tp || '-'}</strong></div>
-                    </div>
-                    
-                    <div class="trade-actions">
-                        ${isActive ? `<button class="btn-close-trade" onclick="closeTrade('${colName}', '${s.id}')">🔒 إغلاق الصفقة</button>` : ''}
-                        <button class="btn-delete-trade" onclick="deleteTrade('${colName}', '${s.id}')">🗑️ حذف نهائي</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    async function closeTrade(colName, docId) {
-        if (!confirm('هل أنت متأكد من إغلاق هذه الصفقة؟ سيتم إزالتها من قائمة الصفقات النشطة لدى المشتركين.')) return;
-        try {
-            await updateDoc(doc(db, colName, docId), { status: 'closed' });
-            showToast('✅ Trade Closed Successfully');
-        } catch (error) {
-            console.error(error);
-            showToast('❌ Error closing trade');
-        }
-    }
-
-    async function deleteTrade(colName, docId) {
-        if (!confirm('هل أنت متأكد من حذف هذه الصفقة نهائياً؟ لا يمكن التراجع عن هذا الإجراء وستختفي من حسابات المشتركين.')) return;
-        try {
-            await deleteDoc(doc(db, colName, docId));
-            showToast('✅ Trade Deleted Successfully');
-        } catch (error) {
-            console.error(error);
-            showToast('❌ Error deleting trade');
-        }
     }
 
     async function handleLogin() {
@@ -694,7 +640,6 @@
             const userCredential = await signInWithEmailAndPassword(auth, email, pass);
             localStorage.setItem('tradix_admin', JSON.stringify({ uid: userCredential.user.uid }));
             showToast('✅ Welcome!'); setTimeout(() => showScreen('dashboardScreen'), 1000);
-            const c = getAudioContext(); if(c) c.resume();
         } catch (error) { showToast('❌ Login failed'); }
     }
 
@@ -713,7 +658,8 @@
     }
 
     function renderUsers() {
-        let filtered = allUsers.filter(u => {
+        let base = filterUsersByMode(allUsers);
+        let filtered = base.filter(u => {
             if (searchQuery && !((u.name||'').toLowerCase().includes(searchQuery) || (u.email||'').toLowerCase().includes(searchQuery))) return false;
             if (currentFilter !== 'all' && (u.status || 'inactive') !== currentFilter) return false;
             return true;
@@ -721,166 +667,202 @@
         filtered.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         const list = document.getElementById('usersList');
         if (filtered.length === 0) { list.innerHTML = `<div class="empty-state"><h3>No Users Found</h3></div>`; return; }
-        
-        list.innerHTML = filtered.map(u => {
-            let typeBadge = '';
-            if (u.planType === 'crypto') typeBadge = '<span class="plan-badge crypto">🪙 Crypto</span>';
-            else if (u.planType === 'gold') typeBadge = '<span class="plan-badge gold">🥇 Gold</span>';
-            else if (u.planType === 'both') typeBadge = '<span class="plan-badge both">⭐ Both</span>';
-
-            return `
+        list.innerHTML = filtered.map(u => `
             <div class="user-card" onclick="openUserDetail('${u.uid}')">
-                <div class="user-header">
-                    <div>
-                        <div class="user-name">${u.name || 'Unknown'} ${typeBadge}</div>
-                        <div class="user-email">${u.email || ''}</div>
-                    </div>
-                    <span class="user-status ${u.status || 'inactive'}">${(u.status || 'inactive').toUpperCase()}</span>
-                </div>
+                <div class="user-header"><div><div class="user-name">${u.name || 'Unknown'}</div><div class="user-email">${u.email || ''}</div></div><span class="user-status ${u.status || 'inactive'}">${(u.status || 'inactive').toUpperCase()}</span></div>
                 <div class="user-info">${u.plan ? `💎 ${u.plan}` : '💎 No Plan'}</div>
-            </div>`;
-        }).join('');
+            </div>`).join('');
     }
 
+    let currentUserUID = null;
     async function openUserDetail(uid) {
         currentUserUID = uid;
         const userDoc = await getDoc(doc(db, 'tradelix_users', uid));
         if (!userDoc.exists()) return;
         const u = userDoc.data();
-        currentUserData = u;
         document.getElementById('detailName').textContent = u.name || '-';
         document.getElementById('detailEmail').textContent = u.email || '-';
         document.getElementById('detailCreated').textContent = u.createdAt ? new Date(u.createdAt.seconds * 1000).toLocaleDateString('en-GB') : '-';
         document.getElementById('detailStatus').textContent = (u.status || 'inactive').toUpperCase();
         document.getElementById('detailPlan').textContent = u.plan || 'No Plan';
-        document.getElementById('detailType').textContent = u.planType ? u.planType.toUpperCase() : 'N/A';
         document.getElementById('detailExpiry').textContent = u.expiryDate || '-';
         showScreen('userDetailScreen');
     }
 
-    function openActivateModal() { 
-        document.getElementById('activateModal').style.display = 'flex'; 
-        document.getElementById('activateStartDate').value = new Date().toISOString().split('T')[0]; 
-        if (currentUserData && currentUserData.planType) {
-            document.getElementById('activatePlanType').value = currentUserData.planType;
-        }
-    }
+    function openActivateModal() { document.getElementById('activateModal').style.display = 'flex'; document.getElementById('activateStartDate').value = new Date().toISOString().split('T')[0]; }
     function closeActivateModal() { document.getElementById('activateModal').style.display = 'none'; }
 
     async function activateSubscription() {
-        if (!currentUserUID) return;
         const plan = document.getElementById('activatePlan').value;
-        let selectedPlanType = document.getElementById('activatePlanType').value;
+        const planType = document.getElementById('activatePlanType').value;
         const startDate = document.getElementById('activateStartDate').value;
-        if (!startDate) { showToast('Please select start date'); return; }
-        try {
-            const start = new Date(startDate);
-            const days = plan === 'Weekly' ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : 90));
-            const expiry = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
-
-            let currentPlanType = currentUserData?.planType || 'none';
-            let finalPlanType = selectedPlanType;
-            if (selectedPlanType === 'crypto' && (currentPlanType === 'gold' || currentPlanType === 'both')) finalPlanType = 'both';
-            else if (selectedPlanType === 'gold' && (currentPlanType === 'crypto' || currentPlanType === 'both')) finalPlanType = 'both';
-
-            await updateDoc(doc(db, 'tradelix_users', currentUserUID), {
-                status: 'active', plan: 'VIP ' + plan, planType: finalPlanType, startDate: startDate, expiryDate: expiry.toISOString().split('T')[0]
-            });
-
-            showToast('✅ Subscription activated!');
-            closeActivateModal();
-            setTimeout(() => openUserDetail(currentUserUID), 1000);
-        } catch (error) { showToast('Error activating'); }
+        const days = plan === 'Weekly' ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : 90));
+        const expiry = new Date(new Date(startDate).getTime() + days * 24 * 60 * 60 * 1000);
+        await updateDoc(doc(db, 'tradelix_users', currentUserUID), {
+            status: 'active', plan: 'VIP ' + plan, planType: planType, startDate: startDate, expiryDate: expiry.toISOString().split('T')[0]
+        });
+        showToast('✅ Activated'); closeActivateModal(); setTimeout(() => openUserDetail(currentUserUID), 1000);
     }
 
     async function deactivateUserSubscription() {
-        if (!currentUserUID || !confirm('Deactivate?')) return;
-        try {
-            await updateDoc(doc(db, 'tradelix_users', currentUserUID), { status: 'inactive', plan: null, planType: null });
-            showToast('✅ Deactivated'); setTimeout(() => openUserDetail(currentUserUID), 1000);
-        } catch(e) { showToast('Error'); }
+        if (!confirm('Deactivate?')) return;
+        await updateDoc(doc(db, 'tradelix_users', currentUserUID), { status: 'inactive', plan: null, planType: null });
+        showToast('✅ Deactivated'); setTimeout(() => openUserDetail(currentUserUID), 1000);
     }
 
     async function confirmDeleteUser() {
-        if (!currentUserUID || !confirm('Are you sure?')) return;
-        try {
-            allUsers = allUsers.filter(u => u.uid !== currentUserUID);
-            renderUsers(); showScreen('usersScreen');
-            await deleteDoc(doc(db, 'tradelix_users', currentUserUID));
-            showToast('✅ User Deleted');
-        } catch (error) { showToast('❌ Error'); }
+        if (!confirm('Delete user permanently?')) return;
+        await deleteDoc(doc(db, 'tradelix_users', currentUserUID));
+        showToast('✅ Deleted'); setTimeout(() => showScreen('usersScreen'), 1000);
     }
 
     async function sendSignal() {
         const col = appMode === 'gold' ? 'gold_signals' : 'tradelix_signals';
-        let pair = '';
-        let coin = '';
-        
-        if (appMode === 'gold') {
-            pair = document.getElementById('signalPairGold').value.trim();
-            coin = 'XAU';
-        } else {
-            coin = document.getElementById('signalCoin').value;
-            pair = coin + '/USDT';
-        }
-
+        const pair = document.getElementById('signalPair').value.trim();
         const dir = document.getElementById('signalDirection').value;
         const entry = document.getElementById('signalEntry').value.trim();
         const sl = document.getElementById('signalSL').value.trim();
         const tp = document.getElementById('signalTP').value.trim();
         const notes = document.getElementById('signalNotes').value.trim();
         
-        if(!entry || !sl || !tp) { showToast('Please fill all fields'); return; }
-
         await addDoc(collection(db, col), {
-            pair: pair, coin: coin, direction: dir, entry: entry, stopLoss: sl, takeProfit: tp,
+            pair: pair, coin: pair.replace('/USDT', ''), direction: dir, entry: entry, stopLoss: sl, takeProfit: tp,
             entryPrice: entry, sl: sl, tp: tp, price: entry, notes: notes, status: 'active', createdAt: serverTimestamp()
         });
         showToast('✅ Signal sent!');
         document.getElementById('signalEntry').value = ''; document.getElementById('signalSL').value = ''; document.getElementById('signalTP').value = '';
     }
 
-    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+    // ==========================================
+    // ✅ TRADES LOGIC
+    // ==========================================
+    function renderTrades() {
+        const listDiv = document.getElementById('tradesList');
+        if (!listDiv) return;
+        let signals = appMode === 'crypto' ? allCryptoSignals : allGoldSignals;
+        
+        signals.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
-    /* ==========================================
-       ✅ NOTIFICATIONS SYSTEM
-       ========================================== */
-    let adminNotifs = JSON.parse(localStorage.getItem('adminNotifs') || '[]');
-    let audioCtx = null;
-    let alarmInterval = null;
+        if (signals.length === 0) {
+            listDiv.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>No Trades Found</h3></div>`;
+            return;
+        }
 
-    function getAudioContext() {
-        if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        return audioCtx;
+        listDiv.innerHTML = signals.map(s => {
+            const isBuy = s.direction === 'BUY';
+            const dirClass = isBuy ? 'buy' : 'sell';
+            const status = s.status || 'active';
+            const isActive = status === 'active';
+            const colName = appMode === 'crypto' ? 'tradelix_signals' : 'gold_signals';
+
+            return `
+                <div class="trade-card">
+                    <div class="trade-header">
+                        <div class="trade-pair">${s.pair || s.coin + '/USDT'}</div>
+                        <div class="trade-dir ${dirClass}">${s.direction || 'BUY'}</div>
+                    </div>
+                    ${!isActive ? `<div class="trade-status-badge">STATUS: ${status.toUpperCase()}</div>` : ''}
+                    <div class="trade-details">
+                        <div><span>Entry</span><strong>${s.entry || s.entryPrice || '-'}</strong></div>
+                        <div><span>SL</span><strong>${s.stopLoss || s.sl || '-'}</strong></div>
+                        <div><span>TP</span><strong>${s.takeProfit || s.tp || '-'}</strong></div>
+                    </div>
+                    <div class="trade-actions">
+                        ${isActive ? `<button class="btn-close-trade" onclick="closeTrade('${colName}', '${s.id}')" style="background:var(--orange);color:#fff;">🔒 إغلاق</button>` : ''}
+                        <button class="btn-delete-trade" onclick="deleteTrade('${colName}', '${s.id}')">🗑️ حذف</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
-    function playNotifSound() {
-        const c = getAudioContext(); if (!c) return;
+    async function closeTrade(colName, docId) {
+        if (!confirm('إغلاق هذه الصفقة؟')) return;
+        try { await updateDoc(doc(db, colName, docId), { status: 'closed' }); showToast('✅ Closed'); } catch (error) { showToast('❌ Error'); }
+    }
+
+    async function deleteTrade(colName, docId) {
+        if (!confirm('حذف هذه الصفقة نهائياً؟')) return;
+        try { await deleteDoc(doc(db, colName, docId)); showToast('✅ Deleted'); } catch (error) { showToast('❌ Error'); }
+    }
+
+    // ==========================================
+    // ✅ RECOMMENDATIONS LOGIC
+    // ==========================================
+    function renderRecommendations() {
+        const listDiv = document.getElementById('recsList');
+        if (!listDiv) return;
+        
+        allRecommendations.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+        if (allRecommendations.length === 0) {
+            listDiv.innerHTML = `<div class="empty-state"><div class="icon">💡</div><h3>No Recommendations</h3></div>`;
+            return;
+        }
+
+        listDiv.innerHTML = allRecommendations.map(r => {
+            const info = COIN_INFO[r.coin] || { color: '#555', letter: r.coin?.charAt(0) || '?' };
+
+            return `
+                <div class="rec-card">
+                    <div class="trade-header">
+                        <div class="trade-pair">
+                            <div class="trade-icon" style="background:${info.color}">${info.letter}</div>
+                            ${r.coin} / USDT
+                        </div>
+                        <div class="trade-dir buy">BUY</div>
+                    </div>
+                    <div class="trade-details" style="grid-template-columns: 1fr;">
+                        <div><span>Target Entry Price</span><strong>${r.price || 'Market Price'}</strong></div>
+                    </div>
+                    <div class="rec-notes">${r.notes || 'No notes provided.'}</div>
+                    <div class="trade-actions">
+                        <button class="btn-delete-trade" onclick="deleteRecommendation('${r.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function sendRecommendation() {
+        const coin = document.getElementById('recCoin').value;
+        const price = document.getElementById('recPrice').value.trim();
+        const notes = document.getElementById('recNotes').value.trim();
+        
+        if (!coin) { showToast('❌ Please select a coin'); return; }
+
         try {
-            [0, 0.3].forEach(delay => {
-                const osc = c.createOscillator(); const gain = c.createGain();
-                osc.connect(gain); gain.connect(c.destination);
-                osc.frequency.setValueAtTime(880, c.currentTime + delay);
-                gain.gain.setValueAtTime(0.3, c.currentTime + delay);
-                gain.gain.exponentialRampToValueAtTime(0.01, c.currentTime + delay + 0.2);
-                osc.start(c.currentTime + delay); osc.stop(c.currentTime + delay + 0.2);
+            await addDoc(collection(db, 'tradelix_recommendations'), {
+                coin: coin,
+                price: price,
+                notes: notes,
+                status: 'active',
+                createdAt: serverTimestamp()
             });
-            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-        } catch(e) {}
+            showToast('✅ Recommendation sent!');
+            document.getElementById('recPrice').value = '';
+            document.getElementById('recNotes').value = '';
+        } catch(e) { 
+            console.error(e);
+            showToast('❌ Error sending'); 
+        }
     }
 
-    function startAlarmLoop() {
-        playNotifSound();
-        document.querySelectorAll('.bell-icon').forEach(b => b.classList.add('alarm'));
-        if (alarmInterval) clearInterval(alarmInterval);
-        alarmInterval = setInterval(() => playNotifSound(), 5000);
+    async function deleteRecommendation(docId) {
+        if (!confirm('Delete permanently?')) return;
+        try {
+            await deleteDoc(doc(db, 'tradelix_recommendations', docId));
+            showToast('✅ Deleted');
+        } catch(e) { 
+            console.error(e);
+            showToast('❌ Error deleting'); 
+        }
     }
 
-    function stopAlarmLoop() {
-        if (alarmInterval) { clearInterval(alarmInterval); alarmInterval = null; }
-        document.querySelectorAll('.bell-icon').forEach(b => b.classList.remove('alarm'));
-    }
+    // ==========================================
+    // ✅ NOTIFICATIONS LOGIC
+    // ==========================================
+    let adminNotifs = JSON.parse(localStorage.getItem('adminNotifs') || '[]');
 
     function saveNotifs() {
         localStorage.setItem('adminNotifs', JSON.stringify(adminNotifs));
@@ -899,22 +881,14 @@
     }
 
     function triggerNotif(message) {
-        let notifs = JSON.parse(localStorage.getItem('adminNotifs') || '[]');
         const now = Date.now();
-        if (notifs.length > 0 && notifs[0].message === message && (now - notifs[0].id) < 5000) return;
-        notifs.unshift({ id: now, message: message, time: new Date().toLocaleString('en-GB'), read: false });
-        if (notifs.length > 50) notifs = notifs.slice(0, 50);
-        localStorage.setItem('adminNotifs', JSON.stringify(notifs));
-        adminNotifs = notifs;
-        updateBadge();
-        startAlarmLoop();
-        if ('Notification' in window && Notification.permission === 'granted') {
-            try { new Notification('🔔 TRADIX Admin', { body: message }); } catch(e) {}
-        }
+        if (adminNotifs.length > 0 && adminNotifs[0].message === message && (now - adminNotifs[0].id) < 5000) return;
+        adminNotifs.unshift({ id: now, message: message, time: new Date().toLocaleString('en-GB'), read: false });
+        if (adminNotifs.length > 50) adminNotifs = adminNotifs.slice(0, 50);
+        saveNotifs();
     }
 
     function openNotifModal() {
-        stopAlarmLoop();
         const list = document.getElementById('notifList');
         if (adminNotifs.length === 0) list.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">No notifications</p>';
         else list.innerHTML = adminNotifs.map(n => `<div style="background:#0a0a0a;border-radius:10px;padding:12px;margin-bottom:8px;border-left:3px solid var(--gold);"><div style="color:var(--gold);font-weight:700;">${n.message}</div><div style="color:#888;font-size:11px;">${n.time}</div></div>`).join('');
@@ -927,160 +901,17 @@
 
     function clearAllNotifs() {
         if (!confirm('Clear all?')) return;
-        stopAlarmLoop();
         adminNotifs = [];
         saveNotifs();
         openNotifModal();
     }
 
-    /* ==========================================
-       ✅ AI ANALYSIS LOGIC
-       ========================================== */
-    let currentAITrade = null;
-
-    async function runAIAnalysis() {
-        const btn = document.getElementById('aiAnalyzeBtn');
-        const loading = document.getElementById('aiLoading');
-        const result = document.getElementById('aiResult');
-        const empty = document.getElementById('aiEmpty');
-
-        btn.disabled = true; btn.style.opacity = '0.5';
-        loading.classList.remove('hidden'); result.classList.add('hidden'); empty.classList.add('hidden');
-
-        try {
-            let symbol = 'PAXGUSDT';
-            let coinName = 'XAU/USD';
-            
-            if (appMode === 'crypto') {
-                const selectedCoin = document.getElementById('aiCoinSelect').value;
-                symbol = selectedCoin + 'USDT';
-                coinName = selectedCoin + '/USDT';
-            }
-
-            const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=100`;
-            const res = await fetch(url);
-            if (!res.ok) throw new Error('API Error');
-            const candles = await res.json();
-            if (!candles || candles.length < 50) throw new Error('Not enough data');
-
-            const currentPrice = parseFloat(candles[candles.length - 1][4]);
-            const closes = candles.map(c => parseFloat(c[4]));
-            const ema20 = calculateEMA(closes, 20);
-            const ema50 = calculateEMA(closes, 50);
-            const rsi = calculateRSI(closes, 14);
-            
-            const trend = ema20 > ema50 ? 'UP' : 'DOWN';
-            let direction = 'WAIT'; let confidence = 50;
-            
-            if (rsi < 30 && trend === 'UP') { direction = 'BUY'; confidence = 75 + Math.min(20, (30 - rsi)); }
-            else if (rsi < 40 && trend === 'UP') { direction = 'BUY'; confidence = 60 + Math.min(15, (40 - rsi)); }
-            else if (rsi > 70 && trend === 'DOWN') { direction = 'SELL'; confidence = 75 + Math.min(20, (rsi - 70)); }
-            else if (rsi > 60 && trend === 'DOWN') { direction = 'SELL'; confidence = 60 + Math.min(15, (rsi - 60)); }
-            else if (trend === 'UP' && rsi > 40 && rsi < 65) { direction = 'BUY'; confidence = 55; }
-            else if (trend === 'DOWN' && rsi > 35 && rsi < 60) { direction = 'SELL'; confidence = 55; }
-
-            confidence = Math.min(95, Math.round(confidence));
-
-            let entry = currentPrice, sl = currentPrice * 0.995, tp = currentPrice * 1.01;
-            if (direction === 'SELL') { sl = currentPrice * 1.005; tp = currentPrice * 0.99; }
-
-            currentAITrade = { direction, entry: entry.toFixed(2), sl: sl.toFixed(2), tp: tp.toFixed(2), confidence };
-
-            const dirColor = direction === 'BUY' ? 'var(--green)' : (direction === 'SELL' ? 'var(--red)' : 'var(--gold)');
-
-            result.innerHTML = `
-                <div class="card" style="border-color: ${dirColor};">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <div style="font-size: 11px; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 8px;">AI SUGGESTION FOR ${coinName}</div>
-                        <div style="font-size: 36px; font-weight: 900; color: ${dirColor}; letter-spacing: 3px;">${direction}</div>
-                        <div style="margin-top: 8px;"><span style="background: rgba(212,175,55,0.15); color: var(--gold); padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1px solid var(--gold);">🎯 Confidence: ${confidence}%</span></div>
-                    </div>
-                    <div class="detail-row"><span>Current Price</span><span>$${currentPrice.toFixed(2)}</span></div>
-                    <div class="detail-row"><span>RSI (14)</span><span>${rsi.toFixed(1)}</span></div>
-                    <div class="detail-row"><span>Trend</span><span>${trend === 'UP' ? '📈 Uptrend' : '📉 Downtrend'}</span></div>
-                </div>
-                <div class="card">
-                    <div class="detail-row"><span>Entry</span><span>$${entry.toFixed(2)}</span></div>
-                    <div class="detail-row"><span>Stop Loss</span><span style="color: var(--red);">$${sl.toFixed(2)}</span></div>
-                    <div class="detail-row"><span>Take Profit</span><span style="color: var(--green);">$${tp.toFixed(2)}</span></div>
-                </div>
-                <button class="btn-block success" onclick="sendAISignal()" style="margin-bottom: 8px; font-size: 16px; padding: 16px;">📤 Send to Subscribers</button>
-                <button class="btn-block outline" onclick="applyAITrade()" style="margin-bottom: 8px;">📝 Edit Before Sending</button>
-                <button class="btn-block outline" onclick="runAIAnalysis()">🔄 Analyze Again</button>
-            `;
-            result.classList.remove('hidden');
-        } catch (error) {
-            empty.classList.remove('hidden');
-            empty.innerHTML = `<div class="icon">⚠️</div><h3>Analysis Failed</h3><p>Could not fetch market data. Try again.</p>`;
-        } finally {
-            btn.disabled = false; btn.style.opacity = '1'; loading.classList.add('hidden');
-        }
-    }
-
-    function calculateEMA(prices, period) {
-        const k = 2 / (period + 1); let ema = prices[0];
-        for (let i = 1; i < prices.length; i++) ema = prices[i] * k + ema * (1 - k);
-        return ema;
-    }
-
-    function calculateRSI(prices, period) {
-        let gains = 0, losses = 0;
-        for (let i = prices.length - period; i < prices.length; i++) {
-            const diff = prices[i] - prices[i - 1];
-            if (diff >= 0) gains += diff; else losses -= diff;
-        }
-        const rs = (gains / period) / (losses / period || 1);
-        return 100 - (100 / (1 + rs));
-    }
-
-    async function sendAISignal() {
-        if (!currentAITrade) return;
-        let direction = currentAITrade.direction === 'WAIT' ? 'BUY' : currentAITrade.direction;
-        const col = appMode === 'gold' ? 'gold_signals' : 'tradelix_signals';
-        
-        let pair = 'XAU/USD';
-        let coin = 'XAU';
-        if (appMode === 'crypto') {
-            coin = document.getElementById('aiCoinSelect').value;
-            pair = coin + '/USDT';
-        }
-
-        try {
-            await addDoc(collection(db, col), {
-                pair: pair,
-                coin: coin,
-                direction: direction,
-                entry: currentAITrade.entry, stopLoss: currentAITrade.sl, takeProfit: currentAITrade.tp,
-                entryPrice: currentAITrade.entry, sl: currentAITrade.sl, tp: currentAITrade.tp,
-                price: currentAITrade.entry, confidence: currentAITrade.confidence,
-                notes: `AI ${direction} signal for ${pair}`, status: 'active', createdAt: serverTimestamp()
-            });
-            showToast('✅ AI Signal sent!');
-        } catch (error) { showToast('Error sending signal'); }
-    }
-
-    function applyAITrade() {
-        if (!currentAITrade) return;
-        showScreen('sendSignalScreen');
-        
-        if (appMode === 'crypto') {
-            const selectedCoin = document.getElementById('aiCoinSelect').value;
-            document.getElementById('signalCoin').value = selectedCoin;
-        }
-        
-        setDirection(currentAITrade.direction === 'WAIT' ? 'BUY' : currentAITrade.direction);
-        
-        document.getElementById('signalEntry').value = currentAITrade.entry;
-        document.getElementById('signalSL').value = currentAITrade.sl;
-        document.getElementById('signalTP').value = currentAITrade.tp;
-        document.getElementById('signalNotes').value = `AI suggested (Confidence: ${currentAITrade.confidence}%)`;
-    }
+    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
 
     window.addEventListener('load', () => {
-        populateCoinSelects(); // ✅ استدعاء دالة توليد العملات عند بدء التشغيل
+        populateCoinSelects();
         initFirebase();
         updateBadge();
-        document.addEventListener('click', () => { getAudioContext(); }, { once: true });
     });
 </script>
 </body>
