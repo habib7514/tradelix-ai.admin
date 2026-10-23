@@ -104,10 +104,13 @@
         .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 13px; }
         .detail-row span:first-child { color: var(--text-muted); }
         .detail-row span:last-child { color: var(--gold-light); font-weight: 700; text-align: right; max-width: 60%; word-break: break-all; }
+        
+        /* Updated nav width for 5 items */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d0d0d; border-top: 1px solid #222; display: flex; justify-content: space-around; padding: 10px 0 18px 0; z-index: 9999; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 9px; text-decoration: none; width: 25%; cursor: pointer; background: none; border: none; font-family: inherit; padding: 4px 0; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 9px; text-decoration: none; width: 20%; cursor: pointer; background: none; border: none; font-family: inherit; padding: 4px 0; }
         .nav-item.active { color: var(--gold); }
         .nav-item .icon { font-size: 20px; }
+
         .hidden { display: none !important; }
         .toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--gold); color: #000; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; opacity: 0; transition: 0.3s; z-index: 99999; text-align: center; }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -133,6 +136,23 @@
             justify-content: center;
             z-index: 10;
         }
+
+        /* New Trade Card Styles */
+        .trade-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+        .trade-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .trade-pair { font-size: 16px; font-weight: 900; color: var(--gold-light); }
+        .trade-dir { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 6px; }
+        .trade-dir.buy { background: rgba(34, 197, 94, 0.15); color: var(--green); border: 1px solid var(--green); }
+        .trade-dir.sell { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid var(--red); }
+        .trade-details { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; background: #111; padding: 10px; border-radius: 8px; }
+        .trade-details div { text-align: center; }
+        .trade-details span { display: block; font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+        .trade-details strong { font-size: 12px; color: #fff; }
+        .trade-actions { display: flex; gap: 8px; }
+        .trade-actions button { flex: 1; padding: 10px; font-size: 12px; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; }
+        .btn-close-trade { background: var(--orange); color: #fff; }
+        .btn-delete-trade { background: var(--red); color: #fff; }
+        .trade-status-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 900; background: rgba(136, 136, 136, 0.2); color: #aaa; border: 1px solid #555; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -188,8 +208,9 @@
     <div id="recentActivity"><div class="empty-state"><div class="icon">📭</div><h3>No Activity Yet</h3></div></div>
 
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item active" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
@@ -213,6 +234,7 @@
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
@@ -245,6 +267,34 @@
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
+        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+    </div>
+</div>
+
+<!-- ✅ شاشة الصفقات الجديدة -->
+<div id="tradesScreen" class="screen">
+    <div class="header">
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>ACTIVE TRADES</h1><span>● MANAGEMENT</span></div></div>
+        <div class="bell-icon" onclick="openNotifModal()">🔔</div>
+    </div>
+
+    <div class="mode-toggle">
+        <button id="btnTradesCrypto" class="mode-btn active" onclick="switchMode('crypto')">🪙 Crypto Trades</button>
+        <button id="btnTradesGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Gold Trades</button>
+    </div>
+
+    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">إدارة الصفقات المفتوحة. إغلاق أو حذف الصفقة سيؤثر فوراً على حسابات المشتركين.</p>
+
+    <div id="tradesList">
+        <div class="empty-state"><div class="icon">⏳</div><h3>Loading trades...</h3></div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item active" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
@@ -327,7 +377,6 @@
             <input type="text" id="signalPairGold" value="XAU/USD">
         </div>
 
-        <!-- ✅ أزرار الشراء والبيع الواضحة -->
         <div class="input-group">
             <label>Direction (Buy/Sell)</label>
             <div style="display: flex; gap: 10px;">
@@ -346,6 +395,7 @@
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item active" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
@@ -403,6 +453,7 @@
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item active" onclick="showScreen('aiAnalysisScreen')"><span class="icon">🤖</span><span>AI</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
     </div>
@@ -442,6 +493,8 @@
 
     let appMode = 'crypto';
     let allUsers = [];
+    let allCryptoSignals = [];
+    let allGoldSignals = [];
     let currentFilter = 'all';
     let searchQuery = '';
     let currentUserUID = null;
@@ -458,10 +511,16 @@
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
+        
+        // Update bottom nav active states
+        document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = Array.from(document.querySelectorAll(`#${id} .bottom-nav .nav-item`)).find(btn => btn.getAttribute('onclick')?.includes(id));
+        if(activeBtn) activeBtn.classList.add('active');
+
+        if(id === 'tradesScreen') renderTrades();
         window.scrollTo(0, 0);
     }
 
-    // ✅ دالة تغيير اتجاه الصفقة
     function setDirection(dir) {
         document.getElementById('signalDirection').value = dir;
         const btnBuy = document.getElementById('btnDirBuy');
@@ -487,6 +546,12 @@
             document.getElementById('btnAiModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnAiModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
+        // New Trades Mode Buttons
+        if(document.getElementById('btnTradesCrypto')) {
+            document.getElementById('btnTradesCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
+            document.getElementById('btnTradesGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
+            renderTrades();
+        }
         
         if (mode === 'gold') {
             if(document.getElementById('coinSelectGroup')) document.getElementById('coinSelectGroup').style.display = 'none';
@@ -510,6 +575,7 @@
             updateDoc = fsModule.updateDoc; deleteDoc = fsModule.deleteDoc; addDoc = fsModule.addDoc; serverTimestamp = fsModule.serverTimestamp;
             onSnapshot = fsModule.onSnapshot;
             
+            // Users Snapshot
             onSnapshot(collection(db, 'tradelix_users'), (snapshot) => {
                 allUsers = [];
                 snapshot.forEach(docSnap => allUsers.push({ uid: docSnap.id, ...docSnap.data() }));
@@ -545,7 +611,13 @@
                 });
             });
 
+            // Crypto Signals Snapshot (Updated to populate list for Trades Screen)
             onSnapshot(collection(db, 'tradelix_signals'), (snapshot) => {
+                allCryptoSignals = [];
+                snapshot.forEach(docSnap => allCryptoSignals.push({ id: docSnap.id, ...docSnap.data() }));
+                
+                if (document.getElementById('tradesScreen').classList.contains('active')) renderTrades();
+
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
                         const s = change.doc.data();
@@ -556,7 +628,13 @@
                 });
             });
 
+            // Gold Signals Snapshot (Updated to populate list for Trades Screen)
             onSnapshot(collection(db, 'gold_signals'), (snapshot) => {
+                allGoldSignals = [];
+                snapshot.forEach(docSnap => allGoldSignals.push({ id: docSnap.id, ...docSnap.data() }));
+                
+                if (document.getElementById('tradesScreen').classList.contains('active')) renderTrades();
+
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
                         const s = change.doc.data();
@@ -568,6 +646,74 @@
             });
 
         } else { setTimeout(initFirebase, 500); }
+    }
+
+    // ==========================================
+    // ✅ TRADES MANAGEMENT LOGIC
+    // ==========================================
+    function renderTrades() {
+        const listDiv = document.getElementById('tradesList');
+        let signals = appMode === 'crypto' ? allCryptoSignals : allGoldSignals;
+        
+        // Sort by newest first
+        signals.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+        if (signals.length === 0) {
+            listDiv.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>No Trades Found</h3><p>No signals sent for ${appMode === 'crypto' ? 'Crypto' : 'Gold'} yet.</p></div>`;
+            return;
+        }
+
+        listDiv.innerHTML = signals.map(s => {
+            const isBuy = s.direction === 'BUY';
+            const dirClass = isBuy ? 'buy' : 'sell';
+            const status = s.status || 'active';
+            const isActive = status === 'active';
+            const colName = appMode === 'crypto' ? 'tradelix_signals' : 'gold_signals';
+
+            return `
+                <div class="trade-card">
+                    <div class="trade-header">
+                        <div class="trade-pair">${s.pair || s.coin + '/USDT'}</div>
+                        <div class="trade-dir ${dirClass}">${s.direction || 'BUY'}</div>
+                    </div>
+                    
+                    ${!isActive ? `<div class="trade-status-badge">STATUS: ${status.toUpperCase()}</div>` : ''}
+                    
+                    <div class="trade-details">
+                        <div><span>Entry</span><strong>${s.entry || s.entryPrice || '-'}</strong></div>
+                        <div><span>SL</span><strong>${s.stopLoss || s.sl || '-'}</strong></div>
+                        <div><span>TP</span><strong>${s.takeProfit || s.tp || '-'}</strong></div>
+                    </div>
+                    
+                    <div class="trade-actions">
+                        ${isActive ? `<button class="btn-close-trade" onclick="closeTrade('${colName}', '${s.id}')">🔒 إغلاق الصفقة</button>` : ''}
+                        <button class="btn-delete-trade" onclick="deleteTrade('${colName}', '${s.id}')">🗑️ حذف نهائي</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function closeTrade(colName, docId) {
+        if (!confirm('هل أنت متأكد من إغلاق هذه الصفقة؟ سيتم إزالتها من قائمة الصفقات النشطة لدى المشتركين.')) return;
+        try {
+            await updateDoc(doc(db, colName, docId), { status: 'closed' });
+            showToast('✅ Trade Closed Successfully');
+        } catch (error) {
+            console.error(error);
+            showToast('❌ Error closing trade');
+        }
+    }
+
+    async function deleteTrade(colName, docId) {
+        if (!confirm('هل أنت متأكد من حذف هذه الصفقة نهائياً؟ لا يمكن التراجع عن هذا الإجراء وستختفي من حسابات المشتركين.')) return;
+        try {
+            await deleteDoc(doc(db, colName, docId));
+            showToast('✅ Trade Deleted Successfully');
+        } catch (error) {
+            console.error(error);
+            showToast('❌ Error deleting trade');
+        }
     }
 
     async function handleLogin() {
@@ -952,7 +1098,6 @@
             document.getElementById('signalCoin').value = selectedCoin;
         }
         
-        // ✅ تحديث أزرار الشراء والبيع
         setDirection(currentAITrade.direction === 'WAIT' ? 'BUY' : currentAITrade.direction);
         
         document.getElementById('signalEntry').value = currentAITrade.entry;
