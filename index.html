@@ -893,14 +893,12 @@
     }
 
     // ==========================================
-    // ✅ ADMIN CHAT LOGIC
+    // ✅ ADMIN CHAT LOGIC (FIXED)
     // ==========================================
     let adminChatUnsub = null;
 
     async function loadAdminChatMessages() {
         if (!window.firebaseDB) return;
-        const fs = window.firebaseFS;
-        const { collection, query, orderBy, onSnapshot } = fs;
         
         const q = query(collection(window.firebaseDB, 'tradelix_chat'), orderBy('createdAt', 'asc'));
         
@@ -942,9 +940,6 @@
         const input = document.getElementById('adminChatInput');
         const text = input.value.trim();
         if (!text) return;
-
-        const fs = window.firebaseFS;
-        const { collection, addDoc, serverTimestamp } = fs;
 
         try {
             await addDoc(collection(window.firebaseDB, 'tradelix_chat'), {
