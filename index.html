@@ -893,15 +893,14 @@
     }
 
     // ==========================================
-    // ✅ ADMIN CHAT LOGIC (FIXED)
+    // ✅ ADMIN CHAT LOGIC
     // ==========================================
     let adminChatUnsub = null;
 
     async function loadAdminChatMessages() {
-        // ✅ انتظر حتى تكون المتغيرات جاهزة
-        if (!window.firebaseDB || typeof collection === 'undefined' || typeof query === 'undefined' || typeof onSnapshot === 'undefined') { 
-            setTimeout(loadAdminChatMessages, 1000); 
-            return; 
+        if (!window.firebaseDB || typeof collection === 'undefined') {
+            setTimeout(loadAdminChatMessages, 1000);
+            return;
         }
         
         const q = query(collection(window.firebaseDB, 'tradelix_chat'), orderBy('createdAt', 'asc'));
@@ -945,10 +944,9 @@
         const text = input.value.trim();
         if (!text) return;
 
-        // ✅ انتظر حتى تكون المتغيرات جاهزة
-        if (!window.firebaseDB || typeof collection === 'undefined' || typeof addDoc === 'undefined') { 
-            showToast('⏳ Please wait...'); 
-            return; 
+        if (!window.firebaseDB || typeof collection === 'undefined' || typeof addDoc === 'undefined') {
+            showToast('⏳ Please wait...');
+            return;
         }
 
         try {
