@@ -294,7 +294,6 @@
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
         <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item" onclick="showScreen('adminChatScreen')"><span class="icon">💬</span><span>Chat</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
@@ -320,7 +319,6 @@
         <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
         <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item" onclick="showScreen('adminChatScreen')"><span class="icon">💬</span><span>Chat</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
@@ -354,7 +352,6 @@
         <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
         <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item" onclick="showScreen('adminChatScreen')"><span class="icon">💬</span><span>Chat</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
@@ -378,7 +375,6 @@
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
         <button class="nav-item active" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item" onclick="showScreen('adminChatScreen')"><span class="icon">💬</span><span>Chat</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
@@ -419,7 +415,6 @@
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
         <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item" onclick="showScreen('adminChatScreen')"><span class="icon">💬</span><span>Chat</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
@@ -450,7 +445,6 @@
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
         <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item active" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item" onclick="showScreen('adminChatScreen')"><span class="icon">💬</span><span>Chat</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
@@ -539,7 +533,7 @@
     const ADMIN_EMAIL = "mmatrix081@gmail.com";
     let auth, db;
     let signInWithEmailAndPassword, signOut;
-    let collection, getDocs, doc, getDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot;
+    let collection, getDocs, doc, getDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot, query, orderBy;
 
     let appMode = 'crypto';
     let allUsers = []; 
@@ -631,6 +625,8 @@
             collection = fsModule.collection; getDocs = fsModule.getDocs; doc = fsModule.doc; getDoc = fsModule.getDoc;
             updateDoc = fsModule.updateDoc; deleteDoc = fsModule.deleteDoc; addDoc = fsModule.addDoc; serverTimestamp = fsModule.serverTimestamp;
             onSnapshot = fsModule.onSnapshot;
+            query = fsModule.query;
+            orderBy = fsModule.orderBy;
             
             onSnapshot(collection(db, 'tradelix_users'), (snapshot) => {
                 allUsers = [];
@@ -927,7 +923,7 @@
     let adminChatUnsub = null;
 
     async function loadAdminChatMessages() {
-        if (!window.firebaseDB || typeof collection === 'undefined') {
+        if (!window.firebaseDB || typeof collection === 'undefined' || typeof query === 'undefined') {
             setTimeout(loadAdminChatMessages, 1000);
             return;
         }
