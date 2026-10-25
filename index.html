@@ -815,31 +815,39 @@
 
     async function activateSubscription() {
         const plan = document.getElementById('activatePlan').value;
-        const planType = document.getElementById('activatePlanType').value;
+        const newPlanType = document.getElementById('activatePlanType').value;
         const startDate = document.getElementById('activateStartDate').value;
         const days = (plan === 'Weekly') ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : (plan === 'Quarterly' ? 90 : 30))); // 30 يوم للكورسات كافتراضي
         const expiry = new Date(new Date(startDate).getTime() + days * 24 * 60 * 60 * 1000);
         
         const userDoc = await getDoc(doc(db, 'tradelix_users', currentUserUID));
-        const userName = userDoc.exists() ? (userDoc.data().name || userDoc.data().email) : 'User';
+        const userData = userDoc.data();
+        const userName = userData.name || userData.email || 'User';
+        const currentPlanType = userData.planType || '';
+
+        // ✅ التعديل الجذري: دمج الاشتراكات (ذهب + كريبتو)
+        let finalPlanType = newPlanType;
+        if (currentPlanType === 'crypto' && newPlanType === 'gold') finalPlanType = 'both';
+        if (currentPlanType === 'gold' && newPlanType === 'crypto') finalPlanType = 'both';
+        if (currentPlanType === 'both') finalPlanType = 'both';
 
         const updateData = {
             status: 'active', 
-            plan: (planType === 'courses' ? plan : 'VIP ' + plan), 
-            planType: planType, 
+            plan: (newPlanType === 'courses' ? plan : 'VIP ' + plan), 
+            planType: finalPlanType, 
             startDate: startDate, 
             expiryDate: expiry.toISOString().split('T')[0]
         };
 
         // إذا كان كورس، نحفظه في حقل course أيضاً
-        if (planType === 'courses') {
+        if (newPlanType === 'courses') {
             updateData.course = plan; 
         }
 
         await updateDoc(doc(db, 'tradelix_users', currentUserUID), updateData);
         
         // ✅ إرسال إشعار مباشر للجرس مع الصوت
-        const pTypeArabic = (planType === 'gold') ? 'الذهب 🥇' : (planType === 'crypto' ? 'الكريبتو 🪙' : (planType === 'courses' ? 'كورس 🎓' : 'كلاهما ⭐'));
+        const pTypeArabic = (newPlanType === 'gold') ? 'الذهب 🥇' : (newPlanType === 'crypto' ? 'الكريبتو 🪙' : (newPlanType === 'courses' ? 'كورس 🎓' : 'كلاهما ⭐'));
         triggerNotif(`💳 تم تفعيل باقة ${pTypeArabic} للمستخدم: ${userName} (${plan})`);
         playNotifSound();
 
