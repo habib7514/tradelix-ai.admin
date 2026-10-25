@@ -327,7 +327,6 @@
             <input type="text" id="signalPairGold" value="XAU/USD">
         </div>
 
-        <!-- ✅ أزرار الشراء والبيع الواضحة -->
         <div class="input-group">
             <label>Direction (Buy/Sell)</label>
             <div style="display: flex; gap: 10px;">
@@ -382,6 +381,41 @@
             <option value="TRX">TRON (TRX)</option>
             <option value="ATOM">Cosmos (ATOM)</option>
             <option value="UNI">Uniswap (UNI)</option>
+            <option value="SHIB">Shiba Inu (SHIB)</option>
+            <option value="APT">Aptos (APT)</option>
+            <option value="ARB">Arbitrum (ARB)</option>
+            <option value="OP">Optimism (OP)</option>
+            <option value="NEAR">NEAR (NEAR)</option>
+            <option value="INJ">Injective (INJ)</option>
+            <option value="SUI">Sui (SUI)</option>
+            <option value="FIL">Filecoin (FIL)</option>
+            <option value="ETC">Ethereum Classic (ETC)</option>
+            <option value="TON">Toncoin (TON)</option>
+            <option value="ICP">Internet Computer (ICP)</option>
+            <option value="RENDER">Render (RENDER)</option>
+            <option value="FET">Fetch.ai (FET)</option>
+            <option value="SEI">Sei (SEI)</option>
+            <option value="TIA">Celestia (TIA)</option>
+            <option value="STX">Stacks (STX)</option>
+            <option value="IMX">Immutable (IMX)</option>
+            <option value="GRT">The Graph (GRT)</option>
+            <option value="SAND">The Sandbox (SAND)</option>
+            <option value="MANA">Decentraland (MANA)</option>
+            <option value="AAVE">Aave (AAVE)</option>
+            <option value="MKR">Maker (MKR)</option>
+            <option value="CRV">Curve DAO (CRV)</option>
+            <option value="ALGO">Algorand (ALGO)</option>
+            <option value="VET">VeChain (VET)</option>
+            <option value="HBAR">Hedera (HBAR)</option>
+            <option value="EOS">EOS (EOS)</option>
+            <option value="XLM">Stellar (XLM)</option>
+            <option value="THETA">Theta Network (THETA)</option>
+            <option value="RUNE">THORChain (RUNE)</option>
+            <option value="KAS">Kaspa (KAS)</option>
+            <option value="TAO">Bittensor (TAO)</option>
+            <option value="WIF">dogwifhat (WIF)</option>
+            <option value="PEPE">Pepe (PEPE)</option>
+            <option value="BONK">Bonk (BONK)</option>
         </select>
     </div>
 
@@ -461,7 +495,6 @@
         window.scrollTo(0, 0);
     }
 
-    // ✅ دالة تغيير اتجاه الصفقة
     function setDirection(dir) {
         document.getElementById('signalDirection').value = dir;
         const btnBuy = document.getElementById('btnDirBuy');
@@ -504,7 +537,6 @@
             const authModule = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js");
             const fsModule = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
             
-            // 👇 تم إضافة هذا السطر لربط الدردشة
             window.firebaseFS = fsModule; 
             
             auth = window.firebaseAuth; db = window.firebaseDB;
@@ -956,7 +988,6 @@
             document.getElementById('signalCoin').value = selectedCoin;
         }
         
-        // ✅ تحديث أزرار الشراء والبيع
         setDirection(currentAITrade.direction === 'WAIT' ? 'BUY' : currentAITrade.direction);
         
         document.getElementById('signalEntry').value = currentAITrade.entry;
@@ -971,7 +1002,7 @@
         document.addEventListener('click', () => { getAudioContext(); }, { once: true });
     });
 </script>
-<!-- ✅ إضافة ملف الدردشة -->
-<script src="chat.js"></script>
+<!-- ✅ Chat Script -->
+<script src="chat.js?v=10"></script>
 </body>
 </html>
