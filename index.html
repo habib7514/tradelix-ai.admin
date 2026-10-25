@@ -636,7 +636,9 @@
                     if (change.type === "modified") {
                         const data = change.doc.data();
                         const hasPlan = data.plan || data.package || data.selectedPlan;
-                        const hasCourse = data.course || data.selectedCourse;
+                        // ✅ هنا التعديل: البحث عن أي حقل يحتوي على كلمة course
+                        const courseField = Object.keys(data).find(key => key.toLowerCase().includes('course'));
+                        const hasCourse = courseField && data[courseField];
                         
                         if (hasPlan || hasCourse) {
                             let pType = '';
@@ -644,7 +646,7 @@
                             
                             if (hasCourse) {
                                 pType = 'كورس 🎓';
-                                pName = data.course || data.selectedCourse || 'كورس غير محدد';
+                                pName = data[courseField] || 'كورس غير محدد';
                             } else {
                                 // ✅ هنا التعديل: إذا كان الحقل غير موجود، نقرأ من اسم الباقة
                                 let rawType = data.planType || '';
@@ -749,7 +751,11 @@
         if (!userDoc.exists()) return;
         const u = userDoc.data();
         
-        const userPlan = u.plan || u.package || u.selectedPlan || u.planName || u.subscription || u.course || u.selectedCourse || 'No Plan';
+        // ✅ هنا التعديل: البحث عن أي حقل يحتوي على كلمة course لكي يظهر في الباك إند
+        const courseField = Object.keys(u).find(key => key.toLowerCase().includes('course'));
+        const userCourse = courseField ? u[courseField] : null;
+        
+        const userPlan = u.plan || u.package || u.selectedPlan || u.planName || u.subscription || userCourse || 'No Plan';
         const userExpiry = u.expiryDate || u.expiry || '-';
 
         document.getElementById('detailName').textContent = u.name || '-';
@@ -972,6 +978,11 @@
             showToast('✅ Recommendation sent!');
             document.getElementById('recPrice').value = '';
             document.getElementById('recNotes').value = '';
+            
+            // ✅ إرسال إشعار صوتي فور إرسال التوصية
+            triggerNotif('💡 New Recommendation Sent: ' + coin);
+            playNotifSound();
+            
         } catch(e) { 
             console.error(e);
             showToast('❌ Error sending'); 
