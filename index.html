@@ -9,6 +9,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -70,42 +71,14 @@
         .header-title h1 { font-size: 16px; font-weight: 900; color: var(--gold); letter-spacing: 1px; }
         .header-title span { font-size: 9px; color: var(--red); font-weight: 700; letter-spacing: 2px; }
         .bell-icon { background: #1a1a1a; border: 1px solid #333; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--gold); cursor: pointer; position: relative; }
+        .bell-icon.alarm { animation: bellShake 0.5s ease-in-out infinite; border-color: var(--red); }
+        @keyframes bellShake { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-15deg); } 75% { transform: rotate(15deg); } }
         .notifBadge { position: absolute; top: -4px; right: -4px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 8px rgba(246, 70, 93, 0.8); animation: pulse 1.5s infinite; pointer-events: none; }
-
-        .recommendation-blue-btn {
-            font-family: 'Tajawal', sans-serif; font-size: 17px; font-weight: 900; color: #FFFFFF; letter-spacing: 0.5px; padding: 16px 26px;
-            background: linear-gradient(180deg, #0099FF 0%, #0066FF 50%, #0044CC 100%); border-radius: 50px;
-            position: relative; display: flex; align-items: center; justify-content: center; width: 100%; margin-bottom: 15px;
-            box-shadow: 0 0 12px rgba(0, 150, 255, 0.9), 0 0 25px rgba(0, 150, 255, 0.7), 0 0 40px rgba(0, 150, 255, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.4);
-            border: 1.5px solid rgba(255, 255, 255, 0.4);
-            text-shadow: 0 0 6px rgba(255, 255, 255, 0.9), 0 0 12px rgba(0, 150, 255, 1);
-            animation: join-pulse 2s ease-in-out infinite; overflow: hidden; white-space: nowrap; cursor: pointer; z-index: 999;
-        }
-        .recommendation-blue-btn::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent 0%, transparent 40%, rgba(255, 255, 255, 0.6) 50%, transparent 60%, transparent 100%);
-            animation: join-shine 2.5s infinite; pointer-events: none;
-        }
-        @keyframes join-shine { 0% { left: -100%; } 50%, 100% { left: 100%; } }
-        @keyframes join-pulse {
-            0%, 100% { box-shadow: 0 0 12px rgba(0, 150, 255, 0.9), 0 0 25px rgba(0, 150, 255, 0.7), 0 0 40px rgba(0, 150, 255, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.4); transform: scale(1); }
-            50% { box-shadow: 0 0 18px rgba(0, 150, 255, 1), 0 0 35px rgba(0, 150, 255, 0.9), 0 0 55px rgba(0, 150, 255, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.5); transform: scale(1.03); }
-        }
-
-        .chat-btn {
-            font-family: 'Tajawal', sans-serif; font-size: 17px; font-weight: 900; color: #FFFFFF; letter-spacing: 0.5px; padding: 16px 26px;
-            background: linear-gradient(180deg, #22c55e 0%, #16a34a 50%, #15803d 100%); border-radius: 50px;
-            position: relative; display: flex; align-items: center; justify-content: center; width: 100%; margin-bottom: 20px;
-            box-shadow: 0 0 12px rgba(34, 197, 94, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.3); border: 1.5px solid rgba(255, 255, 255, 0.3);
-            text-shadow: 0 0 6px rgba(255, 255, 255, 0.8); cursor: pointer; z-index: 999;
-        }
-        .chat-btn:active { transform: scale(0.97); }
 
         .mode-toggle { display: flex; background: var(--card-bg); border-radius: 12px; padding: 4px; border: 1px solid var(--card-border); margin-bottom: 20px; }
         .mode-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: 900; font-size: 14px; cursor: pointer; transition: 0.3s; font-family: inherit; }
         .mode-btn.active { background: var(--gold); color: #000; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
         .mode-btn.inactive { background: transparent; color: var(--text-muted); }
-
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
         .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 16px; text-align: center; }
         .stat-card .stat-icon { font-size: 26px; margin-bottom: 6px; }
@@ -124,15 +97,17 @@
         .user-status.inactive { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid var(--red); }
         .user-status.active { background: rgba(34, 197, 94, 0.15); color: var(--green); border: 1px solid var(--green); }
         .user-status.pending { background: rgba(245, 158, 11, 0.15); color: var(--orange); border: 1px solid var(--orange); }
+        .plan-badge { display: inline-block; font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 6px; margin-left: 8px; }
+        .plan-badge.crypto { background: rgba(240, 185, 11, 0.15); color: var(--gold); border: 1px solid var(--gold); }
+        .plan-badge.gold   { background: rgba(251, 191, 36, 0.15); color: #FBBF24; border: 1px solid #FBBF24; }
+        .plan-badge.both   { background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid #A78BFA; }
         .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 13px; }
         .detail-row span:first-child { color: var(--text-muted); }
-        .detail-row span:last-child { color: var(--gold-light); font-weight: 700; text-align: left; max-width: 60%; word-break: break-all; }
-        
+        .detail-row span:last-child { color: var(--gold-light); font-weight: 700; text-align: right; max-width: 60%; word-break: break-all; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d0d0d; border-top: 1px solid #222; display: flex; justify-content: space-around; padding: 10px 0 18px 0; z-index: 9999; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 9px; text-decoration: none; width: 20%; cursor: pointer; background: none; border: none; font-family: inherit; padding: 4px 0; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 9px; text-decoration: none; width: 25%; cursor: pointer; background: none; border: none; font-family: inherit; padding: 4px 0; }
         .nav-item.active { color: var(--gold); }
         .nav-item .icon { font-size: 20px; }
-        
         .hidden { display: none !important; }
         .toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--gold); color: #000; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; opacity: 0; transition: 0.3s; z-index: 99999; text-align: center; }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -140,25 +115,23 @@
         .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
         .empty-state h3 { color: var(--gold); margin-bottom: 6px; }
 
-        .trade-card, .rec-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
-        .trade-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .trade-pair { font-size: 15px; font-weight: 900; color: var(--gold-light); display: flex; align-items: center; gap: 8px;}
-        .trade-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 12px; }
-        .trade-dir { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 6px; }
-        .trade-dir.buy { background: rgba(34, 197, 94, 0.15); color: var(--green); border: 1px solid var(--green); }
-        .trade-details { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; background: #111; padding: 10px; border-radius: 8px; }
-        .trade-details div { text-align: center; }
-        .trade-details span { display: block; font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
-        .trade-details strong { font-size: 12px; color: #fff; }
-        .trade-actions { display: flex; gap: 8px; }
-        .trade-actions button { flex: 1; padding: 10px; font-size: 12px; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; }
-        .btn-delete-trade { background: var(--red); color: #fff; }
-        .rec-notes { font-size: 12px; color: #ccc; background: rgba(212, 175, 55, 0.1); padding: 8px; border-radius: 6px; margin-bottom: 12px; border-left: 2px solid var(--gold); }
         .notif-close-top {
-            position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(212, 175, 55, 0.15); border: 1.5px solid rgba(212, 175, 55, 0.6);
-            color: #d4af37; font-size: 18px; font-weight: 900; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; z-index: 10;
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1.5px solid rgba(212, 175, 55, 0.6);
+            color: #d4af37;
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
         }
     </style>
 </head>
@@ -181,7 +154,6 @@
     </div>
 </div>
 
-<!-- DASHBOARD -->
 <div id="dashboardScreen" class="screen">
     <div class="header">
         <div class="header-left">
@@ -190,16 +162,9 @@
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
             <div class="bell-icon" onclick="openNotifModal()">🔔</div>
+            <div class="bell-icon" onclick="showScreen('aiAnalysisScreen')" style="font-size:20px;">🤖</div>
         </div>
     </div>
-
-    <div class="recommendation-blue-btn" onclick="showScreen('recommendationsScreen')">
-        💡 Recommendations
-    </div>
-
-    <button class="chat-btn" onclick="showScreen('adminChatScreen')">
-        💬 Open Chat Room
-    </button>
 
     <div class="mode-toggle">
         <button id="btnModeCrypto" class="mode-btn active" onclick="switchMode('crypto')">🪙 Tradelix</button>
@@ -223,15 +188,13 @@
     <div id="recentActivity"><div class="empty-state"><div class="icon">📭</div><h3>No Activity Yet</h3></div></div>
 
     <div class="bottom-nav">
-        <button class="nav-item active" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
 
-<!-- USERS -->
 <div id="usersScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>USERS</h1><span>● MANAGEMENT</span></div></div>
@@ -248,15 +211,13 @@
     <div id="usersList"><div class="empty-state"><div class="icon">⏳</div><h3>Loading users...</h3></div></div>
 
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
 
-<!-- USER DETAIL -->
 <div id="userDetailScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>USER DETAIL</h1><span>● PROFILE</span></div></div>
@@ -272,6 +233,7 @@
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💎 Subscription</h3>
         <div class="detail-row"><span>Status</span><span id="detailStatus">-</span></div>
         <div class="detail-row"><span>Plan</span><span id="detailPlan">-</span></div>
+        <div class="detail-row"><span>Type</span><span id="detailType">-</span></div>
         <div class="detail-row"><span>Expiry Date</span><span id="detailExpiry">-</span></div>
     </div>
     <div class="section-title">⚡ ACTIONS</div>
@@ -281,181 +243,189 @@
         <button class="btn-block" style="background: var(--red); color: #fff;" onclick="confirmDeleteUser()">🗑️ Delete User</button>
     </div>
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
 
-<!-- TRADES SCREEN -->
-<div id="tradesScreen" class="screen">
-    <div class="header">
-        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>ACTIVE TRADES</h1><span>● MANAGEMENT</span></div></div>
-        <div class="bell-icon" onclick="openNotifModal()">🔔</div>
-    </div>
-    <div class="mode-toggle">
-        <button id="btnTradesCrypto" class="mode-btn active" onclick="switchMode('crypto')">🪙 Crypto Trades</button>
-        <button id="btnTradesGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Gold Trades</button>
-    </div>
-    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">إدارة الصفقات المفتوحة. إغلاق أو حذف الصفقة سيؤثر فوراً على حسابات المشتركين.</p>
-    <div id="tradesList">
-        <div class="empty-state"><div class="icon">⏳</div><h3>Loading trades...</h3></div>
-    </div>
-    <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
-        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item active" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
-        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
-    </div>
-</div>
-
-<!-- RECOMMENDATIONS SCREEN -->
-<div id="recommendationsScreen" class="screen">
-    <div class="header">
-        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>RECOMMENDATIONS</h1><span>● INVESTMENTS</span></div></div>
-        <div class="bell-icon" onclick="openNotifModal()">🔔</div>
-    </div>
-
-    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Send buy & hold recommendations to subscribers' portfolios.</p>
-
-    <div class="card">
-        <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💡 New Recommendation</h3>
-        <div class="input-group">
-            <label>Select Coin</label>
-            <select id="recCoin"></select>
-        </div>
-        <div class="input-group">
-            <label>Current Price (Optional)</label>
-            <input type="text" id="recPrice" placeholder="e.g. 1.25">
-        </div>
-        <div class="input-group">
-            <label>Notes / Reason</label>
-            <textarea id="recNotes" placeholder="Why buy now? e.g. Strong support level..."></textarea>
-        </div>
-        <button class="btn-block success" onclick="sendRecommendation()">🚀 Send Recommendation</button>
-    </div>
-
-    <div class="section-title" style="margin-top: 30px;">📋 Active Recommendations</div>
-    <div id="recsList">
-        <div class="empty-state"><div class="icon">⏳</div><h3>Loading...</h3></div>
-    </div>
-
-    <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
-        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
-        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
-    </div>
-</div>
-
-<!-- SEND SIGNAL -->
 <div id="sendSignalScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>SEND SIGNAL</h1><span>● TRADING</span></div></div>
         <div class="bell-icon" onclick="openNotifModal()">🔔</div>
     </div>
+    
     <div class="mode-toggle">
         <button id="btnSignalCrypto" class="mode-btn active" onclick="switchMode('crypto')">🪙 Tradelix</button>
         <button id="btnSignalGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Tradix Gold</button>
     </div>
-    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Send a new signal. Based on the mode selected above.</p>
-    <div class="card">
-        <!-- ✅ الأزرار في الأعلى -->
-        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-            <button class="btn-block" style="flex: 1; background: linear-gradient(90deg, #8A2BE2, #FF00FF); color: white; font-weight: 900; margin: 0;" onclick="generateAIAnalysis()">
-                🤖 AI Analyze
-            </button>
-            <button class="btn-block" style="flex: 1; background: var(--btn-gold-bg); color: #000; font-weight: 900; margin: 0;" onclick="sendSignal()">
-                📤 Send Signal
-            </button>
-        </div>
 
+    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Send a new signal. Based on the mode selected above, the signal will go to the correct app.</p>
+    
+    <div class="card">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">📈 Signal Details</h3>
-        <div class="input-group">
-            <label>Pair / Coin</label>
-            <select id="signalCoin" style="width: 100%; background: #1a1a1a; border: 1px solid #333; padding: 14px; border-radius: 12px; color: #fff; font-size: 15px; outline: none; font-family: inherit; margin-bottom: 16px;">
-                <!-- Options populated via JS -->
+        
+        <div class="input-group" id="coinSelectGroup">
+            <label>Coin (Crypto)</label>
+            <select id="signalCoin">
+                <option value="BTC">Bitcoin (BTC)</option>
+                <option value="ETH">Ethereum (ETH)</option>
+                <option value="BNB">BNB</option>
+                <option value="SOL">Solana (SOL)</option>
+                <option value="XRP">XRP</option>
+                <option value="ADA">Cardano (ADA)</option>
+                <option value="DOGE">Dogecoin (DOGE)</option>
+                <option value="DOT">Polkadot (DOT)</option>
+                <option value="AVAX">Avalanche (AVAX)</option>
+                <option value="LINK">Chainlink (LINK)</option>
+                <option value="POL">Polygon (POL)</option>
+                <option value="LTC">Litecoin (LTC)</option>
+                <option value="TRX">TRON (TRX)</option>
+                <option value="ATOM">Cosmos (ATOM)</option>
+                <option value="UNI">Uniswap (UNI)</option>
+                <option value="SHIB">Shiba Inu (SHIB)</option>
+                <option value="APT">Aptos (APT)</option>
+                <option value="ARB">Arbitrum (ARB)</option>
+                <option value="OP">Optimism (OP)</option>
+                <option value="NEAR">NEAR (NEAR)</option>
+                <option value="INJ">Injective (INJ)</option>
+                <option value="SUI">Sui (SUI)</option>
+                <option value="FIL">Filecoin (FIL)</option>
+                <option value="ETC">Ethereum Classic (ETC)</option>
+                <option value="TON">Toncoin (TON)</option>
+                <option value="ICP">Internet Computer (ICP)</option>
+                <option value="RENDER">Render (RENDER)</option>
+                <option value="FET">Fetch.ai (FET)</option>
+                <option value="SEI">Sei (SEI)</option>
+                <option value="TIA">Celestia (TIA)</option>
+                <option value="STX">Stacks (STX)</option>
+                <option value="IMX">Immutable (IMX)</option>
+                <option value="GRT">The Graph (GRT)</option>
+                <option value="SAND">The Sandbox (SAND)</option>
+                <option value="MANA">Decentraland (MANA)</option>
+                <option value="AAVE">Aave (AAVE)</option>
+                <option value="MKR">Maker (MKR)</option>
+                <option value="CRV">Curve DAO (CRV)</option>
+                <option value="ALGO">Algorand (ALGO)</option>
+                <option value="VET">VeChain (VET)</option>
+                <option value="HBAR">Hedera (HBAR)</option>
+                <option value="EOS">EOS (EOS)</option>
+                <option value="XLM">Stellar (XLM)</option>
+                <option value="THETA">Theta Network (THETA)</option>
+                <option value="RUNE">THORChain (RUNE)</option>
+                <option value="KAS">Kaspa (KAS)</option>
+                <option value="TAO">Bittensor (TAO)</option>
+                <option value="WIF">dogwifhat (WIF)</option>
+                <option value="PEPE">Pepe (PEPE)</option>
+                <option value="BONK">Bonk (BONK)</option>
             </select>
         </div>
-        <div class="input-group"><label>Direction</label><select id="signalDirection"><option value="BUY">BUY (Long)</option><option value="SELL">SELL (Short)</option></select></div>
+
+        <div class="input-group">
+            <label>Pair (Gold)</label>
+            <input type="text" id="signalPairGold" value="XAU/USD">
+        </div>
+
+        <!-- ✅ أزرار الشراء والبيع الواضحة -->
+        <div class="input-group">
+            <label>Direction (Buy/Sell)</label>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" id="btnDirBuy" class="btn-block success" onclick="setDirection('BUY')" style="margin-top:0;">BUY (Long)</button>
+                <button type="button" id="btnDirSell" class="btn-block danger" onclick="setDirection('SELL')" style="margin-top:0; opacity: 0.5;">SELL (Short)</button>
+            </div>
+            <input type="hidden" id="signalDirection" value="BUY">
+        </div>
+        
         <div class="input-group"><label>Entry Price</label><input type="text" id="signalEntry"></div>
         <div class="input-group"><label>Stop Loss</label><input type="text" id="signalSL"></div>
         <div class="input-group"><label>Take Profit</label><input type="text" id="signalTP"></div>
         <div class="input-group"><label>Notes (Optional)</label><textarea id="signalNotes"></textarea></div>
+        <button class="btn-block" onclick="sendSignal()">📤 Send Signal</button>
     </div>
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
         <button class="nav-item active" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
 
-<!-- ✅ ADMIN CHAT SCREEN -->
-<div id="adminChatScreen" class="screen">
+<div id="aiAnalysisScreen" class="screen">
     <div class="header">
-        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>CHAT ROOM</h1><span>● ADMIN</span></div></div>
-        <div class="bell-icon" onclick="showScreen('dashboardScreen')">✕</div>
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>AI ANALYSIS</h1><span>● MARKET SCANNER</span></div></div>
+        <div class="bell-icon" onclick="openNotifModal()">🔔</div>
     </div>
 
-    <div id="adminChatMessages" style="height: calc(100vh - 240px); overflow-y: auto; padding: 10px; background: #000; border-radius: 12px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
-        <p style="text-align: center; color: #888;">Loading messages...</p>
+    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Analyze live market data with AI-powered indicators (EMA, RSI, Trend) and get a suggested trade.</p>
+
+    <div class="mode-toggle">
+        <button id="btnAiModeCrypto" class="mode-btn active" onclick="switchMode('crypto')">🪙 Tradelix</button>
+        <button id="btnAiModeGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Tradix Gold</button>
     </div>
 
-    <div style="display: flex; gap: 10px;">
-        <input type="text" id="adminChatInput" placeholder="Reply as Admin..." style="flex: 1; background: #1a1a1a; border: 1px solid #333; padding: 14px; border-radius: 12px; color: #fff; outline: none; font-family: inherit;">
-        <button onclick="sendAdminChatMessage()" style="background: #F5C518; color: #000; border: none; padding: 0 20px; border-radius: 12px; font-weight: 900; cursor: pointer;">Send</button>
+    <div class="input-group" id="aiCoinSelectGroup">
+        <label>Select Coin to Analyze</label>
+        <select id="aiCoinSelect">
+            <option value="BTC">Bitcoin (BTC)</option>
+            <option value="ETH">Ethereum (ETH)</option>
+            <option value="BNB">BNB</option>
+            <option value="SOL">Solana (SOL)</option>
+            <option value="XRP">XRP</option>
+            <option value="ADA">Cardano (ADA)</option>
+            <option value="DOGE">Dogecoin (DOGE)</option>
+            <option value="DOT">Polkadot (DOT)</option>
+            <option value="AVAX">Avalanche (AVAX)</option>
+            <option value="LINK">Chainlink (LINK)</option>
+            <option value="POL">Polygon (POL)</option>
+            <option value="LTC">Litecoin (LTC)</option>
+            <option value="TRX">TRON (TRX)</option>
+            <option value="ATOM">Cosmos (ATOM)</option>
+            <option value="UNI">Uniswap (UNI)</option>
+        </select>
+    </div>
+
+    <button class="btn-block" onclick="runAIAnalysis()" id="aiAnalyzeBtn" style="margin-bottom: 20px;">🤖 Analyze Market Now</button>
+
+    <div id="aiLoading" class="hidden" style="text-align: center; padding: 30px;">
+        <div style="font-size: 40px; margin-bottom: 12px;">⏳</div>
+        <p style="color: var(--gold); font-weight: 700;">Analyzing...</p>
+    </div>
+
+    <div id="aiResult" class="hidden"></div>
+
+    <div id="aiEmpty" class="empty-state">
+        <div class="icon">🤖</div>
+        <h3>Ready to Analyze</h3>
+        <p>Select a coin and press the button above.</p>
     </div>
 
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item" onclick="showScreen('tradesScreen')"><span class="icon">📉</span><span>Trades</span></button>
+        <button class="nav-item active" onclick="showScreen('aiAnalysisScreen')"><span class="icon">🤖</span><span>AI</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
-        <button class="nav-item active" onclick="showScreen('adminChatScreen')"><span class="icon">💬</span><span>Chat</span></button>
-        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
 
 <div id="activateModal" class="screen" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99998; display: none; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
         <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">✅ Activate Subscription</h3>
-        
-        <div class="input-group">
-            <label>Service Type</label>
-            <select id="activatePlanType" onchange="updatePlanOptions()">
-                <option value="crypto">🪙 Crypto</option>
-                <option value="gold">🥇 Gold</option>
-                <option value="both">⭐ Both</option>
-                <option value="courses">🎓 Courses</option>
-            </select>
-        </div>
-
-        <div class="input-group">
-            <label>Plan Type / Course</label>
-            <select id="activatePlan">
-                <!-- Options will be populated dynamically -->
-            </select>
-        </div>
-        
+        <div class="input-group"><label>Plan Type</label><select id="activatePlan"><option value="Weekly">VIP Weekly - $10</option><option value="15Days">VIP 15 Days - $20</option><option value="Monthly">VIP Monthly - $30</option><option value="Quarterly">VIP Quarterly - $70</option></select></div>
+        <div class="input-group"><label>Service Type</label><select id="activatePlanType"><option value="crypto">🪙 Crypto</option><option value="gold">🥇 Gold</option><option value="both">⭐ Both</option></select></div>
         <div class="input-group"><label>Start Date</label><input type="date" id="activateStartDate"></div>
         <button class="btn-block success" onclick="activateSubscription()" style="margin-bottom: 8px;">✅ Confirm</button>
         <button class="btn-block outline" onclick="closeActivateModal()">Cancel</button>
     </div>
 </div>
 
-<!-- NOTIFICATIONS MODAL -->
 <div id="notifModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:99999; padding:16px; overflow-y:auto;">
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 20px; max-width: 420px; margin: 40px auto; position: relative;">
         <button class="notif-close-top" onclick="closeNotifModal()" aria-label="Close">✕</button>
         <h3 style="color: #d4af37; margin-bottom: 16px; text-align: center; padding-right: 40px; padding-left: 40px;">🔔 Notifications</h3>
         <div style="display:flex; gap:8px; margin-bottom:12px;">
             <button onclick="clearAllNotifs()" class="btn-small reject" style="flex:1;">🗑️ Clear All</button>
+            <button onclick="stopAlarmLoop()" class="btn-small view" style="flex:1;">🔇 Stop Sound</button>
         </div>
         <div id="notifList"></div>
         <button onclick="closeNotifModal()" class="btn-block outline" style="margin-top: 12px;">Close</button>
@@ -465,60 +435,17 @@
 <div id="toast" class="toast">Message</div>
 
 <script>
-    const COIN_INFO = {
-        BTC: { name: 'Bitcoin', color: '#F7931A', letter: '₿' }, ETH: { name: 'Ethereum', color: '#627EEA', letter: 'Ξ' },
-        BNB: { name: 'BNB', color: '#F3BA2F', letter: 'B' }, SOL: { name: 'Solana', color: '#14F195', letter: 'S' },
-        XRP: { name: 'XRP', color: '#23292F', letter: 'X' }, ADA: { name: 'Cardano', color: '#0033AD', letter: 'A' },
-        DOGE: { name: 'Dogecoin', color: '#C2A633', letter: 'Ð' }, DOT: { name: 'Polkadot', color: '#E6007A', letter: '●' },
-        AVAX: { name: 'Avalanche', color: '#E84142', letter: 'A' }, LINK: { name: 'Chainlink', color: '#2A5ADA', letter: 'L' },
-        POL: { name: 'Polygon', color: '#8247E5', letter: 'M' }, LTC: { name: 'Litecoin', color: '#BFBBBB', letter: 'Ł' },
-        TRX: { name: 'TRON', color: '#FF060A', letter: 'T' }, ATOM: { name: 'Cosmos', color: '#2E3148', letter: 'A' },
-        UNI: { name: 'Uniswap', color: '#FF007A', letter: 'U' }, SHIB: { name: 'Shiba Inu', color: '#FFA409', letter: 'S' },
-        APT: { name: 'Aptos', color: '#1B1B1B', letter: 'A' }, ARB: { name: 'Arbitrum', color: '#28A0F0', letter: 'A' },
-        OP: { name: 'Optimism', color: '#FF0420', letter: 'O' }, NEAR: { name: 'NEAR', color: '#000000', letter: 'N' },
-        INJ: { name: 'Injective', color: '#00D2FF', letter: 'I' }, SUI: { name: 'Sui', color: '#4DA2FF', letter: 'S' },
-        FIL: { name: 'Filecoin', color: '#0090FF', letter: 'F' }, ETC: { name: 'Ethereum Classic', color: '#328332', letter: 'E' },
-        TON: { name: 'Toncoin', color: '#0098EA', letter: 'T' }, ICP: { name: 'Internet Computer', color: '#29ABE2', letter: 'I' },
-        RENDER: { name: 'Render', color: '#000000', letter: 'R' }, FET: { name: 'Fetch.ai', color: '#1D4EFF', letter: 'F' },
-        SEI: { name: 'Sei', color: '#9E1F19', letter: 'S' }, TIA: { name: 'Celestia', color: '#7B2BF9', letter: 'T' },
-        STX: { name: 'Stacks', color: '#5546FF', letter: 'S' }, IMX: { name: 'Immutable', color: '#0F0F0F', letter: 'I' },
-        GRT: { name: 'The Graph', color: '#6747ED', letter: 'G' }, SAND: { name: 'The Sandbox', color: '#00ADEF', letter: 'S' },
-        MANA: { name: 'Decentraland', color: '#FF2D55', letter: 'M' }, AAVE: { name: 'Aave', color: '#B6509E', letter: 'A' },
-        MKR: { name: 'Maker', color: '#1AAB9B', letter: 'M' }, CRV: { name: 'Curve DAO', color: '#3465A4', letter: 'C' },
-        ALGO: { name: 'Algorand', color: '#000000', letter: 'A' }, VET: { name: 'VeChain', color: '#15BDFF', letter: 'V' },
-        HBAR: { name: 'Hedera', color: '#000000', letter: 'H' }, EOS: { name: 'EOS', color: '#000000', letter: 'E' },
-        XLM: { name: 'Stellar', color: '#7D00FF', letter: 'X' }, THETA: { name: 'Theta Network', color: '#2AB8E6', letter: 'T' },
-        RUNE: { name: 'THORChain', color: '#33FF99', letter: 'R' }, KAS: { name: 'Kaspa', color: '#70C7BA', letter: 'K' },
-        TAO: { name: 'Bittensor', color: '#000000', letter: 'T' }, WIF: { name: 'dogwifhat', color: '#C0A080', letter: 'W' },
-        PEPE: { name: 'Pepe', color: '#3D8B37', letter: 'P' }, BONK: { name: 'Bonk', color: '#FC8C1C', letter: 'B' },
-        CHIP: { name: 'Chip', color: '#9B59B6', letter: 'C' }, AERO: { name: 'Aerodrome', color: '#4DA2FF', letter: 'A' },
-        ESP: { name: 'Espresso', color: '#FF6B6B', letter: 'E' }, BREV: { name: 'Brevis', color: '#4ECDC4', letter: 'B' },
-        MEGA: { name: 'MegaETH', color: '#8A2BE2', letter: 'M' }, GENIUS: { name: 'Gensyn', color: '#00CED1', letter: 'G' },
-        KAT: { name: 'Katana', color: '#FF4500', letter: 'K' }, T: { name: 'Threshold', color: '#7B61FF', letter: 'T' },
-        BMT: { name: 'BubbleMaps', color: '#FF6B9D', letter: 'B' }, STEEM: { name: 'Steem', color: '#1A6DFF', letter: 'S' },
-        MTL: { name: 'Metal DAO', color: '#FFA500', letter: 'M' }, ZEC: { name: 'Zcash', color: '#F4B728', letter: 'Z' },
-        WLD: { name: 'Worldcoin', color: '#000000', letter: 'W' }, ENA: { name: 'Ethena', color: '#A6A6A6', letter: 'E' }
-    };
-
     const ADMIN_EMAIL = "mmatrix081@gmail.com";
     let auth, db;
     let signInWithEmailAndPassword, signOut;
-    let collection, getDocs, doc, getDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot, query, orderBy;
+    let collection, getDocs, doc, getDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot;
 
     let appMode = 'crypto';
-    let allUsers = []; 
-    let allCryptoSignals = [];
-    let allGoldSignals = [];
-    let allRecommendations = [];
-    let currentFilter = 'all'; 
+    let allUsers = [];
+    let currentFilter = 'all';
     let searchQuery = '';
-
-    // ✅ نغمة إشعار "دينغ" خفيفة وهادئة جداً (بدون إزعاج)
-    const notifAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3'); 
-    function playNotifSound() {
-        notifAudio.currentTime = 0;
-        notifAudio.play().catch(e => console.log('Audio play blocked by browser'));
-    }
+    let currentUserUID = null;
+    let currentUserData = null;
 
     setTimeout(() => {
         document.getElementById('splash').classList.add('hide');
@@ -531,15 +458,18 @@
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        
-        document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => btn.classList.remove('active'));
-        const activeBtn = Array.from(document.querySelectorAll(`#${id} .bottom-nav .nav-item`)).find(btn => btn.getAttribute('onclick')?.includes(id));
-        if(activeBtn) activeBtn.classList.add('active');
-
-        if(id === 'recommendationsScreen') renderRecommendations();
-        if(id === 'tradesScreen') renderTrades();
-        if(id === 'adminChatScreen') loadAdminChatMessages();
         window.scrollTo(0, 0);
+    }
+
+    // ✅ دالة تغيير اتجاه الصفقة
+    function setDirection(dir) {
+        document.getElementById('signalDirection').value = dir;
+        const btnBuy = document.getElementById('btnDirBuy');
+        const btnSell = document.getElementById('btnDirSell');
+        if (btnBuy && btnSell) {
+            btnBuy.style.opacity = dir === 'BUY' ? '1' : '0.5';
+            btnSell.style.opacity = dir === 'SELL' ? '1' : '0.5';
+        }
     }
 
     function switchMode(mode) {
@@ -553,56 +483,20 @@
             document.getElementById('btnSignalCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnSignalGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
-        if(document.getElementById('btnTradesCrypto')) {
-            document.getElementById('btnTradesCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
-            document.getElementById('btnTradesGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
-            renderTrades();
+        if(document.getElementById('btnAiModeCrypto')) {
+            document.getElementById('btnAiModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
+            document.getElementById('btnAiModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
         
         if (mode === 'gold') {
-            if(document.getElementById('signalCoin')) {
-                document.getElementById('signalCoin').value = 'XAU/USD';
-                document.getElementById('signalCoin').disabled = true;
-            }
+            if(document.getElementById('coinSelectGroup')) document.getElementById('coinSelectGroup').style.display = 'none';
+            if(document.getElementById('signalPairGold')) document.getElementById('signalPairGold').style.display = 'block';
+            if(document.getElementById('aiCoinSelectGroup')) document.getElementById('aiCoinSelectGroup').style.display = 'none';
         } else {
-            if(document.getElementById('signalCoin')) {
-                document.getElementById('signalCoin').disabled = false;
-                populateSignalCoins(); // Reset options for crypto
-            }
+            if(document.getElementById('coinSelectGroup')) document.getElementById('coinSelectGroup').style.display = 'block';
+            if(document.getElementById('signalPairGold')) document.getElementById('signalPairGold').style.display = 'none';
+            if(document.getElementById('aiCoinSelectGroup')) document.getElementById('aiCoinSelectGroup').style.display = 'block';
         }
-
-        if (document.getElementById('usersScreen').classList.contains('active')) {
-            renderUsers();
-        }
-    }
-
-    function filterUsersByMode(users) {
-        return users.filter(u => {
-            if (u.status !== 'active' && u.status !== 'pending') return true; 
-            return u.planType === appMode || u.planType === 'both' || !u.planType;
-        });
-    }
-
-    function populateCoinSelects() {
-        const recSelect = document.getElementById('recCoin');
-        if(recSelect) {
-            let optionsHtml = '';
-            for (const [symbol, info] of Object.entries(COIN_INFO)) {
-                optionsHtml += `<option value="${symbol}">${info.name} (${symbol})</option>`;
-            }
-            recSelect.innerHTML = optionsHtml;
-        }
-        populateSignalCoins();
-    }
-
-    function populateSignalCoins() {
-        const signalSelect = document.getElementById('signalCoin');
-        if(!signalSelect) return;
-        let optionsHtml = '';
-        for (const [symbol, info] of Object.entries(COIN_INFO)) {
-            optionsHtml += `<option value="${symbol}USDT">${info.name} (${symbol}/USDT)</option>`;
-        }
-        signalSelect.innerHTML = optionsHtml;
     }
 
     async function initFirebase() {
@@ -615,8 +509,6 @@
             collection = fsModule.collection; getDocs = fsModule.getDocs; doc = fsModule.doc; getDoc = fsModule.getDoc;
             updateDoc = fsModule.updateDoc; deleteDoc = fsModule.deleteDoc; addDoc = fsModule.addDoc; serverTimestamp = fsModule.serverTimestamp;
             onSnapshot = fsModule.onSnapshot;
-            query = fsModule.query;
-            orderBy = fsModule.orderBy;
             
             onSnapshot(collection(db, 'tradelix_users'), (snapshot) => {
                 allUsers = [];
@@ -637,79 +529,39 @@
                             <div class="user-header"><div><div class="user-name">${u.name || 'Unknown'}</div><div class="user-email">${u.email}</div></div><span class="user-status ${u.status || 'inactive'}">${(u.status || 'inactive').toUpperCase()}</span></div>
                         </div>`).join('');
                 }
-                
-                // ✅ إشعار التسجيل الجديد فقط
+
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
                         const data = change.doc.data();
                         if (Date.now() - (data.createdAt?.seconds * 1000) < 60000) {
-                            triggerNotif('👤 New user registered: ' + (data.name || data.email));
-                            playNotifSound();
+                            triggerNotif('👤 New user: ' + (data.name || data.email));
                         }
-                    }
-                    
-                    // ✅ إشعار شراء الباقة أو الكورس (التقاط أي تغيير في الحقول)
-                    if (change.type === "modified") {
+                    } else if (change.type === "modified") {
                         const data = change.doc.data();
-                        const hasPlan = data.plan || data.package || data.selectedPlan;
-                        // ✅ هنا التعديل: البحث عن أي حقل يحتوي على كلمة course
-                        const courseField = Object.keys(data).find(key => key.toLowerCase().includes('course'));
-                        const hasCourse = courseField && data[courseField];
-                        
-                        if (hasPlan || hasCourse) {
-                            let pType = '';
-                            let pName = '';
-                            
-                            if (hasCourse) {
-                                pType = 'كورس 🎓';
-                                pName = data[courseField] || 'كورس غير محدد';
-                            } else {
-                                // ✅ هنا التعديل: إذا كان الحقل غير موجود، نقرأ من اسم الباقة
-                                let rawType = data.planType || '';
-                                if (rawType === 'both' || !rawType) {
-                                    if ((data.plan || '').toLowerCase().includes('gold') || (data.plan || '').includes('ذهب')) rawType = 'gold';
-                                    else if ((data.plan || '').toLowerCase().includes('crypto') || (data.plan || '').includes('كريبتو')) rawType = 'crypto';
-                                }
-                                
-                                pType = (rawType === 'gold') ? 'الذهب 🥇' : (rawType === 'crypto' ? 'الكريبتو 🪙' : 'الذهب والكريبتو 🥇🪙');
-                                pName = data.plan || data.package || data.selectedPlan || 'VIP';
-                            }
-
-                            // لتجنب التكرار، نتحقق مما إذا كان الإشعار قد أُرسل مؤخراً لنفس المستخدم
-                            const lastNotif = localStorage.getItem('lastPlanNotif_' + data.uid);
-                            if (lastNotif !== pName + pType) {
-                                triggerNotif(`💳 ${data.name || data.email} اشترك في باقة ${pType} - ${pName}`);
-                                playNotifSound();
-                                localStorage.setItem('lastPlanNotif_' + data.uid, pName + pType);
-                            }
+                        if (data.txHash && data.status === 'pending') {
+                            triggerNotif(`💰 Deposit: ${data.name || data.email} - $${data.depositAmount || '?'}`);
                         }
                     }
                 });
             });
 
             onSnapshot(collection(db, 'tradelix_signals'), (snapshot) => {
-                allCryptoSignals = [];
-                snapshot.forEach(docSnap => allCryptoSignals.push({ id: docSnap.id, ...docSnap.data() }));
-                if (document.getElementById('tradesScreen').classList.contains('active')) renderTrades();
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const s = change.doc.data();
+                        if (Date.now() - (s.createdAt?.seconds * 1000) < 60000) {
+                            triggerNotif('📊 Crypto: ' + (s.coin || 'BTC') + ' ' + (s.direction || 'BUY'));
+                        }
+                    }
+                });
             });
 
             onSnapshot(collection(db, 'gold_signals'), (snapshot) => {
-                allGoldSignals = [];
-                snapshot.forEach(docSnap => allGoldSignals.push({ id: docSnap.id, ...docSnap.data() }));
-                if (document.getElementById('tradesScreen').classList.contains('active')) renderTrades();
-            });
-
-            onSnapshot(collection(db, 'tradelix_recommendations'), (snapshot) => {
-                allRecommendations = [];
-                snapshot.forEach(docSnap => allRecommendations.push({ id: docSnap.id, ...docSnap.data() }));
-                if (document.getElementById('recommendationsScreen').classList.contains('active')) renderRecommendations();
-
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
-                        const data = change.doc.data();
-                        if (Date.now() - (data.createdAt?.seconds * 1000) < 60000) {
-                            triggerNotif('💡 New Recommendation: ' + (data.coin || '') + ' (Sent)');
-                            playNotifSound();
+                        const s = change.doc.data();
+                        if (Date.now() - (s.createdAt?.seconds * 1000) < 60000) {
+                            triggerNotif('🥇 Gold: ' + (s.pair || 'XAU/USD') + ' ' + (s.direction || 'BUY'));
                         }
                     }
                 });
@@ -726,6 +578,7 @@
             const userCredential = await signInWithEmailAndPassword(auth, email, pass);
             localStorage.setItem('tradix_admin', JSON.stringify({ uid: userCredential.user.uid }));
             showToast('✅ Welcome!'); setTimeout(() => showScreen('dashboardScreen'), 1000);
+            const c = getAudioContext(); if(c) c.resume();
         } catch (error) { showToast('❌ Login failed'); }
     }
 
@@ -744,8 +597,7 @@
     }
 
     function renderUsers() {
-        let base = filterUsersByMode(allUsers);
-        let filtered = base.filter(u => {
+        let filtered = allUsers.filter(u => {
             if (searchQuery && !((u.name||'').toLowerCase().includes(searchQuery) || (u.email||'').toLowerCase().includes(searchQuery))) return false;
             if (currentFilter !== 'all' && (u.status || 'inactive') !== currentFilter) return false;
             return true;
@@ -753,393 +605,166 @@
         filtered.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         const list = document.getElementById('usersList');
         if (filtered.length === 0) { list.innerHTML = `<div class="empty-state"><h3>No Users Found</h3></div>`; return; }
-        list.innerHTML = filtered.map(u => `
+        
+        list.innerHTML = filtered.map(u => {
+            let typeBadge = '';
+            if (u.planType === 'crypto') typeBadge = '<span class="plan-badge crypto">🪙 Crypto</span>';
+            else if (u.planType === 'gold') typeBadge = '<span class="plan-badge gold">🥇 Gold</span>';
+            else if (u.planType === 'both') typeBadge = '<span class="plan-badge both">⭐ Both</span>';
+
+            return `
             <div class="user-card" onclick="openUserDetail('${u.uid}')">
-                <div class="user-header"><div><div class="user-name">${u.name || 'Unknown'}</div><div class="user-email">${u.email || ''}</div></div><span class="user-status ${u.status || 'inactive'}">${(u.status || 'inactive').toUpperCase()}</span></div>
-                <div class="user-info">${u.plan ? `💎 ${u.plan}` : (u.package ? `💎 ${u.package}` : '💎 No Plan')}</div>
-            </div>`).join('');
+                <div class="user-header">
+                    <div>
+                        <div class="user-name">${u.name || 'Unknown'} ${typeBadge}</div>
+                        <div class="user-email">${u.email || ''}</div>
+                    </div>
+                    <span class="user-status ${u.status || 'inactive'}">${(u.status || 'inactive').toUpperCase()}</span>
+                </div>
+                <div class="user-info">${u.plan ? `💎 ${u.plan}` : '💎 No Plan'}</div>
+            </div>`;
+        }).join('');
     }
 
-    let currentUserUID = null;
     async function openUserDetail(uid) {
         currentUserUID = uid;
         const userDoc = await getDoc(doc(db, 'tradelix_users', uid));
         if (!userDoc.exists()) return;
         const u = userDoc.data();
-        
-        // ✅ هنا التعديل: البحث عن أي حقل يحتوي على كلمة course لكي يظهر في الباك إند
-        const courseField = Object.keys(u).find(key => key.toLowerCase().includes('course'));
-        const userCourse = courseField ? u[courseField] : null;
-        
-        const userPlan = u.plan || u.package || u.selectedPlan || u.planName || u.subscription || userCourse || 'No Plan';
-        const userExpiry = u.expiryDate || u.expiry || '-';
-
+        currentUserData = u;
         document.getElementById('detailName').textContent = u.name || '-';
         document.getElementById('detailEmail').textContent = u.email || '-';
         document.getElementById('detailCreated').textContent = u.createdAt ? new Date(u.createdAt.seconds * 1000).toLocaleDateString('en-GB') : '-';
         document.getElementById('detailStatus').textContent = (u.status || 'inactive').toUpperCase();
-        document.getElementById('detailPlan').textContent = userPlan; 
-        document.getElementById('detailExpiry').textContent = userExpiry;
+        document.getElementById('detailPlan').textContent = u.plan || 'No Plan';
+        document.getElementById('detailType').textContent = u.planType ? u.planType.toUpperCase() : 'N/A';
+        document.getElementById('detailExpiry').textContent = u.expiryDate || '-';
         showScreen('userDetailScreen');
-    }
-
-    // ✅ دالة جديدة لتحديث خيارات الباقة عند تغيير نوع الخدمة
-    function updatePlanOptions() {
-        const planType = document.getElementById('activatePlanType').value;
-        const planSelect = document.getElementById('activatePlan');
-        
-        if (planType === 'courses') {
-            planSelect.innerHTML = `
-                <option value="Trading Basics">Trading Basics ($20)</option>
-                <option value="Technical Analysis">Technical Analysis ($20)</option>
-                <option value="Risk Management">Risk Management ($20)</option>
-                <option value="Advanced Strategies">Advanced Strategies ($20)</option>
-            `;
-        } else {
-            planSelect.innerHTML = `
-                <option value="Weekly">VIP Weekly - $10</option>
-                <option value="15Days">VIP 15 Days - $20</option>
-                <option value="Monthly">VIP Monthly - $30</option>
-                <option value="Quarterly">VIP Quarterly - $70</option>
-            `;
-        }
     }
 
     function openActivateModal() { 
         document.getElementById('activateModal').style.display = 'flex'; 
         document.getElementById('activateStartDate').value = new Date().toISOString().split('T')[0]; 
-        document.getElementById('activatePlanType').value = 'crypto'; // إعادة تعيين النوع الافتراضي
-        updatePlanOptions(); // تحديث الخيارات بناءً على النوع الافتراضي
+        if (currentUserData && currentUserData.planType) {
+            document.getElementById('activatePlanType').value = currentUserData.planType;
+        }
     }
     function closeActivateModal() { document.getElementById('activateModal').style.display = 'none'; }
 
     async function activateSubscription() {
+        if (!currentUserUID) return;
         const plan = document.getElementById('activatePlan').value;
-        const newPlanType = document.getElementById('activatePlanType').value;
+        let selectedPlanType = document.getElementById('activatePlanType').value;
         const startDate = document.getElementById('activateStartDate').value;
-        const days = (plan === 'Weekly') ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : (plan === 'Quarterly' ? 90 : 30)));
-        const expiry = new Date(new Date(startDate).getTime() + days * 24 * 60 * 60 * 1000);
-        
-        const userDoc = await getDoc(doc(db, 'tradelix_users', currentUserUID));
-        const userData = userDoc.data();
-        const userName = userData.name || userData.email || 'User';
-        
-        // ✅ التعديل الجذري: لا تمسح الباقات القديمة أبداً
-        let finalPlanType = userData.planType || ''; 
-        if (newPlanType === 'crypto' && finalPlanType !== 'gold') finalPlanType = 'crypto';
-        if (newPlanType === 'crypto' && finalPlanType === 'gold') finalPlanType = 'both';
-        if (newPlanType === 'gold' && finalPlanType !== 'crypto') finalPlanType = 'gold';
-        if (newPlanType === 'gold' && finalPlanType === 'crypto') finalPlanType = 'both';
-        if (newPlanType === 'both') finalPlanType = 'both';
-        // إذا كان كورس، لا نغير planType إطلاقاً، نتركه كما هو
-        if (newPlanType === 'courses') finalPlanType = userData.planType || ''; 
+        if (!startDate) { showToast('Please select start date'); return; }
+        try {
+            const start = new Date(startDate);
+            const days = plan === 'Weekly' ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : 90));
+            const expiry = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
 
-        const updateData = {
-            status: 'active', 
-            plan: (newPlanType === 'courses' ? plan : 'VIP ' + plan), 
-            planType: finalPlanType, 
-            startDate: startDate, 
-            expiryDate: expiry.toISOString().split('T')[0]
-        };
+            let currentPlanType = currentUserData?.planType || 'none';
+            let finalPlanType = selectedPlanType;
+            if (selectedPlanType === 'crypto' && (currentPlanType === 'gold' || currentPlanType === 'both')) finalPlanType = 'both';
+            else if (selectedPlanType === 'gold' && (currentPlanType === 'crypto' || currentPlanType === 'both')) finalPlanType = 'both';
 
-        // إذا كان كورس، نحفظه في حقل course أيضاً
-        if (newPlanType === 'courses') {
-            updateData.course = plan; 
-        }
+            await updateDoc(doc(db, 'tradelix_users', currentUserUID), {
+                status: 'active', plan: 'VIP ' + plan, planType: finalPlanType, startDate: startDate, expiryDate: expiry.toISOString().split('T')[0]
+            });
 
-        await updateDoc(doc(db, 'tradelix_users', currentUserUID), updateData);
-        
-        // ✅ إرسال إشعار مباشر للجرس مع الصوت
-        let pTypeArabic = '';
-        if (newPlanType === 'gold') pTypeArabic = 'الذهب 🥇';
-        else if (newPlanType === 'crypto') pTypeArabic = 'الكريبتو 🪙';
-        else if (newPlanType === 'courses') pTypeArabic = 'كورس 🎓';
-        else pTypeArabic = 'الذهب والكريبتو 🥇🪙';
-
-        triggerNotif(`💳 تم تفعيل باقة ${pTypeArabic} للمستخدم: ${userName} (${plan})`);
-        playNotifSound();
-
-        showToast('✅ Activated'); 
-        closeActivateModal(); 
-        setTimeout(() => openUserDetail(currentUserUID), 1000);
+            showToast('✅ Subscription activated!');
+            closeActivateModal();
+            setTimeout(() => openUserDetail(currentUserUID), 1000);
+        } catch (error) { showToast('Error activating'); }
     }
 
     async function deactivateUserSubscription() {
-        if (!confirm('Deactivate?')) return;
-        await updateDoc(doc(db, 'tradelix_users', currentUserUID), { status: 'inactive', plan: null, planType: null, course: null });
-        showToast('✅ Deactivated'); setTimeout(() => openUserDetail(currentUserUID), 1000);
+        if (!currentUserUID || !confirm('Deactivate?')) return;
+        try {
+            await updateDoc(doc(db, 'tradelix_users', currentUserUID), { status: 'inactive', plan: null, planType: null });
+            showToast('✅ Deactivated'); setTimeout(() => openUserDetail(currentUserUID), 1000);
+        } catch(e) { showToast('Error'); }
     }
 
     async function confirmDeleteUser() {
-        if (!confirm('Delete user permanently?')) return;
-        await deleteDoc(doc(db, 'tradelix_users', currentUserUID));
-        showToast('✅ Deleted'); setTimeout(() => showScreen('usersScreen'), 1000);
-    }
-
-    async function generateAIAnalysis() {
-        const coinSelect = document.getElementById('signalCoin');
-        const directionSelect = document.getElementById('signalDirection');
-        const entryInput = document.getElementById('signalEntry');
-        const slInput = document.getElementById('signalSL');
-        const tpInput = document.getElementById('signalTP');
-        const notesInput = document.getElementById('signalNotes');
-
-        const pair = coinSelect.value; 
-        let basePrice = 0;
-
+        if (!currentUserUID || !confirm('Are you sure?')) return;
         try {
-            showToast('⏳ Fetching real live price...');
-
-            if (appMode === 'gold') {
-                const res = await fetch('https://api.gold-api.com/price/XAU');
-                const data = await res.json();
-                basePrice = data.price;
-            } else {
-                const symbol = pair.replace('/', ''); 
-                const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
-                const data = await res.json();
-                basePrice = parseFloat(data.price);
-            }
-
-            if (!basePrice || isNaN(basePrice)) throw new Error("Price not found");
-
-            const isBuy = Math.random() > 0.5;
-            
-            const entry = basePrice.toFixed(2);
-            const sl = isBuy ? (basePrice * 0.98).toFixed(2) : (basePrice * 1.02).toFixed(2);
-            const tp = isBuy ? (basePrice * 1.04).toFixed(2) : (basePrice * 0.96).toFixed(2);
-
-            entryInput.value = entry;
-            slInput.value = sl;
-            tpInput.value = tp;
-            directionSelect.value = isBuy ? 'BUY' : 'SELL';
-            notesInput.value = `AI Analysis: Live price fetched (${entry}). High probability setup detected.`;
-            
-            showToast('🤖 AI fetched real live price!');
-            
-        } catch (error) {
-            console.error(error);
-            showToast('❌ Failed to fetch price. Check connection.');
-        }
+            allUsers = allUsers.filter(u => u.uid !== currentUserUID);
+            renderUsers(); showScreen('usersScreen');
+            await deleteDoc(doc(db, 'tradelix_users', currentUserUID));
+            showToast('✅ User Deleted');
+        } catch (error) { showToast('❌ Error'); }
     }
 
     async function sendSignal() {
         const col = appMode === 'gold' ? 'gold_signals' : 'tradelix_signals';
-        const pair = document.getElementById('signalCoin').value;
+        let pair = '';
+        let coin = '';
+        
+        if (appMode === 'gold') {
+            pair = document.getElementById('signalPairGold').value.trim();
+            coin = 'XAU';
+        } else {
+            coin = document.getElementById('signalCoin').value;
+            pair = coin + '/USDT';
+        }
+
         const dir = document.getElementById('signalDirection').value;
         const entry = document.getElementById('signalEntry').value.trim();
         const sl = document.getElementById('signalSL').value.trim();
         const tp = document.getElementById('signalTP').value.trim();
         const notes = document.getElementById('signalNotes').value.trim();
         
-        if(!entry || !sl || !tp) {
-            showToast('❌ Please fill in Entry, SL, and TP');
-            return;
-        }
+        if(!entry || !sl || !tp) { showToast('Please fill all fields'); return; }
 
         await addDoc(collection(db, col), {
-            pair: pair, coin: pair.replace('/USDT', ''), direction: dir, entry: entry, stopLoss: sl, takeProfit: tp,
+            pair: pair, coin: coin, direction: dir, entry: entry, stopLoss: sl, takeProfit: tp,
             entryPrice: entry, sl: sl, tp: tp, price: entry, notes: notes, status: 'active', createdAt: serverTimestamp()
         });
-        showToast('✅ Signal Published to Users!');
+        showToast('✅ Signal sent!');
         document.getElementById('signalEntry').value = ''; document.getElementById('signalSL').value = ''; document.getElementById('signalTP').value = '';
     }
 
-    function renderTrades() {
-        const listDiv = document.getElementById('tradesList');
-        if (!listDiv) return;
-        let signals = appMode === 'crypto' ? allCryptoSignals : allGoldSignals;
-        
-        signals.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
 
-        if (signals.length === 0) {
-            listDiv.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>No Trades Found</h3></div>`;
-            return;
-        }
-
-        listDiv.innerHTML = signals.map(s => {
-            const isBuy = s.direction === 'BUY';
-            const dirClass = isBuy ? 'buy' : 'sell';
-            const status = s.status || 'active';
-            const isActive = status === 'active';
-            const colName = appMode === 'crypto' ? 'tradelix_signals' : 'gold_signals';
-
-            return `
-                <div class="trade-card">
-                    <div class="trade-header">
-                        <div class="trade-pair">${s.pair || s.coin + '/USDT'}</div>
-                        <div class="trade-dir ${dirClass}">${s.direction || 'BUY'}</div>
-                    </div>
-                    ${!isActive ? `<div class="trade-status-badge">STATUS: ${status.toUpperCase()}</div>` : ''}
-                    <div class="trade-details">
-                        <div><span>Entry</span><strong>${s.entry || s.entryPrice || '-'}</strong></div>
-                        <div><span>SL</span><strong>${s.stopLoss || s.sl || '-'}</strong></div>
-                        <div><span>TP</span><strong>${s.takeProfit || s.tp || '-'}</strong></div>
-                    </div>
-                    <div class="trade-actions">
-                        ${isActive ? `<button class="btn-close-trade" onclick="closeTrade('${colName}', '${s.id}')" style="background:var(--orange);color:#fff;">🔒 إغلاق</button>` : ''}
-                        <button class="btn-delete-trade" onclick="deleteTrade('${colName}', '${s.id}')">🗑️ حذف</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    async function closeTrade(colName, docId) {
-        if (!confirm('إغلاق هذه الصفقة؟')) return;
-        try { await updateDoc(doc(db, colName, docId), { status: 'closed' }); showToast('✅ Closed'); } catch (error) { showToast('❌ Error'); }
-    }
-
-    async function deleteTrade(colName, docId) {
-        if (!confirm('حذف هذه الصفقة نهائياً؟')) return;
-        try { await deleteDoc(doc(db, colName, docId)); showToast('✅ Deleted'); } catch (error) { showToast('❌ Error'); }
-    }
-
-    function renderRecommendations() {
-        const listDiv = document.getElementById('recsList');
-        if (!listDiv) return;
-        
-        allRecommendations.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-
-        if (allRecommendations.length === 0) {
-            listDiv.innerHTML = `<div class="empty-state"><div class="icon">💡</div><h3>No Recommendations</h3></div>`;
-            return;
-        }
-
-        listDiv.innerHTML = allRecommendations.map(r => {
-            const info = COIN_INFO[r.coin] || { color: '#555', letter: r.coin?.charAt(0) || '?' };
-
-            return `
-                <div class="rec-card">
-                    <div class="trade-header">
-                        <div class="trade-pair">
-                            <div class="trade-icon" style="background:${info.color}">${info.letter}</div>
-                            ${r.coin} / USDT
-                        </div>
-                        <div class="trade-dir buy">BUY</div>
-                    </div>
-                    <div class="trade-details" style="grid-template-columns: 1fr;">
-                        <div><span>Target Entry Price</span><strong>${r.price || 'Market Price'}</strong></div>
-                    </div>
-                    <div class="rec-notes">${r.notes || 'No notes provided.'}</div>
-                    <div class="trade-actions">
-                        <button class="btn-delete-trade" onclick="deleteRecommendation('${r.id}')">🗑️ Delete</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    async function sendRecommendation() {
-        const coin = document.getElementById('recCoin').value;
-        const price = document.getElementById('recPrice').value.trim();
-        const notes = document.getElementById('recNotes').value.trim();
-        
-        if (!coin) { showToast('❌ Please select a coin'); return; }
-
-        try {
-            await addDoc(collection(db, 'tradelix_recommendations'), {
-                coin: coin,
-                price: price,
-                notes: notes,
-                status: 'active',
-                createdAt: serverTimestamp()
-            });
-            showToast('✅ Recommendation sent!');
-            document.getElementById('recPrice').value = '';
-            document.getElementById('recNotes').value = '';
-            
-            // ✅ إرسال إشعار صوتي فور إرسال التوصية
-            triggerNotif('💡 New Recommendation Sent: ' + coin);
-            playNotifSound();
-            
-        } catch(e) { 
-            console.error(e);
-            showToast('❌ Error sending'); 
-        }
-    }
-
-    async function deleteRecommendation(docId) {
-        if (!confirm('Delete permanently?')) return;
-        try {
-            await deleteDoc(doc(db, 'tradelix_recommendations', docId));
-            showToast('✅ Deleted');
-        } catch(e) { 
-            console.error(e);
-            showToast('❌ Error deleting'); 
-        }
-    }
-
-    let adminChatUnsub = null;
-
-    async function loadAdminChatMessages() {
-        if (!window.firebaseDB || typeof collection === 'undefined' || typeof query === 'undefined') {
-            setTimeout(loadAdminChatMessages, 1000);
-            return;
-        }
-        
-        const q = query(collection(window.firebaseDB, 'tradelix_chat'), orderBy('createdAt', 'asc'));
-        
-        if (adminChatUnsub) adminChatUnsub();
-        
-        adminChatUnsub = onSnapshot(q, (snapshot) => {
-            const chatBox = document.getElementById('adminChatMessages');
-            if (!chatBox) return;
-            
-            if (snapshot.empty) {
-                chatBox.innerHTML = '<p style="text-align: center; color: #888;">No messages yet.</p>';
-                return;
-            }
-
-            chatBox.innerHTML = '';
-            snapshot.forEach(doc => {
-                const msg = doc.data();
-                const isAdmin = msg.role === 'admin';
-                
-                const bubbleStyle = isAdmin 
-                    ? 'background: #0099FF; color: #fff; align-self: flex-end; border-radius: 12px 12px 0 12px;' 
-                    : 'background: #333; color: #fff; align-self: flex-start; border-radius: 12px 12px 12px 0;';
-                
-                chatBox.innerHTML += `
-                    <div style="max-width: 80%; padding: 10px 14px; ${bubbleStyle}">
-                        <div style="font-size: 10px; font-weight: bold; margin-bottom: 4px; opacity: 0.7;">
-                            ${isAdmin ? '👑 Admin' : msg.senderName}
-                        </div>
-                        <div style="font-size: 14px;">${msg.text}</div>
-                    </div>
-                `;
-            });
-            
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-    }
-
-    async function sendAdminChatMessage() {
-        const input = document.getElementById('adminChatInput');
-        const text = input.value.trim();
-        if (!text) return;
-
-        if (!window.firebaseDB || typeof collection === 'undefined' || typeof addDoc === 'undefined') {
-            showToast('⏳ Please wait...');
-            return;
-        }
-
-        try {
-            await addDoc(collection(window.firebaseDB, 'tradelix_chat'), {
-                senderId: 'admin',
-                senderName: 'Admin',
-                role: 'admin',
-                text: text,
-                createdAt: serverTimestamp()
-            });
-            input.value = '';
-        } catch (e) {
-            console.error(e);
-            showToast('❌ Failed to send message');
-        }
-    }
-
+    /* ==========================================
+       ✅ NOTIFICATIONS SYSTEM
+       ========================================== */
     let adminNotifs = JSON.parse(localStorage.getItem('adminNotifs') || '[]');
+    let audioCtx = null;
+    let alarmInterval = null;
+
+    function getAudioContext() {
+        if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    }
+
+    function playNotifSound() {
+        const c = getAudioContext(); if (!c) return;
+        try {
+            [0, 0.3].forEach(delay => {
+                const osc = c.createOscillator(); const gain = c.createGain();
+                osc.connect(gain); gain.connect(c.destination);
+                osc.frequency.setValueAtTime(880, c.currentTime + delay);
+                gain.gain.setValueAtTime(0.3, c.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.01, c.currentTime + delay + 0.2);
+                osc.start(c.currentTime + delay); osc.stop(c.currentTime + delay + 0.2);
+            });
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        } catch(e) {}
+    }
+
+    function startAlarmLoop() {
+        playNotifSound();
+        document.querySelectorAll('.bell-icon').forEach(b => b.classList.add('alarm'));
+        if (alarmInterval) clearInterval(alarmInterval);
+        alarmInterval = setInterval(() => playNotifSound(), 5000);
+    }
+
+    function stopAlarmLoop() {
+        if (alarmInterval) { clearInterval(alarmInterval); alarmInterval = null; }
+        document.querySelectorAll('.bell-icon').forEach(b => b.classList.remove('alarm'));
+    }
 
     function saveNotifs() {
         localStorage.setItem('adminNotifs', JSON.stringify(adminNotifs));
@@ -1158,14 +783,22 @@
     }
 
     function triggerNotif(message) {
+        let notifs = JSON.parse(localStorage.getItem('adminNotifs') || '[]');
         const now = Date.now();
-        if (adminNotifs.length > 0 && adminNotifs[0].message === message && (now - adminNotifs[0].id) < 5000) return;
-        adminNotifs.unshift({ id: now, message: message, time: new Date().toLocaleString('en-GB'), read: false });
-        if (adminNotifs.length > 50) adminNotifs = adminNotifs.slice(0, 50);
-        saveNotifs();
+        if (notifs.length > 0 && notifs[0].message === message && (now - notifs[0].id) < 5000) return;
+        notifs.unshift({ id: now, message: message, time: new Date().toLocaleString('en-GB'), read: false });
+        if (notifs.length > 50) notifs = notifs.slice(0, 50);
+        localStorage.setItem('adminNotifs', JSON.stringify(notifs));
+        adminNotifs = notifs;
+        updateBadge();
+        startAlarmLoop();
+        if ('Notification' in window && Notification.permission === 'granted') {
+            try { new Notification('🔔 TRADIX Admin', { body: message }); } catch(e) {}
+        }
     }
 
     function openNotifModal() {
+        stopAlarmLoop();
         const list = document.getElementById('notifList');
         if (adminNotifs.length === 0) list.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">No notifications</p>';
         else list.innerHTML = adminNotifs.map(n => `<div style="background:#0a0a0a;border-radius:10px;padding:12px;margin-bottom:8px;border-left:3px solid var(--gold);"><div style="color:var(--gold);font-weight:700;">${n.message}</div><div style="color:#888;font-size:11px;">${n.time}</div></div>`).join('');
@@ -1178,17 +811,160 @@
 
     function clearAllNotifs() {
         if (!confirm('Clear all?')) return;
+        stopAlarmLoop();
         adminNotifs = [];
         saveNotifs();
         openNotifModal();
     }
 
-    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+    /* ==========================================
+       ✅ AI ANALYSIS LOGIC
+       ========================================== */
+    let currentAITrade = null;
+
+    async function runAIAnalysis() {
+        const btn = document.getElementById('aiAnalyzeBtn');
+        const loading = document.getElementById('aiLoading');
+        const result = document.getElementById('aiResult');
+        const empty = document.getElementById('aiEmpty');
+
+        btn.disabled = true; btn.style.opacity = '0.5';
+        loading.classList.remove('hidden'); result.classList.add('hidden'); empty.classList.add('hidden');
+
+        try {
+            let symbol = 'PAXGUSDT';
+            let coinName = 'XAU/USD';
+            
+            if (appMode === 'crypto') {
+                const selectedCoin = document.getElementById('aiCoinSelect').value;
+                symbol = selectedCoin + 'USDT';
+                coinName = selectedCoin + '/USDT';
+            }
+
+            const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=100`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('API Error');
+            const candles = await res.json();
+            if (!candles || candles.length < 50) throw new Error('Not enough data');
+
+            const currentPrice = parseFloat(candles[candles.length - 1][4]);
+            const closes = candles.map(c => parseFloat(c[4]));
+            const ema20 = calculateEMA(closes, 20);
+            const ema50 = calculateEMA(closes, 50);
+            const rsi = calculateRSI(closes, 14);
+            
+            const trend = ema20 > ema50 ? 'UP' : 'DOWN';
+            let direction = 'WAIT'; let confidence = 50;
+            
+            if (rsi < 30 && trend === 'UP') { direction = 'BUY'; confidence = 75 + Math.min(20, (30 - rsi)); }
+            else if (rsi < 40 && trend === 'UP') { direction = 'BUY'; confidence = 60 + Math.min(15, (40 - rsi)); }
+            else if (rsi > 70 && trend === 'DOWN') { direction = 'SELL'; confidence = 75 + Math.min(20, (rsi - 70)); }
+            else if (rsi > 60 && trend === 'DOWN') { direction = 'SELL'; confidence = 60 + Math.min(15, (rsi - 60)); }
+            else if (trend === 'UP' && rsi > 40 && rsi < 65) { direction = 'BUY'; confidence = 55; }
+            else if (trend === 'DOWN' && rsi > 35 && rsi < 60) { direction = 'SELL'; confidence = 55; }
+
+            confidence = Math.min(95, Math.round(confidence));
+
+            let entry = currentPrice, sl = currentPrice * 0.995, tp = currentPrice * 1.01;
+            if (direction === 'SELL') { sl = currentPrice * 1.005; tp = currentPrice * 0.99; }
+
+            currentAITrade = { direction, entry: entry.toFixed(2), sl: sl.toFixed(2), tp: tp.toFixed(2), confidence };
+
+            const dirColor = direction === 'BUY' ? 'var(--green)' : (direction === 'SELL' ? 'var(--red)' : 'var(--gold)');
+
+            result.innerHTML = `
+                <div class="card" style="border-color: ${dirColor};">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 11px; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 8px;">AI SUGGESTION FOR ${coinName}</div>
+                        <div style="font-size: 36px; font-weight: 900; color: ${dirColor}; letter-spacing: 3px;">${direction}</div>
+                        <div style="margin-top: 8px;"><span style="background: rgba(212,175,55,0.15); color: var(--gold); padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1px solid var(--gold);">🎯 Confidence: ${confidence}%</span></div>
+                    </div>
+                    <div class="detail-row"><span>Current Price</span><span>$${currentPrice.toFixed(2)}</span></div>
+                    <div class="detail-row"><span>RSI (14)</span><span>${rsi.toFixed(1)}</span></div>
+                    <div class="detail-row"><span>Trend</span><span>${trend === 'UP' ? '📈 Uptrend' : '📉 Downtrend'}</span></div>
+                </div>
+                <div class="card">
+                    <div class="detail-row"><span>Entry</span><span>$${entry.toFixed(2)}</span></div>
+                    <div class="detail-row"><span>Stop Loss</span><span style="color: var(--red);">$${sl.toFixed(2)}</span></div>
+                    <div class="detail-row"><span>Take Profit</span><span style="color: var(--green);">$${tp.toFixed(2)}</span></div>
+                </div>
+                <button class="btn-block success" onclick="sendAISignal()" style="margin-bottom: 8px; font-size: 16px; padding: 16px;">📤 Send to Subscribers</button>
+                <button class="btn-block outline" onclick="applyAITrade()" style="margin-bottom: 8px;">📝 Edit Before Sending</button>
+                <button class="btn-block outline" onclick="runAIAnalysis()">🔄 Analyze Again</button>
+            `;
+            result.classList.remove('hidden');
+        } catch (error) {
+            empty.classList.remove('hidden');
+            empty.innerHTML = `<div class="icon">⚠️</div><h3>Analysis Failed</h3><p>Could not fetch market data. Try again.</p>`;
+        } finally {
+            btn.disabled = false; btn.style.opacity = '1'; loading.classList.add('hidden');
+        }
+    }
+
+    function calculateEMA(prices, period) {
+        const k = 2 / (period + 1); let ema = prices[0];
+        for (let i = 1; i < prices.length; i++) ema = prices[i] * k + ema * (1 - k);
+        return ema;
+    }
+
+    function calculateRSI(prices, period) {
+        let gains = 0, losses = 0;
+        for (let i = prices.length - period; i < prices.length; i++) {
+            const diff = prices[i] - prices[i - 1];
+            if (diff >= 0) gains += diff; else losses -= diff;
+        }
+        const rs = (gains / period) / (losses / period || 1);
+        return 100 - (100 / (1 + rs));
+    }
+
+    async function sendAISignal() {
+        if (!currentAITrade) return;
+        let direction = currentAITrade.direction === 'WAIT' ? 'BUY' : currentAITrade.direction;
+        const col = appMode === 'gold' ? 'gold_signals' : 'tradelix_signals';
+        
+        let pair = 'XAU/USD';
+        let coin = 'XAU';
+        if (appMode === 'crypto') {
+            coin = document.getElementById('aiCoinSelect').value;
+            pair = coin + '/USDT';
+        }
+
+        try {
+            await addDoc(collection(db, col), {
+                pair: pair,
+                coin: coin,
+                direction: direction,
+                entry: currentAITrade.entry, stopLoss: currentAITrade.sl, takeProfit: currentAITrade.tp,
+                entryPrice: currentAITrade.entry, sl: currentAITrade.sl, tp: currentAITrade.tp,
+                price: currentAITrade.entry, confidence: currentAITrade.confidence,
+                notes: `AI ${direction} signal for ${pair}`, status: 'active', createdAt: serverTimestamp()
+            });
+            showToast('✅ AI Signal sent!');
+        } catch (error) { showToast('Error sending signal'); }
+    }
+
+    function applyAITrade() {
+        if (!currentAITrade) return;
+        showScreen('sendSignalScreen');
+        
+        if (appMode === 'crypto') {
+            const selectedCoin = document.getElementById('aiCoinSelect').value;
+            document.getElementById('signalCoin').value = selectedCoin;
+        }
+        
+        // ✅ تحديث أزرار الشراء والبيع
+        setDirection(currentAITrade.direction === 'WAIT' ? 'BUY' : currentAITrade.direction);
+        
+        document.getElementById('signalEntry').value = currentAITrade.entry;
+        document.getElementById('signalSL').value = currentAITrade.sl;
+        document.getElementById('signalTP').value = currentAITrade.tp;
+        document.getElementById('signalNotes').value = `AI suggested (Confidence: ${currentAITrade.confidence}%)`;
+    }
 
     window.addEventListener('load', () => {
-        populateCoinSelects();
         initFirebase();
         updateBadge();
+        document.addEventListener('click', () => { getAudioContext(); }, { once: true });
     });
 </script>
 </body>
