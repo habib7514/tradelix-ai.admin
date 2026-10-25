@@ -465,7 +465,6 @@
     </div>
 </div>
 
-<!-- ✅ UPDATED: ACTIVATE MODAL WITH COURSE OPTION -->
 <div id="activateModal" class="screen" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99998; display: none; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
         <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">✅ Activate Subscription</h3>
@@ -481,7 +480,6 @@
             </select>
         </div>
 
-        <!-- Course Selection Dropdown (Hidden by default) -->
         <div class="input-group" id="courseSelectionGroup" style="display: none;">
             <label>Select Course Name</label>
             <select id="activateCourseName">
@@ -819,6 +817,7 @@
             
             let updateData = {};
 
+            // 1. Handle Course Addition
             if (selectedPlanType === 'course') {
                 const courseName = document.getElementById('activateCourseName').value;
                 let currentCourses = freshData.courses || [];
@@ -826,32 +825,46 @@
                     currentCourses.push(courseName);
                 }
                 updateData.courses = currentCourses;
-                updateData.courseRequest = null; 
-                // DO NOT TOUCH status or planType for courses!
-            } else {
-                updateData.status = 'active';
+                updateData.courseRequest = null; // Clear pending request
                 
-                const hasCrypto = freshData.cryptoExpiry && new Date(freshData.cryptoExpiry) >= new Date();
-                const hasGold = freshData.goldExpiry && new Date(freshData.goldExpiry) >= new Date();
-
-                let newPlanType = selectedPlanType;
-                
-                if (selectedPlanType === 'crypto') {
-                    updateData.cryptoExpiry = expiryDateStr;
-                    if (hasGold) newPlanType = 'both';
-                } else if (selectedPlanType === 'gold') {
-                    updateData.goldExpiry = expiryDateStr;
-                    if (hasCrypto) newPlanType = 'both';
-                } else if (selectedPlanType === 'both') {
-                    updateData.cryptoExpiry = expiryDateStr;
-                    updateData.goldExpiry = expiryDateStr;
-                    newPlanType = 'both';
+                // If they don't have an active signal plan, just set the plan name to the course
+                if (!freshData.planType || freshData.planType === 'course') {
+                    updateData.plan = 'Course: ' + courseName;
                 }
-
-                updateData.planType = newPlanType;
-                updateData.plan = 'VIP ' + plan;
+            } else {
+                // 2. Handle Signal Activation (Crypto, Gold, Both)
+                updateData.status = 'active';
                 updateData.startDate = startDate;
+                updateData.plan = 'VIP ' + plan;
                 updateData.expiryDate = expiryDateStr;
+                
+                if (selectedPlanType === 'crypto' || selectedPlanType === 'both') {
+                    updateData.cryptoExpiry = expiryDateStr;
+                }
+                if (selectedPlanType === 'gold' || selectedPlanType === 'both') {
+                    updateData.goldExpiry = expiryDateStr;
+                }
+            }
+
+            // 3. Recalculate planType dynamically to prevent wiping existing access
+            const finalCryptoExpiry = updateData.cryptoExpiry || freshData.cryptoExpiry;
+            const finalGoldExpiry = updateData.goldExpiry || freshData.goldExpiry;
+
+            const isCryptoActive = finalCryptoExpiry && new Date(finalCryptoExpiry) >= new Date();
+            const isGoldActive = finalGoldExpiry && new Date(finalGoldExpiry) >= new Date();
+
+            if (isCryptoActive && isGoldActive) {
+                updateData.planType = 'both';
+                updateData.status = 'active';
+            } else if (isCryptoActive) {
+                updateData.planType = 'crypto';
+                updateData.status = 'active';
+            } else if (isGoldActive) {
+                updateData.planType = 'gold';
+                updateData.status = 'active';
+            } else if (selectedPlanType === 'course' && !isCryptoActive && !isGoldActive) {
+                // If they ONLY have a course and no signals
+                updateData.planType = 'course';
             }
 
             await updateDoc(userRef, updateData);
