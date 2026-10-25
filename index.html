@@ -671,7 +671,7 @@
                                     else if ((data.plan || '').toLowerCase().includes('crypto') || (data.plan || '').includes('كريبتو')) rawType = 'crypto';
                                 }
                                 
-                                pType = (rawType === 'gold') ? 'الذهب 🥇' : (rawType === 'crypto' ? 'الكريبتو 🪙' : 'كلاهما ⭐');
+                                pType = (rawType === 'gold') ? 'الذهب 🥇' : (rawType === 'crypto' ? 'الكريبتو 🪙' : 'الذهب والكريبتو 🥇🪙');
                                 pName = data.plan || data.package || data.selectedPlan || 'VIP';
                             }
 
@@ -817,7 +817,7 @@
         const plan = document.getElementById('activatePlan').value;
         const newPlanType = document.getElementById('activatePlanType').value;
         const startDate = document.getElementById('activateStartDate').value;
-        const days = (plan === 'Weekly') ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : (plan === 'Quarterly' ? 90 : 30))); // 30 يوم للكورسات كافتراضي
+        const days = (plan === 'Weekly') ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : (plan === 'Quarterly' ? 90 : 30)));
         const expiry = new Date(new Date(startDate).getTime() + days * 24 * 60 * 60 * 1000);
         
         const userDoc = await getDoc(doc(db, 'tradelix_users', currentUserUID));
@@ -825,11 +825,12 @@
         const userName = userData.name || userData.email || 'User';
         const currentPlanType = userData.planType || '';
 
-        // ✅ التعديل الجذري: دمج الاشتراكات (ذهب + كريبتو)
+        // ✅ التعديل الجذري: دمج الاشتراكات (ذهب + كريبتو + كورسات)
         let finalPlanType = newPlanType;
         if (currentPlanType === 'crypto' && newPlanType === 'gold') finalPlanType = 'both';
         if (currentPlanType === 'gold' && newPlanType === 'crypto') finalPlanType = 'both';
-        if (currentPlanType === 'both') finalPlanType = 'both';
+        if (currentPlanType === 'both' && (newPlanType === 'crypto' || newPlanType === 'gold')) finalPlanType = 'both';
+        if (newPlanType === 'courses' && (currentPlanType === 'crypto' || currentPlanType === 'gold' || currentPlanType === 'both')) finalPlanType = currentPlanType; // لا تلغي الباقات الأخرى عند شراء كورس
 
         const updateData = {
             status: 'active', 
@@ -847,7 +848,12 @@
         await updateDoc(doc(db, 'tradelix_users', currentUserUID), updateData);
         
         // ✅ إرسال إشعار مباشر للجرس مع الصوت
-        const pTypeArabic = (newPlanType === 'gold') ? 'الذهب 🥇' : (newPlanType === 'crypto' ? 'الكريبتو 🪙' : (newPlanType === 'courses' ? 'كورس 🎓' : 'كلاهما ⭐'));
+        let pTypeArabic = '';
+        if (newPlanType === 'gold') pTypeArabic = 'الذهب 🥇';
+        else if (newPlanType === 'crypto') pTypeArabic = 'الكريبتو 🪙';
+        else if (newPlanType === 'courses') pTypeArabic = 'كورس 🎓';
+        else pTypeArabic = 'الذهب والكريبتو 🥇🪙';
+
         triggerNotif(`💳 تم تفعيل باقة ${pTypeArabic} للمستخدم: ${userName} (${plan})`);
         playNotifSound();
 
