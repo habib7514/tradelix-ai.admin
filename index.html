@@ -560,6 +560,15 @@
     let currentFilter = 'all'; 
     let searchQuery = '';
 
+    // ✅ نظام صوت الإشعارات
+    const notifAudio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU' + '1234567890' + '1234567890'); 
+    function playNotifSound() {
+        try {
+            notifAudio.currentTime = 0;
+            notifAudio.play().catch(e => console.log('Audio play blocked by browser'));
+        } catch(e) {}
+    }
+
     setTimeout(() => {
         document.getElementById('splash').classList.add('hide');
         setTimeout(() => {
@@ -683,6 +692,7 @@
                         const data = change.doc.data();
                         if (Date.now() - (data.createdAt?.seconds * 1000) < 60000) {
                             triggerNotif('👤 New user: ' + (data.name || data.email));
+                            playNotifSound();
                         }
                     }
                 });
@@ -710,6 +720,7 @@
                         const data = change.doc.data();
                         if (Date.now() - (data.createdAt?.seconds * 1000) < 60000) {
                             triggerNotif('💡 New Recommendation: ' + (data.coin || '') + ' (Sent)');
+                            playNotifSound();
                         }
                     }
                 });
