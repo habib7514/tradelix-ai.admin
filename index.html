@@ -682,12 +682,27 @@
                             <div class="user-header"><div><div class="user-name">${u.name || 'Unknown'}</div><div class="user-email">${u.email}</div></div><span class="user-status ${u.status || 'inactive'}">${(u.status || 'inactive').toUpperCase()}</span></div>
                         </div>`).join('');
                 }
-                
+
+                // ✅ إصلاح إشعارات شراء الباقات (المراقبة عند التغيير)
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
                         const data = change.doc.data();
                         if (Date.now() - (data.createdAt?.seconds * 1000) < 60000) {
-                            triggerNotif('👤 New user: ' + (data.name || data.email));
+                            triggerNotif('👤 New user registered: ' + (data.name || data.email));
+                            playNotifSound();
+                        }
+                    }
+                    
+                    if (change.type === "modified") {
+                        const data = change.doc.data();
+                        const newStatus = data.status;
+                        const oldStatus = change.oldIndex !== -1 ? snapshot.docs[change.oldIndex].data().status : null;
+
+                        // إذا تغيرت الحالة من Pending إلى Active، فهذا يعني أنه اشترى/تم تفعيل الباقة
+                        if (newStatus === 'active' && oldStatus === 'pending') {
+                            const pType = (data.planType === 'gold') ? '🥇 Gold' : (data.planType === 'crypto' ? '🪙 Crypto' : '⭐ Both');
+                            const pName = data.plan || data.package || 'VIP';
+                            triggerNotif(`💳 ${data.name || data.email} subscribed to ${pName} (${pType})`);
                             playNotifSound();
                         }
                     }
@@ -800,7 +815,7 @@
             status: 'active', plan: 'VIP ' + plan, planType: planType, startDate: startDate, expiryDate: expiry.toISOString().split('T')[0]
         });
         
-        // ✅ إضافة إشعار صوتي فور التفعيل
+        // ✅ إضافة إشعار صوتي فور التفعيل (لأنه سيتم التقاطه أيضاً عبر onSnapshot)
         triggerNotif('💳 User activated plan: VIP ' + plan);
         playNotifSound();
 
@@ -1132,4 +1147,4 @@
     });
 </script>
 </body>
-</html> 
+</html>
