@@ -432,7 +432,12 @@
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Send a new signal. Based on the mode selected above.</p>
     <div class="card">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">📈 Signal Details</h3>
-        <div class="input-group"><label>Pair / Coin</label><input type="text" id="signalPair" value="XAU/USD"></div>
+        <div class="input-group">
+            <label>Pair / Coin</label>
+            <select id="signalCoin" style="width: 100%; background: #1a1a1a; border: 1px solid #333; padding: 14px; border-radius: 12px; color: #fff; font-size: 15px; outline: none; font-family: inherit; margin-bottom: 16px;">
+                <!-- Options populated via JS -->
+            </select>
+        </div>
         <div class="input-group"><label>Direction</label><select id="signalDirection"><option value="BUY">BUY (Long)</option><option value="SELL">SELL (Short)</option></select></div>
         <div class="input-group"><label>Entry Price</label><input type="text" id="signalEntry"></div>
         <div class="input-group"><label>Stop Loss</label><input type="text" id="signalSL"></div>
@@ -531,14 +536,10 @@
         CHIP: { name: 'Chip', color: '#9B59B6', letter: 'C' }, AERO: { name: 'Aerodrome', color: '#4DA2FF', letter: 'A' },
         ESP: { name: 'Espresso', color: '#FF6B6B', letter: 'E' }, BREV: { name: 'Brevis', color: '#4ECDC4', letter: 'B' },
         MEGA: { name: 'MegaETH', color: '#8A2BE2', letter: 'M' }, GENIUS: { name: 'Gensyn', color: '#00CED1', letter: 'G' },
-        KAT: { name: 'Katana', color: '#FF4500', letter: 'K' },
-        T: { name: 'Threshold', color: '#7B61FF', letter: 'T' },
-        BMT: { name: 'BubbleMaps', color: '#FF6B9D', letter: 'B' },
-        STEEM: { name: 'Steem', color: '#1A6DFF', letter: 'S' },
-        MTL: { name: 'Metal DAO', color: '#FFA500', letter: 'M' },
-        ZEC: { name: 'Zcash', color: '#F4B728', letter: 'Z' },
-        WLD: { name: 'Worldcoin', color: '#000000', letter: 'W' },
-        ENA: { name: 'Ethena', color: '#A6A6A6', letter: 'E' }
+        KAT: { name: 'Katana', color: '#FF4500', letter: 'K' }, T: { name: 'Threshold', color: '#7B61FF', letter: 'T' },
+        BMT: { name: 'BubbleMaps', color: '#FF6B9D', letter: 'B' }, STEEM: { name: 'Steem', color: '#1A6DFF', letter: 'S' },
+        MTL: { name: 'Metal DAO', color: '#FFA500', letter: 'M' }, ZEC: { name: 'Zcash', color: '#F4B728', letter: 'Z' },
+        WLD: { name: 'Worldcoin', color: '#000000', letter: 'W' }, ENA: { name: 'Ethena', color: '#A6A6A6', letter: 'E' }
     };
 
     const ADMIN_EMAIL = "mmatrix081@gmail.com";
@@ -583,10 +584,6 @@
             document.getElementById('btnModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
         }
-        if(document.getElementById('btnUserModeCrypto')) {
-            document.getElementById('btnUserModeCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
-            document.getElementById('btnUserModeGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
-        }
         if(document.getElementById('btnSignalCrypto')) {
             document.getElementById('btnSignalCrypto').className = mode === 'crypto' ? 'mode-btn active' : 'mode-btn inactive';
             document.getElementById('btnSignalGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
@@ -596,11 +593,17 @@
             document.getElementById('btnTradesGold').className = mode === 'gold' ? 'mode-btn active' : 'mode-btn inactive';
             renderTrades();
         }
-
+        
         if (mode === 'gold') {
-            if(document.getElementById('signalPair')) document.getElementById('signalPair').value = 'XAU/USD';
+            if(document.getElementById('signalCoin')) {
+                document.getElementById('signalCoin').value = 'XAU/USD';
+                document.getElementById('signalCoin').disabled = true;
+            }
         } else {
-            if(document.getElementById('signalPair')) document.getElementById('signalPair').value = 'BTC/USDT';
+            if(document.getElementById('signalCoin')) {
+                document.getElementById('signalCoin').disabled = false;
+                populateSignalCoins(); // Reset options for crypto
+            }
         }
 
         if (document.getElementById('usersScreen').classList.contains('active')) {
@@ -617,13 +620,24 @@
 
     function populateCoinSelects() {
         const recSelect = document.getElementById('recCoin');
-        if(!recSelect) return;
-        
+        if(recSelect) {
+            let optionsHtml = '';
+            for (const [symbol, info] of Object.entries(COIN_INFO)) {
+                optionsHtml += `<option value="${symbol}">${info.name} (${symbol})</option>`;
+            }
+            recSelect.innerHTML = optionsHtml;
+        }
+        populateSignalCoins();
+    }
+
+    function populateSignalCoins() {
+        const signalSelect = document.getElementById('signalCoin');
+        if(!signalSelect) return;
         let optionsHtml = '';
         for (const [symbol, info] of Object.entries(COIN_INFO)) {
-            optionsHtml += `<option value="${symbol}">${info.name} (${symbol})</option>`;
+            optionsHtml += `<option value="${symbol}USDT">${info.name} (${symbol}/USDT)</option>`;
         }
-        recSelect.innerHTML = optionsHtml;
+        signalSelect.innerHTML = optionsHtml;
     }
 
     async function initFirebase() {
@@ -669,7 +683,6 @@
                 });
             });
 
-            // Trades Signals Snapshot
             onSnapshot(collection(db, 'tradelix_signals'), (snapshot) => {
                 allCryptoSignals = [];
                 snapshot.forEach(docSnap => allCryptoSignals.push({ id: docSnap.id, ...docSnap.data() }));
@@ -682,7 +695,6 @@
                 if (document.getElementById('tradesScreen').classList.contains('active')) renderTrades();
             });
 
-            // Recommendations Snapshot
             onSnapshot(collection(db, 'tradelix_recommendations'), (snapshot) => {
                 allRecommendations = [];
                 snapshot.forEach(docSnap => allRecommendations.push({ id: docSnap.id, ...docSnap.data() }));
@@ -787,7 +799,7 @@
 
     async function sendSignal() {
         const col = appMode === 'gold' ? 'gold_signals' : 'tradelix_signals';
-        const pair = document.getElementById('signalPair').value.trim();
+        const pair = document.getElementById('signalCoin').value;
         const dir = document.getElementById('signalDirection').value;
         const entry = document.getElementById('signalEntry').value.trim();
         const sl = document.getElementById('signalSL').value.trim();
@@ -802,9 +814,6 @@
         document.getElementById('signalEntry').value = ''; document.getElementById('signalSL').value = ''; document.getElementById('signalTP').value = '';
     }
 
-    // ==========================================
-    // ✅ TRADES LOGIC
-    // ==========================================
     function renderTrades() {
         const listDiv = document.getElementById('tradesList');
         if (!listDiv) return;
@@ -855,9 +864,6 @@
         try { await deleteDoc(doc(db, colName, docId)); showToast('✅ Deleted'); } catch (error) { showToast('❌ Error'); }
     }
 
-    // ==========================================
-    // ✅ RECOMMENDATIONS LOGIC
-    // ==========================================
     function renderRecommendations() {
         const listDiv = document.getElementById('recsList');
         if (!listDiv) return;
@@ -928,9 +934,6 @@
         }
     }
 
-    // ==========================================
-    // ✅ ADMIN CHAT LOGIC
-    // ==========================================
     let adminChatUnsub = null;
 
     async function loadAdminChatMessages() {
@@ -1000,9 +1003,6 @@
         }
     }
 
-    // ==========================================
-    // ✅ NOTIFICATIONS LOGIC
-    // ==========================================
     let adminNotifs = JSON.parse(localStorage.getItem('adminNotifs') || '[]');
 
     function saveNotifs() {
