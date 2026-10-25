@@ -474,7 +474,17 @@
 <div id="activateModal" class="screen" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99998; display: none; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
         <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">✅ Activate Subscription</h3>
-        <div class="input-group"><label>Plan Type</label><select id="activatePlan"><option value="Weekly">VIP Weekly - $10</option><option value="15Days">VIP 15 Days - $20</option><option value="Monthly">VIP Monthly - $30</option><option value="Quarterly">VIP Quarterly - $70</option></select></div>
+        
+        <!-- ✅ إضافة id لصندوق الباقة لكي نتمكن من إخفائه -->
+        <div class="input-group" id="planTypeGroup">
+            <label>Plan Type</label>
+            <select id="activatePlan">
+                <option value="Weekly">VIP Weekly - $10</option>
+                <option value="15Days">VIP 15 Days - $20</option>
+                <option value="Monthly">VIP Monthly - $30</option>
+                <option value="Quarterly">VIP Quarterly - $70</option>
+            </select>
+        </div>
         
         <div class="input-group">
             <label>Service Type</label>
@@ -582,9 +592,16 @@
         }
     }
 
+    // ✅ تم تعديل الدالة لإخفاء/إظهار الباقة
     function toggleCourseInput() {
         const type = document.getElementById('activatePlanType').value;
-        document.getElementById('courseSelectionGroup').style.display = (type === 'course') ? 'block' : 'none';
+        if (type === 'course') {
+            document.getElementById('courseSelectionGroup').style.display = 'block';
+            document.getElementById('planTypeGroup').style.display = 'none';
+        } else {
+            document.getElementById('courseSelectionGroup').style.display = 'none';
+            document.getElementById('planTypeGroup').style.display = 'block';
+        }
     }
 
     function openManageSignals() {
