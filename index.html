@@ -73,7 +73,6 @@
         .bell-icon { background: #1a1a1a; border: 1px solid #333; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--gold); cursor: pointer; position: relative; }
         .notifBadge { position: absolute; top: -4px; right: -4px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 8px rgba(246, 70, 93, 0.8); animation: pulse 1.5s infinite; pointer-events: none; }
 
-        /* ✅ التصميم الجديد لزر التوصيات (أزرق، لامع، يتحرك) */
         .recommendation-blue-btn {
             font-family: 'Tajawal', sans-serif;
             font-size: 17px;
@@ -141,7 +140,6 @@
             }
         }
 
-        /* ✅ زر الدردشة الجديد (أخضر) */
         .chat-btn {
             font-family: 'Tajawal', sans-serif;
             font-size: 17px;
@@ -428,6 +426,16 @@
     </div>
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Send a new signal. Based on the mode selected above.</p>
     <div class="card">
+        <!-- ✅ الأزرار في الأعلى -->
+        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+            <button class="btn-block" style="flex: 1; background: linear-gradient(90deg, #8A2BE2, #FF00FF); color: white; font-weight: 900; margin: 0;" onclick="generateAIAnalysis()">
+                🤖 AI Analyze
+            </button>
+            <button class="btn-block" style="flex: 1; background: var(--btn-gold-bg); color: #000; font-weight: 900; margin: 0;" onclick="sendSignal()">
+                📤 Send Signal
+            </button>
+        </div>
+
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">📈 Signal Details</h3>
         <div class="input-group">
             <label>Pair / Coin</label>
@@ -440,13 +448,6 @@
         <div class="input-group"><label>Stop Loss</label><input type="text" id="signalSL"></div>
         <div class="input-group"><label>Take Profit</label><input type="text" id="signalTP"></div>
         <div class="input-group"><label>Notes (Optional)</label><textarea id="signalNotes"></textarea></div>
-        
-        <!-- ✅ زر الذكاء الاصطناعي -->
-        <button class="btn-block" style="background: linear-gradient(90deg, #8A2BE2, #FF00FF); color: white; margin-bottom: 10px; font-weight: 900;" onclick="generateAIAnalysis()">
-            🤖 AI Analyze & Auto-Fill
-        </button>
-
-        <button class="btn-block" onclick="sendSignal()">📤 Send Signal</button>
     </div>
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
@@ -558,7 +559,6 @@
     let currentFilter = 'all'; 
     let searchQuery = '';
 
-    // ✅ نظام صوت الإشعارات الحقيقي
     const notifAudio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'); 
     function playNotifSound() {
         notifAudio.currentTime = 0;
@@ -774,7 +774,6 @@
         if (!userDoc.exists()) return;
         const u = userDoc.data();
         
-        // ✅ إصلاح عرض الباقة (يقرأ من plan أو package أو selectedPlan)
         const userPlan = u.plan || u.package || u.selectedPlan || u.planName || 'No Plan';
         const userExpiry = u.expiryDate || u.expiry || '-';
 
@@ -814,7 +813,6 @@
         showToast('✅ Deleted'); setTimeout(() => showScreen('usersScreen'), 1000);
     }
 
-    // ✅ دالة الذكاء الاصطناعي (تسحب السعر الحقيقي من Binance)
     async function generateAIAnalysis() {
         const coinSelect = document.getElementById('signalCoin');
         const directionSelect = document.getElementById('signalDirection');
@@ -823,20 +821,18 @@
         const tpInput = document.getElementById('signalTP');
         const notesInput = document.getElementById('signalNotes');
 
-        const pair = coinSelect.value; // مثال: BTC/USDT أو XAU/USD
+        const pair = coinSelect.value; 
         let basePrice = 0;
 
         try {
             showToast('⏳ Fetching real live price...');
 
             if (appMode === 'gold') {
-                // جلب سعر الذهب الحقيقي (API خارجي)
                 const res = await fetch('https://api.gold-api.com/price/XAU');
                 const data = await res.json();
                 basePrice = data.price;
             } else {
-                // جلب سعر العملة الحقيقي من Binance
-                const symbol = pair.replace('/', ''); // تحويل BTC/USDT إلى BTCUSDT
+                const symbol = pair.replace('/', ''); 
                 const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
                 const data = await res.json();
                 basePrice = parseFloat(data.price);
@@ -846,7 +842,6 @@
 
             const isBuy = Math.random() > 0.5;
             
-            // حساب وقف الخسارة والهدف بناءً على السعر الحقيقي
             const entry = basePrice.toFixed(2);
             const sl = isBuy ? (basePrice * 0.98).toFixed(2) : (basePrice * 1.02).toFixed(2);
             const tp = isBuy ? (basePrice * 1.04).toFixed(2) : (basePrice * 0.96).toFixed(2);
