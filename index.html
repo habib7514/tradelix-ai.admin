@@ -503,6 +503,10 @@
         if (window.firebaseReady) {
             const authModule = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js");
             const fsModule = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+            
+            // 👇 تم إضافة هذا السطر لربط الدردشة
+            window.firebaseFS = fsModule; 
+            
             auth = window.firebaseAuth; db = window.firebaseDB;
             signInWithEmailAndPassword = authModule.signInWithEmailAndPassword;
             signOut = authModule.signOut;
@@ -967,5 +971,7 @@
         document.addEventListener('click', () => { getAudioContext(); }, { once: true });
     });
 </script>
+<!-- ✅ إضافة ملف الدردشة -->
+<script src="chat.js"></script>
 </body>
 </html>
