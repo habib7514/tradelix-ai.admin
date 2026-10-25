@@ -497,8 +497,8 @@
     let currentFilter = 'all'; 
     let searchQuery = '';
 
-    // ✅ نغمة إشعار "دينغ" خفيفة وهادئة
-    const notifAudio = new Audio('https://assets.mixkit.co/active_settings/sfx/2358/2358-preview.mp3'); 
+    // ✅ نغمة إشعار "دينغ" خفيفة وهادئة جداً (بدون إزعاج)
+    const notifAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3'); 
     function playNotifSound() {
         notifAudio.currentTime = 0;
         notifAudio.play().catch(e => console.log('Audio play blocked by browser'));
