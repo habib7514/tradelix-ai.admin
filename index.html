@@ -823,14 +823,16 @@
         const userDoc = await getDoc(doc(db, 'tradelix_users', currentUserUID));
         const userData = userDoc.data();
         const userName = userData.name || userData.email || 'User';
-        const currentPlanType = userData.planType || '';
-
-        // ✅ التعديل الجذري: دمج الاشتراكات (ذهب + كريبتو + كورسات)
-        let finalPlanType = newPlanType;
-        if (currentPlanType === 'crypto' && newPlanType === 'gold') finalPlanType = 'both';
-        if (currentPlanType === 'gold' && newPlanType === 'crypto') finalPlanType = 'both';
-        if (currentPlanType === 'both' && (newPlanType === 'crypto' || newPlanType === 'gold')) finalPlanType = 'both';
-        if (newPlanType === 'courses' && (currentPlanType === 'crypto' || currentPlanType === 'gold' || currentPlanType === 'both')) finalPlanType = currentPlanType; // لا تلغي الباقات الأخرى عند شراء كورس
+        
+        // ✅ التعديل الجذري: لا تمسح الباقات القديمة أبداً
+        let finalPlanType = userData.planType || ''; 
+        if (newPlanType === 'crypto' && finalPlanType !== 'gold') finalPlanType = 'crypto';
+        if (newPlanType === 'crypto' && finalPlanType === 'gold') finalPlanType = 'both';
+        if (newPlanType === 'gold' && finalPlanType !== 'crypto') finalPlanType = 'gold';
+        if (newPlanType === 'gold' && finalPlanType === 'crypto') finalPlanType = 'both';
+        if (newPlanType === 'both') finalPlanType = 'both';
+        // إذا كان كورس، لا نغير planType إطلاقاً، نتركه كما هو
+        if (newPlanType === 'courses') finalPlanType = userData.planType || ''; 
 
         const updateData = {
             status: 'active', 
