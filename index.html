@@ -30,6 +30,7 @@
     </script>
     
     <style>
+        /* ... (نفس التنسيقات السابقة) ... */
         [data-netlify-badge], #netlify-badge, .netlify-badge, iframe[title="Netlify"], a[href*="netlify.com"] { display: none !important; }
         :root { --bg-color: #0a0a0a; --card-bg: #141414; --card-border: #2a2a2a; --gold: #d4af37; --gold-light: #f4d03f; --text-main: #ffffff; --text-muted: #888888; --green: #22c55e; --red: #ef4444; --orange: #f59e0b; --blue: #3b82f6; --btn-gold-bg: linear-gradient(135deg, #d4af37, #f4d03f); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -426,7 +427,7 @@
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
         <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">✅ Activate Subscription</h3>
         <div class="input-group"><label>Plan Type</label><select id="activatePlan"><option value="Weekly">VIP Weekly - $10</option><option value="15Days">VIP 15 Days - $20</option><option value="Monthly">VIP Monthly - $30</option><option value="Quarterly">VIP Quarterly - $70</option></select></div>
-        <div class="input-group"><label>Service Type</label><select id="activatePlanType"><option value="crypto">🪙 Crypto</option><option value="gold">🥇 Gold</option><option value="both">⭐ Both</option></select></div>
+        <div class="input-group"><label>Service Type</label><select id="activatePlanType"><option value="crypto">🪙 Crypto</option><option value="gold">🥇 Gold</option><option value="both">⭐ Both</option><option value="courses">🎓 Courses</option></select></div>
         <div class="input-group"><label>Start Date</label><input type="date" id="activateStartDate"></div>
         <button class="btn-block success" onclick="activateSubscription()" style="margin-bottom: 8px;">✅ Confirm</button>
         <button class="btn-block outline" onclick="closeActivateModal()">Cancel</button>
@@ -497,7 +498,7 @@
     let currentFilter = 'all'; 
     let searchQuery = '';
 
-    // ✅ نغمة إشعار هادئة
+    // ✅ نغمة إشعار هادئة جداً
     const notifAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); 
     function playNotifSound() {
         notifAudio.currentTime = 0;
@@ -632,21 +633,37 @@
                         }
                     }
                     
-                    // ✅ إشعار شراء الباقة (أي تغيير في حقل الباقة أو الخدمة)
+                    // ✅ إشعار شراء الباقة أو الكورس (التقاط أي تغيير في الحقول)
                     if (change.type === "modified") {
                         const data = change.doc.data();
-                        const hasPlan = data.plan || data.package || data.selectedPlan || data.planName;
+                        const hasPlan = data.plan || data.package || data.selectedPlan;
+                        const hasCourse = data.course || data.selectedCourse;
                         
-                        if (hasPlan) {
-                            const pType = (data.planType === 'gold') ? 'الذهب 🥇' : (data.planType === 'crypto' ? 'الكريبتو 🪙' : 'كلاهما ⭐');
-                            const pName = data.plan || data.package || data.selectedPlan || data.planName || 'VIP';
+                        if (hasPlan || hasCourse) {
+                            let pType = '';
+                            let pName = '';
                             
+                            if (hasCourse) {
+                                pType = 'كورس 🎓';
+                                pName = data.course || data.selectedCourse || 'كورس غير محدد';
+                            } else {
+                                // ✅ هنا التعديل: إذا كان الحقل غير موجود، نقرأ من اسم الباقة
+                                let rawType = data.planType || '';
+                                if (rawType === 'both' || !rawType) {
+                                    if ((data.plan || '').toLowerCase().includes('gold') || (data.plan || '').includes('ذهب')) rawType = 'gold';
+                                    else if ((data.plan || '').toLowerCase().includes('crypto') || (data.plan || '').includes('كريبتو')) rawType = 'crypto';
+                                }
+                                
+                                pType = (rawType === 'gold') ? 'الذهب 🥇' : (rawType === 'crypto' ? 'الكريبتو 🪙' : 'كلاهما ⭐');
+                                pName = data.plan || data.package || data.selectedPlan || 'VIP';
+                            }
+
                             // لتجنب التكرار، نتحقق مما إذا كان الإشعار قد أُرسل مؤخراً لنفس المستخدم
                             const lastNotif = localStorage.getItem('lastPlanNotif_' + data.uid);
-                            if (lastNotif !== pName) {
+                            if (lastNotif !== pName + pType) {
                                 triggerNotif(`💳 ${data.name || data.email} اشترك في باقة ${pType} - ${pName}`);
                                 playNotifSound();
-                                localStorage.setItem('lastPlanNotif_' + data.uid, pName);
+                                localStorage.setItem('lastPlanNotif_' + data.uid, pName + pType);
                             }
                         }
                     }
@@ -733,7 +750,7 @@
         if (!userDoc.exists()) return;
         const u = userDoc.data();
         
-        const userPlan = u.plan || u.package || u.selectedPlan || u.planName || u.subscription || 'No Plan';
+        const userPlan = u.plan || u.package || u.selectedPlan || u.planName || u.subscription || u.course || u.selectedCourse || 'No Plan';
         const userExpiry = u.expiryDate || u.expiry || '-';
 
         document.getElementById('detailName').textContent = u.name || '-';
@@ -763,7 +780,7 @@
         });
         
         // ✅ إرسال إشعار مباشر للجرس مع الصوت
-        const pTypeArabic = (planType === 'gold') ? 'الذهب 🥇' : (planType === 'crypto' ? 'الكريبتو 🪙' : 'كلاهما ⭐');
+        const pTypeArabic = (planType === 'gold') ? 'الذهب 🥇' : (planType === 'crypto' ? 'الكريبتو 🪙' : (planType === 'courses' ? 'كورس 🎓' : 'كلاهما ⭐'));
         triggerNotif(`💳 تم تفعيل باقة ${pTypeArabic} للمستخدم: ${userName} (VIP ${plan})`);
         playNotifSound();
 
