@@ -1139,7 +1139,15 @@
             let entry = currentPrice, sl = currentPrice * 0.995, tp = currentPrice * 1.01;
             if (direction === 'SELL') { sl = currentPrice * 1.005; tp = currentPrice * 0.99; }
 
-            currentAITrade = { direction, entry: entry.toFixed(2), sl: sl.toFixed(2), tp: tp.toFixed(2), confidence };
+            // ✅ دالة مساعدة لتنسيق الأسعار الصغيرة
+            function formatPrice(price) {
+                if (price >= 1) return price.toFixed(2);
+                if (price >= 0.01) return price.toFixed(4);
+                if (price >= 0.0001) return price.toFixed(6);
+                return price.toFixed(8);
+            }
+
+            currentAITrade = { direction, entry: formatPrice(entry), sl: formatPrice(sl), tp: formatPrice(tp), confidence };
 
             const dirColor = direction === 'BUY' ? 'var(--green)' : (direction === 'SELL' ? 'var(--red)' : 'var(--gold)');
 
@@ -1150,14 +1158,14 @@
                         <div style="font-size: 36px; font-weight: 900; color: ${dirColor}; letter-spacing: 3px;">${direction}</div>
                         <div style="margin-top: 8px;"><span style="background: rgba(212,175,55,0.15); color: var(--gold); padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1px solid var(--gold);">🎯 Confidence: ${confidence}%</span></div>
                     </div>
-                    <div class="detail-row"><span>Current Price</span><span>$${currentPrice.toFixed(2)}</span></div>
+                    <div class="detail-row"><span>Current Price</span><span>$${formatPrice(currentPrice)}</span></div>
                     <div class="detail-row"><span>RSI (14)</span><span>${rsi.toFixed(1)}</span></div>
                     <div class="detail-row"><span>Trend</span><span>${trend === 'UP' ? '📈 Uptrend' : '📉 Downtrend'}</span></div>
                 </div>
                 <div class="card">
-                    <div class="detail-row"><span>Entry</span><span>$${entry.toFixed(2)}</span></div>
-                    <div class="detail-row"><span>Stop Loss</span><span style="color: var(--red);">$${sl.toFixed(2)}</span></div>
-                    <div class="detail-row"><span>Take Profit</span><span style="color: var(--green);">$${tp.toFixed(2)}</span></div>
+                    <div class="detail-row"><span>Entry</span><span>$${formatPrice(entry)}</span></div>
+                    <div class="detail-row"><span>Stop Loss</span><span style="color: var(--red);">$${formatPrice(sl)}</span></div>
+                    <div class="detail-row"><span>Take Profit</span><span style="color: var(--green);">$${formatPrice(tp)}</span></div>
                 </div>
                 <button class="btn-block success" onclick="sendAISignal()" style="margin-bottom: 8px; font-size: 16px; padding: 16px;">📤 Send to Subscribers</button>
                 <button class="btn-block outline" onclick="applyAITrade()" style="margin-bottom: 8px;">📝 Edit Before Sending</button>
