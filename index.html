@@ -559,6 +559,7 @@
     let currentFilter = 'all'; 
     let searchQuery = '';
 
+    // ✅ نظام صوت الإشعارات
     const notifAudio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'); 
     function playNotifSound() {
         notifAudio.currentTime = 0;
@@ -691,15 +692,6 @@
                             playNotifSound();
                         }
                     }
-                    if (change.type === "modified") {
-                        const data = change.doc.data();
-                        if (data.status === 'active') {
-                             const pType = (data.planType === 'gold') ? '🥇 Gold' : (data.planType === 'crypto' ? '🪙 Crypto' : '⭐ Both');
-                             const pName = data.plan || data.package || 'VIP';
-                             triggerNotif(`💳 ${data.name || data.email} subscribed to ${pName} (${pType})`);
-                             playNotifSound();
-                        }
-                    }
                 });
             });
 
@@ -805,14 +797,16 @@
         const days = plan === 'Weekly' ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : 90));
         const expiry = new Date(new Date(startDate).getTime() + days * 24 * 60 * 60 * 1000);
         
+        const userDoc = await getDoc(doc(db, 'tradelix_users', currentUserUID));
+        const userName = userDoc.exists() ? (userDoc.data().name || userDoc.data().email) : 'User';
+
         await updateDoc(doc(db, 'tradelix_users', currentUserUID), {
             status: 'active', plan: 'VIP ' + plan, planType: planType, startDate: startDate, expiryDate: expiry.toISOString().split('T')[0]
         });
         
-        // ✅ إرسال إشعار مباشر للجرس
-        const userDoc = await getDoc(doc(db, 'tradelix_users', currentUserUID));
-        const userName = userDoc.exists() ? (userDoc.data().name || userDoc.data().email) : 'User';
-        triggerNotif(`💳 ${userName} subscribed to VIP ${plan} (${planType})`);
+        // ✅ إرسال إشعار مباشر للجرس مع الصوت (بدون تحديث الصفحة)
+        const pTypeArabic = (planType === 'gold') ? 'الذهب 🥇' : (planType === 'crypto' ? 'الكريبتو 🪙' : 'كلاهما ⭐');
+        triggerNotif(`💳 تم تفعيل باقة ${pTypeArabic} للمستخدم: ${userName} (VIP ${plan})`);
         playNotifSound();
 
         showToast('✅ Activated'); 
