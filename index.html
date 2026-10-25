@@ -782,7 +782,6 @@
         document.getElementById('detailStatus').textContent = (u.status || 'inactive').toUpperCase();
         document.getElementById('detailType').textContent = u.planType ? u.planType.toUpperCase() : 'N/A';
         
-        // Show independent expiries
         document.getElementById('detailCryptoExpiry').textContent = u.cryptoExpiry || '-';
         document.getElementById('detailGoldExpiry').textContent = u.goldExpiry || '-';
         document.getElementById('detailCourses').textContent = (u.courses && u.courses.length > 0) ? u.courses.join(', ') : '-';
@@ -803,11 +802,16 @@
     async function activateSubscription() {
         if (!currentUserUID) return;
         const plan = document.getElementById('activatePlan').value;
-        let selectedPlanType = document.getElementById('activatePlanType').value;
+        const selectedPlanType = document.getElementById('activatePlanType').value;
         const startDate = document.getElementById('activateStartDate').value;
         if (!startDate) { showToast('Please select start date'); return; }
         
         try {
+            const userRef = doc(db, 'tradelix_users', currentUserUID);
+            const userSnap = await getDoc(userRef);
+            if (!userSnap.exists()) return showToast('User not found');
+            const freshData = userSnap.data();
+
             const start = new Date(startDate);
             const days = plan === 'Weekly' ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : 90));
             const expiry = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
@@ -817,37 +821,42 @@
 
             if (selectedPlanType === 'course') {
                 const courseName = document.getElementById('activateCourseName').value;
-                updateData.courseRequest = null;
-                let currentCourses = currentUserData.courses || [];
+                let currentCourses = freshData.courses || [];
                 if (!currentCourses.includes(courseName)) {
                     currentCourses.push(courseName);
                 }
                 updateData.courses = currentCourses;
-                // Do NOT touch planType, plan, status, expiryDate
-                // This keeps the signals subscription active.
+                updateData.courseRequest = null; 
+                // DO NOT TOUCH status or planType for courses!
             } else {
-                // Crypto, Gold, or Both activation
                 updateData.status = 'active';
-                updateData.startDate = startDate;
-                updateData.plan = 'VIP ' + plan;
-                updateData.expiryDate = expiryDateStr; // Legacy fallback
                 
-                // Keep them separate and don't merge into 'both' unless explicitly selected
-                updateData.planType = selectedPlanType;
+                const hasCrypto = freshData.cryptoExpiry && new Date(freshData.cryptoExpiry) >= new Date();
+                const hasGold = freshData.goldExpiry && new Date(freshData.goldExpiry) >= new Date();
 
+                let newPlanType = selectedPlanType;
+                
                 if (selectedPlanType === 'crypto') {
                     updateData.cryptoExpiry = expiryDateStr;
+                    if (hasGold) newPlanType = 'both';
                 } else if (selectedPlanType === 'gold') {
                     updateData.goldExpiry = expiryDateStr;
+                    if (hasCrypto) newPlanType = 'both';
                 } else if (selectedPlanType === 'both') {
                     updateData.cryptoExpiry = expiryDateStr;
                     updateData.goldExpiry = expiryDateStr;
+                    newPlanType = 'both';
                 }
+
+                updateData.planType = newPlanType;
+                updateData.plan = 'VIP ' + plan;
+                updateData.startDate = startDate;
+                updateData.expiryDate = expiryDateStr;
             }
 
-            await updateDoc(doc(db, 'tradelix_users', currentUserUID), updateData);
+            await updateDoc(userRef, updateData);
 
-            showToast('✅ Subscription activated!');
+            showToast('✅ Activated successfully!');
             closeActivateModal();
             setTimeout(() => openUserDetail(currentUserUID), 1000);
         } catch (error) { 
@@ -859,7 +868,7 @@
     async function deactivateUserSubscription() {
         if (!currentUserUID || !confirm('Deactivate?')) return;
         try {
-            await updateDoc(doc(db, 'tradelix_users', currentUserUID), { status: 'inactive', plan: null, planType: null, cryptoExpiry: null, goldExpiry: null });
+            await updateDoc(doc(db, 'tradelix_users', currentUserUID), { status: 'inactive', plan: null, planType: null, cryptoExpiry: null, goldExpiry: null, courses: [] });
             showToast('✅ Deactivated'); setTimeout(() => openUserDetail(currentUserUID), 1000);
         } catch(e) { showToast('Error'); }
     }
