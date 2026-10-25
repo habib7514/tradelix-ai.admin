@@ -73,6 +73,7 @@
         .bell-icon { background: #1a1a1a; border: 1px solid #333; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--gold); cursor: pointer; position: relative; }
         .notifBadge { position: absolute; top: -4px; right: -4px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 8px rgba(246, 70, 93, 0.8); animation: pulse 1.5s infinite; pointer-events: none; }
 
+        /* ✅ التصميم الجديد لزر التوصيات (أزرق، لامع، يتحرك) */
         .recommendation-blue-btn {
             font-family: 'Tajawal', sans-serif;
             font-size: 17px;
@@ -140,6 +141,7 @@
             }
         }
 
+        /* ✅ زر الدردشة الجديد (أخضر) */
         .chat-btn {
             font-family: 'Tajawal', sans-serif;
             font-size: 17px;
@@ -425,18 +427,7 @@
         <button id="btnSignalGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Tradix Gold</button>
     </div>
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Send a new signal. Based on the mode selected above.</p>
-    
     <div class="card">
-        <!-- ✅ زر الذكاء الاصطناعي (في الأعلى) -->
-        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-            <button class="btn-block" style="flex: 1; background: linear-gradient(90deg, #8A2BE2, #FF00FF); color: white; font-weight: 900; margin: 0;" onclick="generateAIAnalysis()">
-                🤖 AI Analyze
-            </button>
-            <button class="btn-block" style="flex: 1; background: linear-gradient(90deg, #22c55e, #16a34a); color: white; font-weight: 900; margin: 0;" onclick="sendSignal()">
-                🚀 Publish Trade
-            </button>
-        </div>
-
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">📈 Signal Details</h3>
         <div class="input-group">
             <label>Pair / Coin</label>
@@ -449,6 +440,13 @@
         <div class="input-group"><label>Stop Loss</label><input type="text" id="signalSL"></div>
         <div class="input-group"><label>Take Profit</label><input type="text" id="signalTP"></div>
         <div class="input-group"><label>Notes (Optional)</label><textarea id="signalNotes"></textarea></div>
+        
+        <!-- ✅ زر الذكاء الاصطناعي -->
+        <button class="btn-block" style="background: linear-gradient(90deg, #8A2BE2, #FF00FF); color: white; margin-bottom: 10px; font-weight: 900;" onclick="generateAIAnalysis()">
+            🤖 AI Analyze & Auto-Fill
+        </button>
+
+        <button class="btn-block" onclick="sendSignal()">📤 Send Signal</button>
     </div>
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
@@ -560,13 +558,11 @@
     let currentFilter = 'all'; 
     let searchQuery = '';
 
-    // ✅ نظام صوت الإشعارات
-    const notifAudio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU' + '1234567890' + '1234567890'); 
+    // ✅ نظام صوت الإشعارات الحقيقي
+    const notifAudio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'); 
     function playNotifSound() {
-        try {
-            notifAudio.currentTime = 0;
-            notifAudio.play().catch(e => console.log('Audio play blocked by browser'));
-        } catch(e) {}
+        notifAudio.currentTime = 0;
+        notifAudio.play().catch(e => console.log('Audio play blocked by browser'));
     }
 
     setTimeout(() => {
@@ -767,7 +763,7 @@
         list.innerHTML = filtered.map(u => `
             <div class="user-card" onclick="openUserDetail('${u.uid}')">
                 <div class="user-header"><div><div class="user-name">${u.name || 'Unknown'}</div><div class="user-email">${u.email || ''}</div></div><span class="user-status ${u.status || 'inactive'}">${(u.status || 'inactive').toUpperCase()}</span></div>
-                <div class="user-info">${u.plan ? `💎 ${u.plan}` : '💎 No Plan'}</div>
+                <div class="user-info">${u.plan ? `💎 ${u.plan}` : (u.package ? `💎 ${u.package}` : '💎 No Plan')}</div>
             </div>`).join('');
     }
 
@@ -777,12 +773,17 @@
         const userDoc = await getDoc(doc(db, 'tradelix_users', uid));
         if (!userDoc.exists()) return;
         const u = userDoc.data();
+        
+        // ✅ إصلاح عرض الباقة (يقرأ من plan أو package أو selectedPlan)
+        const userPlan = u.plan || u.package || u.selectedPlan || u.planName || 'No Plan';
+        const userExpiry = u.expiryDate || u.expiry || '-';
+
         document.getElementById('detailName').textContent = u.name || '-';
         document.getElementById('detailEmail').textContent = u.email || '-';
         document.getElementById('detailCreated').textContent = u.createdAt ? new Date(u.createdAt.seconds * 1000).toLocaleDateString('en-GB') : '-';
         document.getElementById('detailStatus').textContent = (u.status || 'inactive').toUpperCase();
-        document.getElementById('detailPlan').textContent = u.plan || 'No Plan';
-        document.getElementById('detailExpiry').textContent = u.expiryDate || '-';
+        document.getElementById('detailPlan').textContent = userPlan; 
+        document.getElementById('detailExpiry').textContent = userExpiry;
         showScreen('userDetailScreen');
     }
 
