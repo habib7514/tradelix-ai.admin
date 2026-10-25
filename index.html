@@ -425,8 +425,24 @@
 <div id="activateModal" class="screen" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99998; display: none; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
         <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">✅ Activate Subscription</h3>
-        <div class="input-group"><label>Plan Type</label><select id="activatePlan"><option value="Weekly">VIP Weekly - $10</option><option value="15Days">VIP 15 Days - $20</option><option value="Monthly">VIP Monthly - $30</option><option value="Quarterly">VIP Quarterly - $70</option></select></div>
-        <div class="input-group"><label>Service Type</label><select id="activatePlanType"><option value="crypto">🪙 Crypto</option><option value="gold">🥇 Gold</option><option value="both">⭐ Both</option><option value="courses">🎓 Courses</option></select></div>
+        
+        <div class="input-group">
+            <label>Service Type</label>
+            <select id="activatePlanType" onchange="updatePlanOptions()">
+                <option value="crypto">🪙 Crypto</option>
+                <option value="gold">🥇 Gold</option>
+                <option value="both">⭐ Both</option>
+                <option value="courses">🎓 Courses</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Plan Type / Course</label>
+            <select id="activatePlan">
+                <!-- Options will be populated dynamically -->
+            </select>
+        </div>
+        
         <div class="input-group"><label>Start Date</label><input type="date" id="activateStartDate"></div>
         <button class="btn-block success" onclick="activateSubscription()" style="margin-bottom: 8px;">✅ Confirm</button>
         <button class="btn-block outline" onclick="closeActivateModal()">Cancel</button>
@@ -767,26 +783,64 @@
         showScreen('userDetailScreen');
     }
 
-    function openActivateModal() { document.getElementById('activateModal').style.display = 'flex'; document.getElementById('activateStartDate').value = new Date().toISOString().split('T')[0]; }
+    // ✅ دالة جديدة لتحديث خيارات الباقة عند تغيير نوع الخدمة
+    function updatePlanOptions() {
+        const planType = document.getElementById('activatePlanType').value;
+        const planSelect = document.getElementById('activatePlan');
+        
+        if (planType === 'courses') {
+            planSelect.innerHTML = `
+                <option value="Trading Basics">Trading Basics ($20)</option>
+                <option value="Technical Analysis">Technical Analysis ($20)</option>
+                <option value="Risk Management">Risk Management ($20)</option>
+                <option value="Advanced Strategies">Advanced Strategies ($20)</option>
+            `;
+        } else {
+            planSelect.innerHTML = `
+                <option value="Weekly">VIP Weekly - $10</option>
+                <option value="15Days">VIP 15 Days - $20</option>
+                <option value="Monthly">VIP Monthly - $30</option>
+                <option value="Quarterly">VIP Quarterly - $70</option>
+            `;
+        }
+    }
+
+    function openActivateModal() { 
+        document.getElementById('activateModal').style.display = 'flex'; 
+        document.getElementById('activateStartDate').value = new Date().toISOString().split('T')[0]; 
+        document.getElementById('activatePlanType').value = 'crypto'; // إعادة تعيين النوع الافتراضي
+        updatePlanOptions(); // تحديث الخيارات بناءً على النوع الافتراضي
+    }
     function closeActivateModal() { document.getElementById('activateModal').style.display = 'none'; }
 
     async function activateSubscription() {
         const plan = document.getElementById('activatePlan').value;
         const planType = document.getElementById('activatePlanType').value;
         const startDate = document.getElementById('activateStartDate').value;
-        const days = plan === 'Weekly' ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : 90));
+        const days = (plan === 'Weekly') ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : (plan === 'Quarterly' ? 90 : 30))); // 30 يوم للكورسات كافتراضي
         const expiry = new Date(new Date(startDate).getTime() + days * 24 * 60 * 60 * 1000);
         
         const userDoc = await getDoc(doc(db, 'tradelix_users', currentUserUID));
         const userName = userDoc.exists() ? (userDoc.data().name || userDoc.data().email) : 'User';
 
-        await updateDoc(doc(db, 'tradelix_users', currentUserUID), {
-            status: 'active', plan: 'VIP ' + plan, planType: planType, startDate: startDate, expiryDate: expiry.toISOString().split('T')[0]
-        });
+        const updateData = {
+            status: 'active', 
+            plan: (planType === 'courses' ? plan : 'VIP ' + plan), 
+            planType: planType, 
+            startDate: startDate, 
+            expiryDate: expiry.toISOString().split('T')[0]
+        };
+
+        // إذا كان كورس، نحفظه في حقل course أيضاً
+        if (planType === 'courses') {
+            updateData.course = plan; 
+        }
+
+        await updateDoc(doc(db, 'tradelix_users', currentUserUID), updateData);
         
         // ✅ إرسال إشعار مباشر للجرس مع الصوت
         const pTypeArabic = (planType === 'gold') ? 'الذهب 🥇' : (planType === 'crypto' ? 'الكريبتو 🪙' : (planType === 'courses' ? 'كورس 🎓' : 'كلاهما ⭐'));
-        triggerNotif(`💳 تم تفعيل باقة ${pTypeArabic} للمستخدم: ${userName} (VIP ${plan})`);
+        triggerNotif(`💳 تم تفعيل باقة ${pTypeArabic} للمستخدم: ${userName} (${plan})`);
         playNotifSound();
 
         showToast('✅ Activated'); 
@@ -796,7 +850,7 @@
 
     async function deactivateUserSubscription() {
         if (!confirm('Deactivate?')) return;
-        await updateDoc(doc(db, 'tradelix_users', currentUserUID), { status: 'inactive', plan: null, planType: null });
+        await updateDoc(doc(db, 'tradelix_users', currentUserUID), { status: 'inactive', plan: null, planType: null, course: null });
         showToast('✅ Deactivated'); setTimeout(() => openUserDetail(currentUserUID), 1000);
     }
 
