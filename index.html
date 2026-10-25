@@ -182,7 +182,6 @@
     <div class="card" style="padding: 14px;">
         <button class="btn-block" onclick="showScreen('sendSignalScreen')" style="margin-bottom: 8px;">📤 Send New Signal</button>
         <button class="btn-block outline" onclick="showScreen('usersScreen')" style="margin-bottom: 8px;">👥 Manage Users</button>
-        <!-- ✅ NEW BUTTON FOR MANAGING SIGNALS -->
         <button class="btn-block outline" onclick="openManageSignals()" style="border-color: var(--red); color: var(--red);">🗑️ Manage Sent Signals</button>
     </div>
 
@@ -197,7 +196,6 @@
     </div>
 </div>
 
-<!-- ✅ NEW SCREEN: MANAGE SIGNALS -->
 <div id="manageSignalsScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>SIGNAL HISTORY</h1><span>● DELETE OLD</span></div></div>
@@ -256,9 +254,10 @@
     <div class="card">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💎 Subscription</h3>
         <div class="detail-row"><span>Status</span><span id="detailStatus">-</span></div>
-        <div class="detail-row"><span>Plan</span><span id="detailPlan">-</span></div>
-        <div class="detail-row"><span>Type</span><span id="detailType">-</span></div>
-        <div class="detail-row"><span>Expiry Date</span><span id="detailExpiry">-</span></div>
+        <div class="detail-row"><span>Plan Type</span><span id="detailType">-</span></div>
+        <div class="detail-row"><span>Crypto Expiry</span><span id="detailCryptoExpiry">-</span></div>
+        <div class="detail-row"><span>Gold Expiry</span><span id="detailGoldExpiry">-</span></div>
+        <div class="detail-row"><span>Courses</span><span id="detailCourses">-</span></div>
     </div>
     <div class="section-title">⚡ ACTIONS</div>
     <div class="card" style="padding: 14px;">
@@ -466,11 +465,33 @@
     </div>
 </div>
 
+<!-- ✅ UPDATED: ACTIVATE MODAL WITH COURSE OPTION -->
 <div id="activateModal" class="screen" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99998; display: none; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
         <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">✅ Activate Subscription</h3>
         <div class="input-group"><label>Plan Type</label><select id="activatePlan"><option value="Weekly">VIP Weekly - $10</option><option value="15Days">VIP 15 Days - $20</option><option value="Monthly">VIP Monthly - $30</option><option value="Quarterly">VIP Quarterly - $70</option></select></div>
-        <div class="input-group"><label>Service Type</label><select id="activatePlanType"><option value="crypto">🪙 Crypto</option><option value="gold">🥇 Gold</option><option value="both">⭐ Both</option></select></div>
+        
+        <div class="input-group">
+            <label>Service Type</label>
+            <select id="activatePlanType" onchange="toggleCourseInput()">
+                <option value="crypto">🪙 Crypto</option>
+                <option value="gold">🥇 Gold</option>
+                <option value="both">⭐ Both</option>
+                <option value="course">🎓 Course</option>
+            </select>
+        </div>
+
+        <!-- Course Selection Dropdown (Hidden by default) -->
+        <div class="input-group" id="courseSelectionGroup" style="display: none;">
+            <label>Select Course Name</label>
+            <select id="activateCourseName">
+                <option value="Trading Basics">1️⃣ Trading Basics</option>
+                <option value="Technical Analysis">2️⃣ Technical Analysis</option>
+                <option value="Risk Management">3️⃣ Risk Management</option>
+                <option value="Advanced Strategies">4️⃣ Advanced Strategies</option>
+            </select>
+        </div>
+
         <div class="input-group"><label>Start Date</label><input type="date" id="activateStartDate"></div>
         <button class="btn-block success" onclick="activateSubscription()" style="margin-bottom: 8px;">✅ Confirm</button>
         <button class="btn-block outline" onclick="closeActivateModal()">Cancel</button>
@@ -557,7 +578,11 @@
         }
     }
 
-    // ✅ NEW FUNCTIONS FOR MANAGING SIGNALS
+    function toggleCourseInput() {
+        const type = document.getElementById('activatePlanType').value;
+        document.getElementById('courseSelectionGroup').style.display = (type === 'course') ? 'block' : 'none';
+    }
+
     function openManageSignals() {
         showScreen('manageSignalsScreen');
         loadSignalsForAdmin(currentManageMode);
@@ -755,9 +780,13 @@
         document.getElementById('detailEmail').textContent = u.email || '-';
         document.getElementById('detailCreated').textContent = u.createdAt ? new Date(u.createdAt.seconds * 1000).toLocaleDateString('en-GB') : '-';
         document.getElementById('detailStatus').textContent = (u.status || 'inactive').toUpperCase();
-        document.getElementById('detailPlan').textContent = u.plan || 'No Plan';
         document.getElementById('detailType').textContent = u.planType ? u.planType.toUpperCase() : 'N/A';
-        document.getElementById('detailExpiry').textContent = u.expiryDate || '-';
+        
+        // Show independent expiries
+        document.getElementById('detailCryptoExpiry').textContent = u.cryptoExpiry || '-';
+        document.getElementById('detailGoldExpiry').textContent = u.goldExpiry || '-';
+        document.getElementById('detailCourses').textContent = (u.courses && u.courses.length > 0) ? u.courses.join(', ') : '-';
+
         showScreen('userDetailScreen');
     }
 
@@ -767,6 +796,7 @@
         if (currentUserData && currentUserData.planType) {
             document.getElementById('activatePlanType').value = currentUserData.planType;
         }
+        toggleCourseInput(); 
     }
     function closeActivateModal() { document.getElementById('activateModal').style.display = 'none'; }
 
@@ -776,30 +806,60 @@
         let selectedPlanType = document.getElementById('activatePlanType').value;
         const startDate = document.getElementById('activateStartDate').value;
         if (!startDate) { showToast('Please select start date'); return; }
+        
         try {
             const start = new Date(startDate);
             const days = plan === 'Weekly' ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : 90));
             const expiry = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
+            const expiryDateStr = expiry.toISOString().split('T')[0];
+            
+            let updateData = {};
 
-            let currentPlanType = currentUserData?.planType || 'none';
-            let finalPlanType = selectedPlanType;
-            if (selectedPlanType === 'crypto' && (currentPlanType === 'gold' || currentPlanType === 'both')) finalPlanType = 'both';
-            else if (selectedPlanType === 'gold' && (currentPlanType === 'crypto' || currentPlanType === 'both')) finalPlanType = 'both';
+            if (selectedPlanType === 'course') {
+                const courseName = document.getElementById('activateCourseName').value;
+                updateData.courseRequest = null;
+                let currentCourses = currentUserData.courses || [];
+                if (!currentCourses.includes(courseName)) {
+                    currentCourses.push(courseName);
+                }
+                updateData.courses = currentCourses;
+                // Do NOT touch planType, plan, status, expiryDate
+                // This keeps the signals subscription active.
+            } else {
+                // Crypto, Gold, or Both activation
+                updateData.status = 'active';
+                updateData.startDate = startDate;
+                updateData.plan = 'VIP ' + plan;
+                updateData.expiryDate = expiryDateStr; // Legacy fallback
+                
+                // Keep them separate and don't merge into 'both' unless explicitly selected
+                updateData.planType = selectedPlanType;
 
-            await updateDoc(doc(db, 'tradelix_users', currentUserUID), {
-                status: 'active', plan: 'VIP ' + plan, planType: finalPlanType, startDate: startDate, expiryDate: expiry.toISOString().split('T')[0]
-            });
+                if (selectedPlanType === 'crypto') {
+                    updateData.cryptoExpiry = expiryDateStr;
+                } else if (selectedPlanType === 'gold') {
+                    updateData.goldExpiry = expiryDateStr;
+                } else if (selectedPlanType === 'both') {
+                    updateData.cryptoExpiry = expiryDateStr;
+                    updateData.goldExpiry = expiryDateStr;
+                }
+            }
+
+            await updateDoc(doc(db, 'tradelix_users', currentUserUID), updateData);
 
             showToast('✅ Subscription activated!');
             closeActivateModal();
             setTimeout(() => openUserDetail(currentUserUID), 1000);
-        } catch (error) { showToast('Error activating'); }
+        } catch (error) { 
+            console.error(error);
+            showToast('Error activating'); 
+        }
     }
 
     async function deactivateUserSubscription() {
         if (!currentUserUID || !confirm('Deactivate?')) return;
         try {
-            await updateDoc(doc(db, 'tradelix_users', currentUserUID), { status: 'inactive', plan: null, planType: null });
+            await updateDoc(doc(db, 'tradelix_users', currentUserUID), { status: 'inactive', plan: null, planType: null, cryptoExpiry: null, goldExpiry: null });
             showToast('✅ Deactivated'); setTimeout(() => openUserDetail(currentUserUID), 1000);
         } catch(e) { showToast('Error'); }
     }
