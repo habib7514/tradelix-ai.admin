@@ -9,7 +9,6 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -255,9 +254,16 @@
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💎 Subscription</h3>
         <div class="detail-row"><span>Status</span><span id="detailStatus">-</span></div>
         <div class="detail-row"><span>Plan Type</span><span id="detailType">-</span></div>
+        
+        <!-- ✅ صندوق اسم الكورس المطلوب -->
+        <div class="detail-row" style="background: rgba(245, 158, 11, 0.1); border-radius: 8px; padding: 10px; margin: 10px 0; border: 1px dashed var(--orange);">
+            <span style="color: var(--orange); font-weight: 900;">Course Requested</span>
+            <span id="detailPendingRequest" style="color: var(--orange); font-weight: 900; font-size: 14px;">-</span>
+        </div>
+        
         <div class="detail-row"><span>Crypto Expiry</span><span id="detailCryptoExpiry">-</span></div>
         <div class="detail-row"><span>Gold Expiry</span><span id="detailGoldExpiry">-</span></div>
-        <div class="detail-row"><span>Courses</span><span id="detailCourses">-</span></div>
+        <div class="detail-row"><span>Active Courses</span><span id="detailCourses">-</span></div>
     </div>
     <div class="section-title">⚡ ACTIONS</div>
     <div class="card" style="padding: 14px;">
@@ -780,6 +786,9 @@
         document.getElementById('detailStatus').textContent = (u.status || 'inactive').toUpperCase();
         document.getElementById('detailType').textContent = u.planType ? u.planType.toUpperCase() : 'N/A';
         
+        let reqText = u.courseRequest ? u.courseRequest : (u.plan && u.status === 'pending' ? u.plan : 'None');
+        document.getElementById('detailPendingRequest').textContent = reqText;
+
         document.getElementById('detailCryptoExpiry').textContent = u.cryptoExpiry || '-';
         document.getElementById('detailGoldExpiry').textContent = u.goldExpiry || '-';
         document.getElementById('detailCourses').textContent = (u.courses && u.courses.length > 0) ? u.courses.join(', ') : '-';
@@ -790,11 +799,25 @@
     function openActivateModal() { 
         document.getElementById('activateModal').style.display = 'flex'; 
         document.getElementById('activateStartDate').value = new Date().toISOString().split('T')[0]; 
-        if (currentUserData && currentUserData.planType) {
+        
+        // Auto-fill if user requested a course
+        if (currentUserData && currentUserData.courseRequest) {
+            document.getElementById('activatePlanType').value = 'course';
+            let cName = currentUserData.courseRequest.replace('Course: ', '').trim();
+            let select = document.getElementById('activateCourseName');
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].value.includes(cName) || cName.includes(select.options[i].value)) {
+                    select.selectedIndex = i;
+                    break;
+                }
+            }
+        } else if (currentUserData && currentUserData.planType) {
             document.getElementById('activatePlanType').value = currentUserData.planType;
         }
+        
         toggleCourseInput(); 
     }
+    
     function closeActivateModal() { document.getElementById('activateModal').style.display = 'none'; }
 
     async function activateSubscription() {
@@ -817,7 +840,6 @@
             
             let updateData = {};
 
-            // 1. Handle Course Addition
             if (selectedPlanType === 'course') {
                 const courseName = document.getElementById('activateCourseName').value;
                 let currentCourses = freshData.courses || [];
@@ -825,14 +847,11 @@
                     currentCourses.push(courseName);
                 }
                 updateData.courses = currentCourses;
-                updateData.courseRequest = null; // Clear pending request
-                
-                // If they don't have an active signal plan, just set the plan name to the course
+                updateData.courseRequest = null; 
                 if (!freshData.planType || freshData.planType === 'course') {
                     updateData.plan = 'Course: ' + courseName;
                 }
             } else {
-                // 2. Handle Signal Activation (Crypto, Gold, Both)
                 updateData.status = 'active';
                 updateData.startDate = startDate;
                 updateData.plan = 'VIP ' + plan;
@@ -846,7 +865,6 @@
                 }
             }
 
-            // 3. Recalculate planType dynamically to prevent wiping existing access
             const finalCryptoExpiry = updateData.cryptoExpiry || freshData.cryptoExpiry;
             const finalGoldExpiry = updateData.goldExpiry || freshData.goldExpiry;
 
@@ -863,7 +881,6 @@
                 updateData.planType = 'gold';
                 updateData.status = 'active';
             } else if (selectedPlanType === 'course' && !isCryptoActive && !isGoldActive) {
-                // If they ONLY have a course and no signals
                 updateData.planType = 'course';
             }
 
@@ -1161,7 +1178,6 @@
         document.addEventListener('click', () => { getAudioContext(); }, { once: true });
     });
 </script>
-<!-- ✅ Chat Script -->
 <script src="chat.js?v=10"></script>
 </body>
 </html>
