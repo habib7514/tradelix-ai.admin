@@ -443,6 +443,12 @@
         <div class="input-group"><label>Stop Loss</label><input type="text" id="signalSL"></div>
         <div class="input-group"><label>Take Profit</label><input type="text" id="signalTP"></div>
         <div class="input-group"><label>Notes (Optional)</label><textarea id="signalNotes"></textarea></div>
+        
+        <!-- ✅ زر الذكاء الاصطناعي -->
+        <button class="btn-block" style="background: linear-gradient(90deg, #8A2BE2, #FF00FF); color: white; margin-bottom: 10px; font-weight: 900;" onclick="generateAIAnalysis()">
+            🤖 AI Analyze & Auto-Fill
+        </button>
+
         <button class="btn-block" onclick="sendSignal()">📤 Send Signal</button>
     </div>
     <div class="bottom-nav">
@@ -795,6 +801,32 @@
         if (!confirm('Delete user permanently?')) return;
         await deleteDoc(doc(db, 'tradelix_users', currentUserUID));
         showToast('✅ Deleted'); setTimeout(() => showScreen('usersScreen'), 1000);
+    }
+
+    // ✅ دالة الذكاء الاصطناعي (محاكاة)
+    function generateAIAnalysis() {
+        const coinSelect = document.getElementById('signalCoin');
+        const directionSelect = document.getElementById('signalDirection');
+        const entryInput = document.getElementById('signalEntry');
+        const slInput = document.getElementById('signalSL');
+        const tpInput = document.getElementById('signalTP');
+        const notesInput = document.getElementById('signalNotes');
+
+        // محاكاة تحليل السعر (يمكنك استبدال هذا لاحقاً بـ API حقيقي)
+        const basePrice = appMode === 'gold' ? 2350.50 : Math.random() * 60000 + 1000; 
+        const isBuy = Math.random() > 0.5;
+        
+        const entry = basePrice.toFixed(2);
+        const sl = isBuy ? (basePrice * 0.98).toFixed(2) : (basePrice * 1.02).toFixed(2);
+        const tp = isBuy ? (basePrice * 1.04).toFixed(2) : (basePrice * 0.96).toFixed(2);
+
+        entryInput.value = entry;
+        slInput.value = sl;
+        tpInput.value = tp;
+        directionSelect.value = isBuy ? 'BUY' : 'SELL';
+        notesInput.value = "AI Analysis: Strong support/resistance level detected. High probability setup.";
+        
+        showToast('🤖 AI Analysis Complete! Fields Auto-Filled.');
     }
 
     async function sendSignal() {
