@@ -774,7 +774,7 @@
         if (!userDoc.exists()) return;
         const u = userDoc.data();
         
-        const userPlan = u.plan || u.package || u.selectedPlan || u.planName || 'No Plan';
+        const userPlan = u.plan || u.package || u.selectedPlan || u.planName || u.subscription || 'No Plan';
         const userExpiry = u.expiryDate || u.expiry || '-';
 
         document.getElementById('detailName').textContent = u.name || '-';
@@ -795,10 +795,18 @@
         const startDate = document.getElementById('activateStartDate').value;
         const days = plan === 'Weekly' ? 7 : (plan === '15Days' ? 15 : (plan === 'Monthly' ? 30 : 90));
         const expiry = new Date(new Date(startDate).getTime() + days * 24 * 60 * 60 * 1000);
+        
         await updateDoc(doc(db, 'tradelix_users', currentUserUID), {
             status: 'active', plan: 'VIP ' + plan, planType: planType, startDate: startDate, expiryDate: expiry.toISOString().split('T')[0]
         });
-        showToast('✅ Activated'); closeActivateModal(); setTimeout(() => openUserDetail(currentUserUID), 1000);
+        
+        // ✅ إضافة إشعار صوتي فور التفعيل
+        triggerNotif('💳 User activated plan: VIP ' + plan);
+        playNotifSound();
+
+        showToast('✅ Activated'); 
+        closeActivateModal(); 
+        setTimeout(() => openUserDetail(currentUserUID), 1000);
     }
 
     async function deactivateUserSubscription() {
