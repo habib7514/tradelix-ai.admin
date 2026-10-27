@@ -103,10 +103,13 @@
         .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 13px; }
         .detail-row span:first-child { color: var(--text-muted); }
         .detail-row span:last-child { color: var(--gold-light); font-weight: 700; text-align: right; max-width: 60%; word-break: break-all; }
+        
+        /* ✅ تعديل الشريط السفلي ليتسع لـ 5 أزرار */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d0d0d; border-top: 1px solid #222; display: flex; justify-content: space-around; padding: 10px 0 18px 0; z-index: 9999; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 9px; text-decoration: none; width: 25%; cursor: pointer; background: none; border: none; font-family: inherit; padding: 4px 0; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 9px; text-decoration: none; flex: 1; cursor: pointer; background: none; border: none; font-family: inherit; padding: 4px 0; }
         .nav-item.active { color: var(--gold); }
         .nav-item .icon { font-size: 20px; }
+        
         .hidden { display: none !important; }
         .toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--gold); color: #000; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; opacity: 0; transition: 0.3s; z-index: 99999; text-align: center; }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -165,6 +168,20 @@
         </div>
     </div>
 
+    <!-- ✅ زر الإحالة السريع -->
+    <a href="javascript:void(0)" onclick="showScreen('referralsScreen'); loadReferrals();" style="text-decoration: none; display: block; margin-bottom: 16px;">
+        <div style="background: linear-gradient(135deg, #1A1500, #2A2000); border: 1.5px solid var(--gold); border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 24px;">🎁</span>
+                <div style="text-align: left;">
+                    <div style="color: var(--gold); font-weight: 900; font-size: 15px;">Referrals Management</div>
+                    <div style="color: var(--text-muted); font-size: 11px;">Manage invites & give rewards</div>
+                </div>
+            </div>
+            <span style="color: var(--gold); font-size: 24px; font-weight: 900;">›</span>
+        </div>
+    </a>
+
     <div class="mode-toggle">
         <button id="btnModeCrypto" class="mode-btn active" onclick="switchMode('crypto')">🪙 Tradelix</button>
         <button id="btnModeGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Tradix Gold</button>
@@ -188,10 +205,55 @@
     <div id="recentActivity"><div class="empty-state"><div class="icon">📭</div><h3>No Activity Yet</h3></div></div>
 
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item active" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+    </div>
+</div>
+
+<!-- ✅ شاشة الإحالات الجديدة -->
+<div id="referralsScreen" class="screen">
+    <div class="header">
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>REFERRALS</h1><span>● MANAGEMENT</span></div></div>
+        <div class="bell-icon" onclick="openNotifModal()">🔔</div>
+    </div>
+    
+    <div style="display:flex; gap:8px; margin-bottom:16px;">
+        <button class="btn-small view" onclick="filterReferrals('all')" id="refBtnAll" style="flex:1;">All</button>
+        <button class="btn-small" style="background:var(--orange); color:#fff; flex:1;" onclick="filterReferrals('pending')" id="refBtnPending">Ready for Reward</button>
+        <button class="btn-small approve" onclick="filterReferrals('rewarded')" id="refBtnRewarded" style="flex:1;">Rewarded</button>
+    </div>
+
+    <div id="referralsList">
+        <div class="empty-state"><div class="icon">⏳</div><h3>Loading referrals...</h3></div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
+        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item active" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
+        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+    </div>
+</div>
+
+<!-- ✅ نافذة إعطاء الهدية -->
+<div id="rewardModal" class="screen" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99998; display: none; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
+        <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">🎁 Give Referral Reward</h3>
+        
+        <div class="detail-row"><span>Referrer</span><span id="rewardReferrerName">-</span></div>
+        <div class="detail-row"><span>Current Crypto Expiry</span><span id="rewardCurrentExpiry">-</span></div>
+        <div class="detail-row"><span>Days Left</span><span id="rewardDaysLeft">-</span></div>
+        
+        <div style="background: rgba(34, 197, 94, 0.1); border: 1px dashed var(--green); border-radius: 8px; padding: 12px; margin: 15px 0; text-align: center;">
+            <span style="color: var(--green); font-weight: 900; font-size: 14px;">New Expiry: <br><span id="rewardNewExpiry" style="font-size: 18px; margin-top: 5px; display: inline-block;">-</span></span>
+        </div>
+
+        <button class="btn-block success" onclick="confirmReward()" style="margin-bottom: 8px;">✅ Confirm & Add 7 Days</button>
+        <button class="btn-block outline" onclick="closeRewardModal()">Cancel</button>
     </div>
 </div>
 
@@ -209,8 +271,9 @@
     <div id="adminSignalsList"></div>
 
     <div class="bottom-nav">
-        <button class="nav-item active" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
@@ -232,8 +295,9 @@
     <div id="usersList"><div class="empty-state"><div class="icon">⏳</div><h3>Loading users...</h3></div></div>
 
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
@@ -255,7 +319,6 @@
         <div class="detail-row"><span>Status</span><span id="detailStatus">-</span></div>
         <div class="detail-row"><span>Plan Type</span><span id="detailType">-</span></div>
         
-        <!-- ✅ صندوق اسم الكورس المطلوب -->
         <div class="detail-row" style="background: rgba(245, 158, 11, 0.1); border-radius: 8px; padding: 10px; margin: 10px 0; border: 1px dashed var(--orange);">
             <span style="color: var(--orange); font-weight: 900;">Course Requested</span>
             <span id="detailPendingRequest" style="color: var(--orange); font-weight: 900; font-size: 14px;">-</span>
@@ -272,8 +335,9 @@
         <button class="btn-block" style="background: var(--red); color: #fff;" onclick="confirmDeleteUser()">🗑️ Delete User</button>
     </div>
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
@@ -348,7 +412,6 @@
                 <option value="WIF">dogwifhat (WIF)</option>
                 <option value="PEPE">Pepe (PEPE)</option>
                 <option value="BONK">Bonk (BONK)</option>
-                <!-- عملات جديدة -->
                 <option value="WLD">Worldcoin (WLD)</option>
                 <option value="LDO">Lido DAO (LDO)</option>
                 <option value="CHZ">Chiliz (CHZ)</option>
@@ -393,8 +456,9 @@
         <button class="btn-block" onclick="sendSignal()">📤 Send Signal</button>
     </div>
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
         <button class="nav-item active" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
@@ -466,7 +530,6 @@
             <option value="WIF">dogwifhat (WIF)</option>
             <option value="PEPE">Pepe (PEPE)</option>
             <option value="BONK">Bonk (BONK)</option>
-            <!-- عملات جديدة -->
             <option value="WLD">Worldcoin (WLD)</option>
             <option value="LDO">Lido DAO (LDO)</option>
             <option value="CHZ">Chiliz (CHZ)</option>
@@ -506,10 +569,11 @@
     </div>
 
     <div class="bottom-nav">
-        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item active" onclick="showScreen('aiAnalysisScreen')"><span class="icon">🤖</span><span>AI</span></button>
+        <button class="nav-item" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
+        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
 
@@ -517,7 +581,6 @@
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
         <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">✅ Activate Subscription</h3>
         
-        <!-- ✅ إضافة id لصندوق الباقة لكي نتمكن من إخفائه -->
         <div class="input-group" id="planTypeGroup">
             <label>Plan Type</label>
             <select id="activatePlan">
@@ -583,6 +646,10 @@
     let currentUserData = null;
     let currentManageMode = 'crypto';
 
+    // ✅ متغيرات الإحالة
+    let currentRefFilter = 'all';
+    let currentRewardData = null;
+
     setTimeout(() => {
         document.getElementById('splash').classList.add('hide');
         setTimeout(() => {
@@ -634,7 +701,6 @@
         }
     }
 
-    // ✅ تم تعديل الدالة لإخفاء/إظهار الباقة
     function toggleCourseInput() {
         const type = document.getElementById('activatePlanType').value;
         if (type === 'course') {
@@ -703,6 +769,141 @@
         }
     }
 
+    // ✅ دوال الإحالة
+    function loadReferrals() {
+        const list = document.getElementById('referralsList');
+        if (!list) return;
+
+        let referredUsers = allUsers.filter(u => u.referred_by);
+        
+        if (currentRefFilter === 'pending') {
+            referredUsers = referredUsers.filter(u => u.status === 'active' && !u.referral_rewarded);
+        } else if (currentRefFilter === 'rewarded') {
+            referredUsers = referredUsers.filter(u => u.referral_rewarded === true);
+        }
+
+        if (referredUsers.length === 0) {
+            list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><h3>No Referrals Found</h3><p>Try changing the filter.</p></div>';
+            return;
+        }
+
+        list.innerHTML = referredUsers.map(referred => {
+            const referrer = allUsers.find(u => u.uid === referred.referred_by);
+            const referrerName = referrer ? (referrer.name || referrer.email) : 'Unknown User';
+            
+            let statusBadge = '';
+            let actionBtn = '';
+            
+            if (referred.referral_rewarded) {
+                statusBadge = '<span class="user-status active">Rewarded</span>';
+            } else if (referred.status === 'active') {
+                statusBadge = '<span class="user-status pending">Ready</span>';
+                actionBtn = `<button class="btn-block" style="margin-top:12px; padding:10px; font-size:13px;" onclick="openRewardModal('${referred.referred_by}', '${referrerName}', '${referred.uid}')">🎁 Give Reward</button>`;
+            } else {
+                statusBadge = '<span class="user-status inactive">Inactive</span>';
+            }
+
+            return `
+                <div class="user-card" style="cursor:default;">
+                    <div class="user-header">
+                        <div>
+                            <div class="user-name" style="font-size:13px;">Dari: ${referrerName}</div>
+                            <div class="user-email">Diundang: ${referred.name || referred.email}</div>
+                        </div>
+                        <div>${statusBadge}</div>
+                    </div>
+                    ${actionBtn}
+                </div>
+            `;
+        }).join('');
+    }
+
+    function filterReferrals(type) {
+        currentRefFilter = type;
+        document.getElementById('refBtnAll').style.opacity = type === 'all' ? '1' : '0.5';
+        document.getElementById('refBtnPending').style.opacity = type === 'pending' ? '1' : '0.5';
+        document.getElementById('refBtnRewarded').style.opacity = type === 'rewarded' ? '1' : '0.5';
+        loadReferrals();
+    }
+
+    function openRewardModal(referrerUid, referrerName, referredUid) {
+        const referrer = allUsers.find(u => u.uid === referrerUid);
+        if (!referrer) return showToast('Referrer not found');
+
+        currentRewardData = { referrerUid, referredUid };
+        
+        document.getElementById('rewardReferrerName').textContent = referrerName;
+        
+        let currentExpiry = referrer.cryptoExpiry ? new Date(referrer.cryptoExpiry) : null;
+        let displayExpiry = currentExpiry ? currentExpiry.toISOString().split('T')[0] : 'None';
+        document.getElementById('rewardCurrentExpiry').textContent = displayExpiry;
+        
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        let daysLeft = 0;
+        
+        if (currentExpiry && currentExpiry > today) {
+            daysLeft = Math.ceil((currentExpiry - today) / (1000 * 60 * 60 * 24));
+        }
+        document.getElementById('rewardDaysLeft').textContent = daysLeft + ' days';
+
+        let baseDate = today;
+        if (currentExpiry && currentExpiry > today) {
+            baseDate = currentExpiry;
+        }
+        const newExpiry = new Date(baseDate);
+        newExpiry.setDate(newExpiry.getDate() + 7);
+        const newExpiryStr = newExpiry.toISOString().split('T')[0];
+        
+        document.getElementById('rewardNewExpiry').textContent = newExpiryStr + ' (Total ' + (daysLeft + 7) + ' days)';
+        currentRewardData.newExpiryStr = newExpiryStr;
+        
+        document.getElementById('rewardModal').style.display = 'flex';
+    }
+
+    function closeRewardModal() {
+        document.getElementById('rewardModal').style.display = 'none';
+        currentRewardData = null;
+    }
+
+    async function confirmReward() {
+        if (!currentRewardData) return;
+        const { referrerUid, referredUid, newExpiryStr } = currentRewardData;
+        
+        try {
+            const referrerRef = doc(db, 'tradelix_users', referrerUid);
+            const referrerSnap = await getDoc(referrerRef);
+            
+            if (referrerSnap.exists()) {
+                const refData = referrerSnap.data();
+                let newPlanType = refData.planType || 'crypto';
+                
+                if (newPlanType === 'gold') {
+                    newPlanType = 'both';
+                } else if (newPlanType === 'course' || newPlanType === 'none') {
+                    newPlanType = 'crypto';
+                }
+                
+                await updateDoc(referrerRef, {
+                    cryptoExpiry: newExpiryStr,
+                    planType: newPlanType,
+                    status: 'active'
+                });
+            }
+            
+            await updateDoc(doc(db, 'tradelix_users', referredUid), {
+                referral_rewarded: true
+            });
+            
+            showToast('✅ Reward given successfully!');
+            closeRewardModal();
+            loadReferrals();
+        } catch (e) {
+            console.error(e);
+            showToast('❌ Error giving reward');
+        }
+    }
+
     async function initFirebase() {
         if (window.firebaseReady) {
             const authModule = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js");
@@ -727,6 +928,7 @@
                 document.getElementById('statInactiveUsers').textContent = allUsers.filter(u => u.status === 'inactive' || !u.status).length;
 
                 if (document.getElementById('usersScreen').classList.contains('active')) renderUsers();
+                if (document.getElementById('referralsScreen').classList.contains('active')) loadReferrals();
                 
                 const recent = [...allUsers].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 3);
                 const recentDiv = document.getElementById('recentActivity');
@@ -859,7 +1061,6 @@
         document.getElementById('activateModal').style.display = 'flex'; 
         document.getElementById('activateStartDate').value = new Date().toISOString().split('T')[0]; 
         
-        // Auto-fill if user requested a course
         if (currentUserData && currentUserData.courseRequest) {
             document.getElementById('activatePlanType').value = 'course';
             let cName = currentUserData.courseRequest.replace('Course: ', '').trim();
@@ -1139,7 +1340,6 @@
             let entry = currentPrice, sl = currentPrice * 0.995, tp = currentPrice * 1.01;
             if (direction === 'SELL') { sl = currentPrice * 1.005; tp = currentPrice * 0.99; }
 
-            // ✅ دالة مساعدة لتنسيق الأسعار الصغيرة
             function formatPrice(price) {
                 if (price >= 1) return price.toFixed(2);
                 if (price >= 0.01) return price.toFixed(4);
