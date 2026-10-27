@@ -1114,14 +1114,23 @@
             } else {
                 updateData.status = 'active';
                 updateData.startDate = startDate;
-                updateData.plan = 'VIP ' + plan;
-                updateData.expiryDate = expiryDateStr;
                 
+                // ✅ إصلاح جذري: فصل خطط الكريبتو عن الذهب لمنع التداخل
                 if (selectedPlanType === 'crypto' || selectedPlanType === 'both') {
                     updateData.cryptoExpiry = expiryDateStr;
+                    updateData.cryptoPlan = 'VIP ' + plan; // حفظ اسم باقة الكريبتو
+                    // تحديث الحقل العام ليتوافق مع التطبيق الرئيسي
+                    updateData.plan = 'VIP ' + plan; 
+                    updateData.expiryDate = expiryDateStr;
                 }
                 if (selectedPlanType === 'gold' || selectedPlanType === 'both') {
                     updateData.goldExpiry = expiryDateStr;
+                    updateData.goldPlan = 'VIP ' + plan; // حفظ اسم باقة الذهب
+                    // إذا كان "Both"، نضع الاسم العام للكريبتو حتى لا يظهر الذهب في التطبيق الرئيسي
+                    if (selectedPlanType === 'both') {
+                         updateData.plan = 'VIP ' + plan; 
+                         updateData.expiryDate = expiryDateStr;
+                    }
                 }
             }
 
