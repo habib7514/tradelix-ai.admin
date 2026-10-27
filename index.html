@@ -104,7 +104,6 @@
         .detail-row span:first-child { color: var(--text-muted); }
         .detail-row span:last-child { color: var(--gold-light); font-weight: 700; text-align: right; max-width: 60%; word-break: break-all; }
         
-        /* ✅ تعديل الشريط السفلي ليتسع لـ 5 أزرار */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d0d0d; border-top: 1px solid #222; display: flex; justify-content: space-around; padding: 10px 0 18px 0; z-index: 9999; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 9px; text-decoration: none; flex: 1; cursor: pointer; background: none; border: none; font-family: inherit; padding: 4px 0; }
         .nav-item.active { color: var(--gold); }
@@ -168,7 +167,6 @@
         </div>
     </div>
 
-    <!-- ✅ زر الإحالة السريع -->
     <a href="javascript:void(0)" onclick="showScreen('referralsScreen'); loadReferrals();" style="text-decoration: none; display: block; margin-bottom: 16px;">
         <div style="background: linear-gradient(135deg, #1A1500, #2A2000); border: 1.5px solid var(--gold); border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15);">
             <div style="display: flex; align-items: center; gap: 12px;">
@@ -213,7 +211,6 @@
     </div>
 </div>
 
-<!-- ✅ شاشة الإحالات الجديدة -->
 <div id="referralsScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>REFERRALS</h1><span>● MANAGEMENT</span></div></div>
@@ -239,7 +236,6 @@
     </div>
 </div>
 
-<!-- ✅ نافذة إعطاء الهدية -->
 <div id="rewardModal" class="screen" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99998; display: none; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
         <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">🎁 Give Referral Reward</h3>
@@ -646,7 +642,6 @@
     let currentUserData = null;
     let currentManageMode = 'crypto';
 
-    // ✅ متغيرات الإحالة
     let currentRefFilter = 'all';
     let currentRewardData = null;
 
@@ -790,29 +785,49 @@
         list.innerHTML = referredUsers.map(referred => {
             const referrer = allUsers.find(u => u.uid === referred.referred_by);
             const referrerName = referrer ? (referrer.name || referrer.email) : 'Unknown User';
+            const referrerExpiry = referrer && referrer.cryptoExpiry ? referrer.cryptoExpiry : 'None';
             
             let statusBadge = '';
             let actionBtn = '';
             
             if (referred.referral_rewarded) {
-                statusBadge = '<span class="user-status active">Rewarded</span>';
+                statusBadge = '<span class="user-status active">Reward Given</span>';
             } else if (referred.status === 'active') {
-                statusBadge = '<span class="user-status pending">Ready</span>';
-                actionBtn = `<button class="btn-block" style="margin-top:12px; padding:10px; font-size:13px;" onclick="openRewardModal('${referred.referred_by}', '${referrerName}', '${referred.uid}')">🎁 Give Reward</button>`;
+                statusBadge = '<span class="user-status pending">Ready for Reward</span>';
+                actionBtn = `<button class="btn-block" style="margin-top:0; padding:10px; font-size:13px; width:auto;" onclick="openRewardModal('${referred.referred_by}', '${referrerName}', '${referred.uid}')">🎁 Give Reward</button>`;
             } else {
-                statusBadge = '<span class="user-status inactive">Inactive</span>';
+                statusBadge = '<span class="user-status inactive">User Inactive</span>';
             }
 
             return `
-                <div class="user-card" style="cursor:default;">
-                    <div class="user-header">
+                <div class="user-card" style="cursor:default; padding: 16px; border-left: 4px solid ${referred.referral_rewarded ? 'var(--green)' : (referred.status === 'active' ? 'var(--orange)' : 'var(--red)')};">
+                    <!-- الداعي -->
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 10px;">
                         <div>
-                            <div class="user-name" style="font-size:13px;">Dari: ${referrerName}</div>
-                            <div class="user-email">Diundang: ${referred.name || referred.email}</div>
+                            <span style="color:var(--text-muted); font-size:11px;">Referrer (الداعي):</span>
+                            <div style="color:var(--gold); font-weight:900; font-size:15px; cursor:pointer; text-decoration:underline;" onclick="openUserDetail('${referred.referred_by}')">${referrerName}</div>
                         </div>
-                        <div>${statusBadge}</div>
+                        <div style="text-align:right;">
+                            <span style="color:var(--text-muted); font-size:11px;">Crypto Expiry:</span>
+                            <div style="color:#fff; font-size:13px;">${referrerExpiry}</div>
+                        </div>
                     </div>
-                    ${actionBtn}
+                    <!-- المدعو -->
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 12px;">
+                        <div>
+                            <span style="color:var(--text-muted); font-size:11px;">Referred (المدعو):</span>
+                            <div style="color:#fff; font-weight:700; font-size:14px; cursor:pointer; text-decoration:underline;" onclick="openUserDetail('${referred.uid}')">${referred.name || referred.email}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <span style="color:var(--text-muted); font-size:11px;">Plan Bought:</span>
+                            <div style="color:var(--green); font-size:12px; font-weight:700;">${referred.plan || 'N/A'}</div>
+                        </div>
+                    </div>
+                    <!-- الحالة والزر -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                        <div>${statusBadge}</div>
+                        ${actionBtn}
+                    </div>
                 </div>
             `;
         }).join('');
@@ -1115,18 +1130,15 @@
                 updateData.status = 'active';
                 updateData.startDate = startDate;
                 
-                // ✅ إصلاح جذري: فصل خطط الكريبتو عن الذهب لمنع التداخل
                 if (selectedPlanType === 'crypto' || selectedPlanType === 'both') {
                     updateData.cryptoExpiry = expiryDateStr;
-                    updateData.cryptoPlan = 'VIP ' + plan; // حفظ اسم باقة الكريبتو
-                    // تحديث الحقل العام ليتوافق مع التطبيق الرئيسي
+                    updateData.cryptoPlan = 'VIP ' + plan;
                     updateData.plan = 'VIP ' + plan; 
                     updateData.expiryDate = expiryDateStr;
                 }
                 if (selectedPlanType === 'gold' || selectedPlanType === 'both') {
                     updateData.goldExpiry = expiryDateStr;
-                    updateData.goldPlan = 'VIP ' + plan; // حفظ اسم باقة الذهب
-                    // إذا كان "Both"، نضع الاسم العام للكريبتو حتى لا يظهر الذهب في التطبيق الرئيسي
+                    updateData.goldPlan = 'VIP ' + plan;
                     if (selectedPlanType === 'both') {
                          updateData.plan = 'VIP ' + plan; 
                          updateData.expiryDate = expiryDateStr;
