@@ -196,8 +196,10 @@
     <div class="card" style="padding: 14px;">
         <button class="btn-block" onclick="showScreen('sendSignalScreen')" style="margin-bottom: 8px;">📤 Send New Signal</button>
         
-        <!-- ✅ الزر الجديد للتوصيات -->
         <button class="btn-block outline" onclick="showScreen('sendRecommendationScreen')" style="margin-bottom: 8px; border-color: var(--gold); color: var(--gold);">💡 Send Recommendation</button>
+        
+        <!-- ✅ زر إدارة التوصيات الجديد -->
+        <button class="btn-block outline" onclick="openManageRecommendations()" style="margin-bottom: 8px; border-color: var(--red); color: var(--red);">🗑️ Manage Recommendations</button>
         
         <button class="btn-block outline" onclick="showScreen('usersScreen')" style="margin-bottom: 8px;">👥 Manage Users</button>
         <button class="btn-block outline" onclick="openManageSignals()" style="border-color: var(--red); color: var(--red);">🗑️ Manage Sent Signals</button>
@@ -215,7 +217,7 @@
     </div>
 </div>
 
-<!-- ✅ شاشة التوصيات الجديدة -->
+<!-- ✅ شاشة التوصيات (إرسال) -->
 <div id="sendRecommendationScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>SEND RECOMMENDATION</h1><span>● INVESTMENT ADVICE</span></div></div>
@@ -243,6 +245,28 @@
         </div>
 
         <button class="btn-block success" onclick="sendRecommendation()">📤 Send to Subscribers</button>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
+        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
+        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+    </div>
+</div>
+
+<!-- ✅ شاشة إدارة وحذف التوصيات الجديدة -->
+<div id="manageRecommendationsScreen" class="screen">
+    <div class="header">
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>RECOMMENDATIONS</h1><span>● HISTORY / DELETE</span></div></div>
+        <div class="bell-icon" onclick="showScreen('dashboardScreen')">✕</div>
+    </div>
+    
+    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Here you can delete old recommendations. Deleting them removes them permanently from the users' app.</p>
+
+    <div id="adminRecommendationsList">
+        <div class="empty-state"><div class="icon">⏳</div><h3>Loading...</h3></div>
     </div>
 
     <div class="bottom-nav">
@@ -801,6 +825,67 @@
             await deleteDoc(doc(db, colName, docId));
             showToast('✅ Signal deleted');
             loadSignalsForAdmin(currentManageMode);
+        } catch(e) {
+            console.error(e);
+            showToast('❌ Error deleting');
+        }
+    }
+
+    // ✅ دوال التوصيات (الإدارة والحذف)
+    function openManageRecommendations() {
+        showScreen('manageRecommendationsScreen');
+        loadRecommendationsForAdmin();
+    }
+
+    async function loadRecommendationsForAdmin() {
+        const list = document.getElementById('adminRecommendationsList');
+        list.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">Loading...</p>';
+
+        try {
+            const snap = await getDocs(collection(db, 'tradelix_recommendations'));
+            
+            if(snap.empty) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><h3>No recommendations found</h3></div>';
+                return;
+            }
+
+            let html = '';
+            // تحويل الـ snapshot إلى مصفوفة لترتيبها تنازلياً حسب التاريخ
+            const recs = [];
+            snap.forEach(docSnap => recs.push({ id: docSnap.id, ...docSnap.data() }));
+            recs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+            recs.forEach(data => {
+                const dateStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString('en-GB') : 'Unknown Date';
+                const priceStr = data.price ? `@ $${data.price}` : 'Market Price';
+                
+                html += `
+                    <div class="card" style="padding: 15px; margin-bottom: 10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <h3 style="color: var(--gold); margin:0; font-size:16px;">${data.coin} / USDT</h3>
+                                <p style="color: #fff; font-weight:bold; margin:5px 0;">${priceStr}</p>
+                                <p style="color: var(--text-muted); font-size:11px;">${dateStr}</p>
+                            </div>
+                            <button class="btn-block danger" style="width:auto; padding:10px 15px; margin:0; font-size:12px;" onclick="deleteRecommendation('${data.id}')">Delete</button>
+                        </div>
+                        ${data.notes ? `<p style="color:var(--text-muted); font-size:12px; margin-top:8px; border-top:1px solid #333; padding-top:8px;">${data.notes}</p>` : ''}
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        } catch (e) {
+            console.error(e);
+            list.innerHTML = '<p style="color:var(--red); text-align:center;">Error loading recommendations.</p>';
+        }
+    }
+
+    async function deleteRecommendation(docId) {
+        if(!confirm('Are you sure you want to delete this recommendation? Users will no longer see it.')) return;
+        try {
+            await deleteDoc(doc(db, 'tradelix_recommendations', docId));
+            showToast('✅ Recommendation deleted');
+            loadRecommendationsForAdmin(); // تحديث القائمة
         } catch(e) {
             console.error(e);
             showToast('❌ Error deleting');
