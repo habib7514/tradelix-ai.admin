@@ -195,6 +195,10 @@
     <div class="section-title">⚡ QUICK ACTIONS</div>
     <div class="card" style="padding: 14px;">
         <button class="btn-block" onclick="showScreen('sendSignalScreen')" style="margin-bottom: 8px;">📤 Send New Signal</button>
+        
+        <!-- ✅ الزر الجديد للتوصيات -->
+        <button class="btn-block outline" onclick="showScreen('sendRecommendationScreen')" style="margin-bottom: 8px; border-color: var(--gold); color: var(--gold);">💡 Send Recommendation</button>
+        
         <button class="btn-block outline" onclick="showScreen('usersScreen')" style="margin-bottom: 8px;">👥 Manage Users</button>
         <button class="btn-block outline" onclick="openManageSignals()" style="border-color: var(--red); color: var(--red);">🗑️ Manage Sent Signals</button>
     </div>
@@ -204,6 +208,45 @@
 
     <div class="bottom-nav">
         <button class="nav-item active" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
+        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
+        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+    </div>
+</div>
+
+<!-- ✅ شاشة التوصيات الجديدة -->
+<div id="sendRecommendationScreen" class="screen">
+    <div class="header">
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>SEND RECOMMENDATION</h1><span>● INVESTMENT ADVICE</span></div></div>
+        <div class="bell-icon" onclick="showScreen('dashboardScreen')">✕</div>
+    </div>
+
+    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Send a buy & hold recommendation to all active subscribers. This will appear in their "Recommendations" tab instantly.</p>
+    
+    <div class="card">
+        <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💡 Recommendation Details</h3>
+        
+        <div class="input-group">
+            <label>Coin Symbol (e.g., BTC, ETH)</label>
+            <input type="text" id="recCoin" placeholder="BTC" style="text-transform: uppercase;">
+        </div>
+
+        <div class="input-group">
+            <label>Target Price (Optional)</label>
+            <input type="text" id="recPrice" placeholder="e.g., 65000">
+        </div>
+
+        <div class="input-group">
+            <label>Notes / Reason</label>
+            <textarea id="recNotes" placeholder="Strong support level reached, good time to buy and hold..."></textarea>
+        </div>
+
+        <button class="btn-block success" onclick="sendRecommendation()">📤 Send to Subscribers</button>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
         <button class="nav-item" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
@@ -801,7 +844,6 @@
 
             return `
                 <div class="user-card" style="cursor:default; padding: 16px; border-left: 4px solid ${referred.referral_rewarded ? 'var(--green)' : (referred.status === 'active' ? 'var(--orange)' : 'var(--red)')};">
-                    <!-- الداعي -->
                     <div style="display:flex; justify-content:space-between; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 10px;">
                         <div>
                             <span style="color:var(--text-muted); font-size:11px;">Referrer (الداعي):</span>
@@ -812,7 +854,6 @@
                             <div style="color:#fff; font-size:13px;">${referrerExpiry}</div>
                         </div>
                     </div>
-                    <!-- المدعو -->
                     <div style="display:flex; justify-content:space-between; margin-bottom: 12px;">
                         <div>
                             <span style="color:var(--text-muted); font-size:11px;">Referred (المدعو):</span>
@@ -823,12 +864,10 @@
                             <div style="color:var(--green); font-size:12px; font-weight:700;">${referred.plan || 'N/A'}</div>
                         </div>
                     </div>
-                    <!-- الحالة والزر -->
                     <div style="display:flex; justify-content:space-between; align-items:center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
                         <div>${statusBadge}</div>
                         <div style="display:flex; gap: 8px;">
                             ${actionBtn}
-                            <!-- ✅ الزر الاحترافي الجديد بدلاً من السلة -->
                             <button class="btn-block danger" style="margin-top:0; padding:8px 12px; font-size:12px; width:auto; display:flex; align-items:center; gap:6px; border-radius:8px;" onclick="deleteReferral('${referred.uid}')" title="Remove Referral">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                                 إزالة
@@ -1007,6 +1046,18 @@
                         const s = change.doc.data();
                         if (Date.now() - (s.createdAt?.seconds * 1000) < 60000) {
                             triggerNotif('🥇 Gold: ' + (s.pair || 'XAU/USD') + ' ' + (s.direction || 'BUY'));
+                        }
+                    }
+                });
+            });
+
+            // ✅ إضافة مراقبة التوصيات (لتصل إشعارات للمستخدمين)
+            onSnapshot(collection(db, 'tradelix_recommendations'), (snapshot) => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const r = change.doc.data();
+                        if (Date.now() - (r.createdAt?.seconds * 1000) < 60000) {
+                            triggerNotif('💡 New Recommendation: ' + (r.coin || 'BTC') + ' ' + (r.price ? '@ $'+r.price : ''));
                         }
                     }
                 });
@@ -1242,6 +1293,41 @@
         });
         showToast('✅ Signal sent!');
         document.getElementById('signalEntry').value = ''; document.getElementById('signalSL').value = ''; document.getElementById('signalTP').value = '';
+    }
+
+    // ✅ دالة إرسال التوصية الجديدة
+    async function sendRecommendation() {
+        const coin = document.getElementById('recCoin').value.trim().toUpperCase();
+        const price = document.getElementById('recPrice').value.trim();
+        const notes = document.getElementById('recNotes').value.trim();
+
+        if (!coin) { 
+            showToast('❌ Please enter a coin symbol (e.g., BTC)'); 
+            return; 
+        }
+
+        try {
+            // إرسال البيانات إلى مجموعة tradelix_recommendations
+            await addDoc(collection(db, 'tradelix_recommendations'), {
+                coin: coin,
+                price: price || null,
+                notes: notes || null,
+                status: 'active',
+                createdAt: serverTimestamp()
+            });
+            
+            showToast('✅ Recommendation sent successfully!');
+            
+            document.getElementById('recCoin').value = '';
+            document.getElementById('recPrice').value = '';
+            document.getElementById('recNotes').value = '';
+            
+            setTimeout(() => { showScreen('dashboardScreen'); }, 1500);
+
+        } catch (error) {
+            console.error("Error sending recommendation:", error);
+            showToast('❌ Error sending recommendation');
+        }
     }
 
     function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
