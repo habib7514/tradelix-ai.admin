@@ -262,6 +262,13 @@
         <div class="bell-icon" onclick="showScreen('dashboardScreen')">✕</div>
     </div>
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Subscribers who deposited funds for trading. Click on any name to manage their trade individually.</p>
+    
+    <!-- قسم طلبات فتح الصفقات (جديد) -->
+    <div class="section-title" style="color: var(--orange);">⏳ Pending Trade Requests (From Balance)</div>
+    <div id="adminTradeRequestList" class="card" style="border-color: var(--orange);">
+        <p style="color:#888; text-align:center; font-size:12px;">No pending trade requests.</p>
+    </div>
+
     <div class="section-title">📥 Pending Trade Deposits</div>
     <div id="adminTradeDepositList" class="card">
         <p style="color:#888; text-align:center; font-size:12px;">No pending trade deposits.</p>
@@ -291,6 +298,8 @@
         <div class="detail-row"><span>Current Balance</span><span id="tradeDetailBalance">$0.00</span></div>
         <div class="detail-row"><span>Total Profit</span><span id="tradeDetailProfit">$0.00</span></div>
         <div class="detail-row"><span>Active Trade</span><span id="tradeDetailActive">None</span></div>
+        <div class="detail-row"><span>Entry Price</span><span id="tradeDetailEntry">-</span></div>
+        
         <div class="input-group" style="margin-top: 15px;">
             <label>Add Profit to Balance ($)</label>
             <div style="display: flex; gap: 8px;">
@@ -301,6 +310,7 @@
         <div class="input-group" style="margin-top: 15px; background: rgba(212, 175, 55, 0.1); padding: 10px; border-radius: 8px; border: 1px solid var(--gold);">
             <label style="color: var(--gold);">Open Individual Trade</label>
             <input type="text" id="adminTradeCoinInput" placeholder="Coin (e.g., BTCUSDT)" style="margin-bottom: 8px;">
+            <input type="text" id="adminTradeEntryInput" placeholder="Entry Price (e.g., 65000)" style="margin-bottom: 8px;">
             <input type="text" id="adminTradeLinkInput" placeholder="Binance Trade Link (https://...)" style="margin-bottom: 8px;">
             <button class="btn-block success" onclick="adminOpenTrade()">📡 Open Trade for this User</button>
             <button class="btn-block danger" onclick="adminCloseTrade()" style="margin-top: 8px;">🔴 Close User Trade</button>
@@ -1026,28 +1036,52 @@
 
     // ✅ دوال التداول المعزولة (مُصلحة بالكامل)
     async function loadTradeSubscribers() {
+        // 1. طلبات فتح الصفقات (Trade Requests)
+        const reqList = document.getElementById('adminTradeRequestList');
+        reqList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
+        try {
+            const q = query(collection(db, 'trade_requests'), where('status', '==', 'pending'));
+            const snap = await getDocs(q);
+            if (snap.empty) {
+                reqList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending trade requests.</p>';
+            } else {
+                const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                docs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                reqList.innerHTML = docs.map(r => `
+                    <div class="card" style="padding: 15px; border-left: 4px solid var(--orange); margin-bottom: 10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="flex:1; min-width:0;">
+                                <h3 style="color:#fff; margin:0; font-size:15px;">${r.userName || 'Unknown'}</h3>
+                                <p style="color:#888; font-size:11px;">${r.userEmail || ''}</p>
+                                <p style="color:var(--orange); font-weight:900; font-size:18px; margin-top:5px;">Requested: $${r.amount || 0}</p>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:5px; margin-left:8px;">
+                                <button class="btn-small approve" onclick="approveTradeRequest('${r.id}', '${r.userId}', '${r.amount}')">✅ Approve</button>
+                                <button class="btn-small reject" onclick="rejectTradeRequest('${r.id}')">❌ Reject</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        } catch(e) { console.error(e); reqList.innerHTML = `<p style="color:red; text-align:center;">Error.</p>`; }
+
+        // 2. طلبات الإيداع (Trade Deposits)
         const depList = document.getElementById('adminTradeDepositList');
         depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
         try {
-            // استعلام بسيط بدون orderBy (يتجنب مشاكل الفهرس)
             const q = query(collection(db, 'trade_deposits'), where('status', '==', 'pending'));
             const snap = await getDocs(q);
             if (snap.empty) {
                 depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending trade deposits.</p>';
             } else {
-                // ترتيب برمجياً بدل orderBy
                 const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                docs.sort((a, b) => {
-                    const ta = a.createdAt?.seconds || 0;
-                    const tb = b.createdAt?.seconds || 0;
-                    return tb - ta;
-                });
+                docs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
                 depList.innerHTML = docs.map(r => `
                     <div class="card" style="padding: 15px; border-left: 4px solid var(--blue); margin-bottom: 10px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div style="flex:1; min-width:0;">
-                                <h3 style="color:#fff; margin:0; font-size:15px; word-break:break-word;">${r.userName || 'Unknown'}</h3>
-                                <p style="color:#888; font-size:11px; word-break:break-all;">${r.userEmail || ''}</p>
+                                <h3 style="color:#fff; margin:0; font-size:15px;">${r.userName || 'Unknown'}</h3>
+                                <p style="color:#888; font-size:11px;">${r.userEmail || ''}</p>
                                 <p style="color:var(--blue); font-weight:900; font-size:18px; margin-top:5px;">$${r.amount || 0}</p>
                                 <p style="color:#aaa; font-size:10px; word-break:break-all;">TX: ${r.txHash || '-'}</p>
                             </div>
@@ -1059,23 +1093,15 @@
                     </div>
                 `).join('');
             }
-        } catch(e) {
-            console.error('loadTradeSubscribers deposits error:', e);
-            depList.innerHTML = `<p style="color:red; text-align:center; font-size:12px;">Error: ${e.message || e.code || 'Unknown'}</p>`;
-        }
+        } catch(e) { depList.innerHTML = `<p style="color:red; text-align:center;">Error.</p>`; }
 
+        // 3. المشتركين النشطين
         const actList = document.getElementById('activeTradeSubscribersList');
         actList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
         try {
-            // جلب كل المستخدمين ثم الفلترة برمجياً (بدون where على balance)
             const snap = await getDocs(collection(db, 'tradelix_users'));
             const subs = [];
-            snap.forEach(d => {
-                const u = d.data();
-                if (typeof u.balance === 'number' && u.balance > 0) {
-                    subs.push({ id: d.id, ...u });
-                }
-            });
+            snap.forEach(d => { const u = d.data(); if (typeof u.balance === 'number' && u.balance > 0) subs.push({ id: d.id, ...u }); });
             subs.sort((a, b) => (b.balance || 0) - (a.balance || 0));
             if (subs.length === 0) {
                 actList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No active trade subscribers.</p>';
@@ -1083,30 +1109,74 @@
                 actList.innerHTML = subs.map(u => `
                     <div class="user-card" style="border-left: 4px solid var(--green);" onclick="openUserTradeDetail('${u.id}')">
                         <div class="user-header">
-                            <div>
-                                <div class="user-name">${u.name || 'Unknown'}</div>
-                                <div class="user-email">${u.email || ''}</div>
-                            </div>
+                            <div><div class="user-name">${u.name || 'Unknown'}</div><div class="user-email">${u.email || ''}</div></div>
                             <span style="color: var(--gold); font-weight: 900;">$${(u.balance || 0).toFixed(2)}</span>
                         </div>
                     </div>
                 `).join('');
             }
+        } catch(e) { actList.innerHTML = `<p style="color:red; text-align:center;">Error.</p>`; }
+    }
+
+    // ✅ دالة الموافقة على طلب فتح الصفقة
+    async function approveTradeRequest(requestId, userId, amount) {
+        const coin = prompt("Enter Coin (e.g., BTCUSDT):");
+        if (!coin) return;
+        const entry = prompt("Enter Entry Price:");
+        if (!entry) return;
+        const link = prompt("Enter Binance Trade Link:");
+        if (!link) return;
+
+        const amt = parseFloat(amount);
+        if (!amt || isNaN(amt)) return showToast('❌ Invalid amount');
+        
+        if (!confirm(`Approve request to open ${coin} trade for this user with $${amt}?`)) return;
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                const reqRef = doc(db, 'trade_requests', requestId);
+                const userRef = doc(db, 'tradelix_users', userId);
+                const reqSnap = await transaction.get(reqRef);
+                const userSnap = await transaction.get(userRef);
+
+                if (!reqSnap.exists()) throw new Error('Request not found');
+                if (reqSnap.data().status !== 'pending') throw new Error('Already processed');
+                if (!userSnap.exists()) throw new Error('User not found');
+
+                const currentBalance = Number(userSnap.data().balance) || 0;
+                if (currentBalance < amt) throw new Error('User does not have enough balance');
+
+                transaction.update(userRef, { 
+                    balance: currentBalance - amt,
+                    activeTrade: coin.toUpperCase(),
+                    activeTradeLink: link,
+                    activeTradeEntry: entry,
+                    activeTradeAmount: amt
+                });
+                transaction.update(reqRef, { status: 'approved', processedAt: serverTimestamp() });
+            });
+            showToast('✅ Trade Request Approved & Trade Opened!');
+            loadTradeSubscribers();
         } catch(e) {
-            console.error('loadTradeSubscribers users error:', e);
-            actList.innerHTML = `<p style="color:red; text-align:center; font-size:12px;">Error: ${e.message || e.code || 'Unknown'}</p>`;
+            console.error(e);
+            showToast('❌ ' + (e.message || 'Error'));
         }
+    }
+
+    async function rejectTradeRequest(requestId) {
+        if (!confirm('Reject this trade request?')) return;
+        try {
+            await updateDoc(doc(db, 'trade_requests', requestId), { status: 'rejected', processedAt: serverTimestamp() });
+            showToast('✅ Request Rejected');
+            loadTradeSubscribers();
+        } catch(e) { showToast('❌ Error'); }
     }
 
     async function processTradeDeposit(requestId, userId, amount, action) {
         if (!confirm(`Are you sure you want to ${action} this trade deposit?`)) return;
         const amt = parseFloat(amount);
-        if (action === 'approve' && (!amt || isNaN(amt) || amt <= 0)) {
-            return showToast('❌ Invalid amount');
-        }
-        if (!userId) {
-            return showToast('❌ Missing user ID');
-        }
+        if (action === 'approve' && (!amt || isNaN(amt) || amt <= 0)) return showToast('❌ Invalid amount');
+        if (!userId) return showToast('❌ Missing user ID');
         try {
             if (action === 'approve') {
                 await runTransaction(db, async (transaction) => {
@@ -1114,27 +1184,19 @@
                     const userRef = doc(db, 'tradelix_users', userId);
                     const reqSnap = await transaction.get(reqRef);
                     const userSnap = await transaction.get(userRef);
-
                     if (!reqSnap.exists()) throw new Error('Request not found');
-                    if (reqSnap.data().status !== 'pending') throw new Error('Request already processed');
+                    if (reqSnap.data().status !== 'pending') throw new Error('Already processed');
                     if (!userSnap.exists()) throw new Error('User not found');
-
                     const currentBalance = Number(userSnap.data().balance) || 0;
                     transaction.update(userRef, { balance: currentBalance + amt });
                     transaction.update(reqRef, { status: 'approved', processedAt: serverTimestamp() });
                 });
             } else {
-                await updateDoc(doc(db, 'trade_deposits', requestId), {
-                    status: 'rejected',
-                    processedAt: serverTimestamp()
-                });
+                await updateDoc(doc(db, 'trade_deposits', requestId), { status: 'rejected', processedAt: serverTimestamp() });
             }
             showToast(`✅ Deposit ${action}d`);
             loadTradeSubscribers();
-        } catch(e) {
-            console.error('processTradeDeposit error:', e);
-            showToast('❌ ' + (e.message || 'Error'));
-        }
+        } catch(e) { showToast('❌ ' + (e.message || 'Error')); }
     }
 
     async function openUserTradeDetail(uid) {
@@ -1142,12 +1204,11 @@
         const userDoc = await getDoc(doc(db, 'tradelix_users', uid));
         if (!userDoc.exists()) return;
         const u = userDoc.data();
-        
         document.getElementById('tradeDetailName').textContent = u.name || '-';
         document.getElementById('tradeDetailBalance').textContent = '$' + (u.balance || 0).toFixed(2);
         document.getElementById('tradeDetailProfit').textContent = '$' + (u.totalProfit || 0).toFixed(2);
         document.getElementById('tradeDetailActive').textContent = u.activeTrade || 'None';
-
+        document.getElementById('tradeDetailEntry').textContent = u.activeTradeEntry || '-';
         showScreen('userTradeDetailScreen');
     }
 
@@ -1170,15 +1231,18 @@
     async function adminOpenTrade() {
         if (!currentTradeUserUID) return;
         const coin = document.getElementById('adminTradeCoinInput').value.trim().toUpperCase();
+        const entry = document.getElementById('adminTradeEntryInput').value.trim();
         const link = document.getElementById('adminTradeLinkInput').value.trim();
-        if (!coin || !link) return showToast('❌ Enter coin and link');
+        if (!coin || !link || !entry) return showToast('❌ Enter coin, entry price, and link');
         try {
             await updateDoc(doc(db, 'tradelix_users', currentTradeUserUID), {
                 activeTrade: coin,
-                activeTradeLink: link
+                activeTradeLink: link,
+                activeTradeEntry: entry
             });
-            showToast('✅ Trade opened for user!');
+            showToast('✅ Trade opened!');
             document.getElementById('adminTradeCoinInput').value = '';
+            document.getElementById('adminTradeEntryInput').value = '';
             document.getElementById('adminTradeLinkInput').value = '';
             openUserTradeDetail(currentTradeUserUID);
         } catch(e) { showToast('❌ Error'); }
@@ -1186,42 +1250,23 @@
 
     async function adminCloseTrade() {
         if (!currentTradeUserUID) return;
-        
         const pnlStr = prompt("Enter Trade Result (PnL) in $:\nExample: 5 (for profit) or -3 (for loss)");
         if (pnlStr === null) return;
-        
         const pnl = parseFloat(pnlStr);
         if (isNaN(pnl)) return showToast('❌ Invalid number entered');
-
         try {
             const userRef = doc(db, 'tradelix_users', currentTradeUserUID);
             const userSnap = await getDoc(userRef);
             if (!userSnap.exists()) return;
-
             const userData = userSnap.data();
             const activeTradeName = userData.activeTrade || 'Unknown Coin';
-            
-            const closedTrade = {
-                coin: activeTradeName,
-                pnl: pnl,
-                closedAt: Date.now()
-            };
-            
+            const closedTrade = { coin: activeTradeName, pnl: pnl, closedAt: Date.now() };
             let currentHistory = userData.closedTrades || [];
             currentHistory.unshift(closedTrade);
-
-            await updateDoc(userRef, {
-                activeTrade: null,
-                activeTradeLink: null,
-                closedTrades: currentHistory
-            });
-            
-            showToast('✅ Trade closed & saved to user history!');
+            await updateDoc(userRef, { activeTrade: null, activeTradeLink: null, activeTradeEntry: null, activeTradeAmount: null, closedTrades: currentHistory });
+            showToast('✅ Trade closed & saved!');
             openUserTradeDetail(currentTradeUserUID);
-        } catch(e) { 
-            console.error(e); 
-            showToast('❌ Error closing trade'); 
-        }
+        } catch(e) { showToast('❌ Error closing trade'); }
     }
 
     async function loadDepositRequests() {
@@ -1230,10 +1275,7 @@
         try {
             const q = query(collection(db, 'deposit_requests'), where('status', '==', 'pending'));
             const snap = await getDocs(q);
-            if (snap.empty) {
-                list.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending deposits.</p>';
-                return;
-            }
+            if (snap.empty) { list.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending deposits.</p>'; return; }
             const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             docs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
             list.innerHTML = docs.map(r => `
@@ -1243,7 +1285,6 @@
                             <h3 style="color:#fff; margin:0; font-size:15px;">${r.userName || 'Unknown'}</h3>
                             <p style="color:#888; font-size:11px;">${r.userEmail || ''}</p>
                             <p style="color:var(--gold); font-weight:900; font-size:18px; margin-top:5px;">$${r.amount || 0}</p>
-                            <p style="color:#aaa; font-size:10px; word-break:break-all;">TX: ${r.txHash || '-'}</p>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:5px; margin-left:8px;">
                             <button class="btn-small approve" onclick="processDeposit('${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'approve')">✅ Approve</button>
@@ -1251,10 +1292,7 @@
                         </div>
                     </div>
                 </div>`).join('');
-        } catch(e) { 
-            console.error(e); 
-            list.innerHTML = `<p style="color:red; text-align:center; font-size:12px;">Error: ${e.message || 'Unknown'}</p>`; 
-        }
+        } catch(e) { list.innerHTML = `<p style="color:red; text-align:center; font-size:12px;">Error: ${e.message}</p>`; }
     }
 
     async function processDeposit(requestId, userId, amount, action) {
@@ -1269,11 +1307,9 @@
                     const userRef = doc(db, 'tradelix_users', userId);
                     const reqSnap = await transaction.get(reqRef);
                     const userSnap = await transaction.get(userRef);
-
                     if (!reqSnap.exists()) throw new Error('Request not found');
-                    if (reqSnap.data().status !== 'pending') throw new Error('Request already processed');
+                    if (reqSnap.data().status !== 'pending') throw new Error('Already processed');
                     if (!userSnap.exists()) throw new Error('User not found');
-
                     const currentBalance = Number(userSnap.data().balance) || 0;
                     transaction.update(userRef, { balance: currentBalance + amt });
                     transaction.update(reqRef, { status: 'approved', processedAt: serverTimestamp() });
@@ -1283,10 +1319,7 @@
             }
             showToast(`✅ Deposit ${action}d`);
             loadDepositRequests();
-        } catch(e) { 
-            console.error(e); 
-            showToast('❌ ' + (e.message || 'Error')); 
-        }
+        } catch(e) { showToast('❌ ' + (e.message || 'Error')); }
     }
 
     async function loadWithdrawRequests() {
@@ -1295,10 +1328,7 @@
         try {
             const q = query(collection(db, 'withdraw_requests'), where('status', '==', 'pending'));
             const snap = await getDocs(q);
-            if (snap.empty) {
-                list.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending withdrawals.</p>';
-                return;
-            }
+            if (snap.empty) { list.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending withdrawals.</p>'; return; }
             const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             docs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
             list.innerHTML = docs.map(r => `
@@ -1316,10 +1346,7 @@
                         </div>
                     </div>
                 </div>`).join('');
-        } catch(e) { 
-            console.error(e); 
-            list.innerHTML = `<p style="color:red; text-align:center; font-size:12px;">Error: ${e.message || 'Unknown'}</p>`; 
-        }
+        } catch(e) { list.innerHTML = `<p style="color:red; text-align:center; font-size:12px;">Error: ${e.message}</p>`; }
     }
 
     async function processWithdrawal(requestId, userId, amount, action) {
@@ -1334,11 +1361,9 @@
                     const userRef = doc(db, 'tradelix_users', userId);
                     const reqSnap = await transaction.get(reqRef);
                     const userSnap = await transaction.get(userRef);
-
                     if (!reqSnap.exists()) throw new Error('Request not found');
-                    if (reqSnap.data().status !== 'pending') throw new Error('Request already processed');
+                    if (reqSnap.data().status !== 'pending') throw new Error('Already processed');
                     if (!userSnap.exists()) throw new Error('User not found');
-
                     const currentBalance = Number(userSnap.data().balance) || 0;
                     transaction.update(userRef, { balance: Math.max(0, currentBalance - amt) });
                     transaction.update(reqRef, { status: 'paid', processedAt: serverTimestamp() });
@@ -1348,10 +1373,7 @@
             }
             showToast(`✅ Withdrawal ${action}`);
             loadWithdrawRequests();
-        } catch(e) { 
-            console.error(e); 
-            showToast('❌ ' + (e.message || 'Error')); 
-        }
+        } catch(e) { showToast('❌ ' + (e.message || 'Error')); }
     }
 
     async function initFirebase() {
@@ -1417,6 +1439,17 @@
                         const r = change.doc.data();
                         if (Date.now() - (r.createdAt?.seconds * 1000) < 60000) {
                             triggerNotif(`📈 طلب إيداع تداول جديد: ${r.userName} - $${r.amount}`);
+                        }
+                    }
+                });
+            });
+
+            onSnapshot(collection(db, 'trade_requests'), (snapshot) => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const r = change.doc.data();
+                        if (Date.now() - (r.createdAt?.seconds * 1000) < 60000) {
+                            triggerNotif(`📊 طلب فتح صفقة جديد: ${r.userName} - $${r.amount}`);
                         }
                     }
                 });
