@@ -198,8 +198,12 @@
         
         <button class="btn-block outline" onclick="showScreen('sendRecommendationScreen')" style="margin-bottom: 8px; border-color: var(--gold); color: var(--gold);">💡 Send Recommendation</button>
         
-        <!-- ✅ زر إدارة التوصيات الجديد -->
         <button class="btn-block outline" onclick="openManageRecommendations()" style="margin-bottom: 8px; border-color: var(--red); color: var(--red);">🗑️ Manage Recommendations</button>
+        
+        <button class="btn-block outline" onclick="showScreen('manageInvestmentsScreen')" style="margin-bottom: 8px; border-color: var(--green); color: var(--green);">💼 Manage Investments</button>
+
+        <!-- ✅ زر إدارة الصفقات (معزول تماماً) -->
+        <button class="btn-block outline" onclick="showScreen('manageTradesScreen'); loadTradeSubscribers();" style="margin-bottom: 8px; border-color: var(--blue); color: var(--blue);">📈 Manage Trades (Isolated)</button>
         
         <button class="btn-block outline" onclick="showScreen('usersScreen')" style="margin-bottom: 8px;">👥 Manage Users</button>
         <button class="btn-block outline" onclick="openManageSignals()" style="border-color: var(--red); color: var(--red);">🗑️ Manage Sent Signals</button>
@@ -217,62 +221,95 @@
     </div>
 </div>
 
-<!-- ✅ شاشة التوصيات (إرسال) -->
-<div id="sendRecommendationScreen" class="screen">
+<!-- ✅ شاشة إدارة الصفقات (معزولة) -->
+<div id="manageTradesScreen" class="screen">
     <div class="header">
-        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>SEND RECOMMENDATION</h1><span>● INVESTMENT ADVICE</span></div></div>
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>MANAGE TRADES</h1><span>● ISOLATED</span></div></div>
         <div class="bell-icon" onclick="showScreen('dashboardScreen')">✕</div>
     </div>
-
-    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Send a buy & hold recommendation to all active subscribers. This will appear in their "Recommendations" tab instantly.</p>
     
-    <div class="card">
-        <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💡 Recommendation Details</h3>
-        
-        <div class="input-group">
-            <label>Coin Symbol (e.g., BTC, ETH)</label>
-            <input type="text" id="recCoin" placeholder="BTC" style="text-transform: uppercase;">
-        </div>
+    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Subscribers who deposited funds for trading. Click on any name to manage their trade individually.</p>
 
-        <div class="input-group">
-            <label>Target Price (Optional)</label>
-            <input type="text" id="recPrice" placeholder="e.g., 65000">
-        </div>
+    <div class="section-title">📥 Pending Trade Deposits</div>
+    <div id="adminTradeDepositList" class="card">
+        <p style="color:#888; text-align:center; font-size:12px;">No pending trade deposits.</p>
+    </div>
 
-        <div class="input-group">
-            <label>Notes / Reason</label>
-            <textarea id="recNotes" placeholder="Strong support level reached, good time to buy and hold..."></textarea>
-        </div>
-
-        <button class="btn-block success" onclick="sendRecommendation()">📤 Send to Subscribers</button>
+    <div class="section-title">📈 Active Trade Subscribers</div>
+    <div id="activeTradeSubscribersList" class="card">
+        <p style="color:#888; text-align:center; font-size:12px;">No active trade subscribers.</p>
     </div>
 
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
-        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
+        <button class="nav-item active" onclick="showScreen('manageTradesScreen'); loadTradeSubscribers();"><span class="icon">📈</span><span>Trades</span></button>
+        <button class="nav-item" onclick="showScreen('manageInvestmentsScreen')"><span class="icon">💼</span><span>Invest</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
 
-<!-- ✅ شاشة إدارة وحذف التوصيات الجديدة -->
-<div id="manageRecommendationsScreen" class="screen">
+<!-- ✅ شاشة تفاصيل تداول المستخدم -->
+<div id="userTradeDetailScreen" class="screen">
     <div class="header">
-        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>RECOMMENDATIONS</h1><span>● HISTORY / DELETE</span></div></div>
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>USER TRADE</h1><span>● INDIVIDUAL</span></div></div>
+        <div class="bell-icon" onclick="showScreen('manageTradesScreen')">✕</div>
+    </div>
+
+    <div class="card" style="border-color: var(--blue);">
+        <h3 style="color: var(--blue); margin-bottom: 16px; font-size: 16px;">📈 Trade Details</h3>
+        <div class="detail-row"><span>User Name</span><span id="tradeDetailName">-</span></div>
+        <div class="detail-row"><span>Current Balance</span><span id="tradeDetailBalance">$0.00</span></div>
+        <div class="detail-row"><span>Total Profit</span><span id="tradeDetailProfit">$0.00</span></div>
+        <div class="detail-row"><span>Active Trade</span><span id="tradeDetailActive">None</span></div>
+
+        <div class="input-group" style="margin-top: 15px;">
+            <label>Add Profit to Balance ($)</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="number" id="adminTradeProfitAmount" placeholder="e.g., 5">
+                <button class="btn-small approve" onclick="adminAddTradeProfit()">Add</button>
+            </div>
+        </div>
+
+        <div class="input-group" style="margin-top: 15px; background: rgba(212, 175, 55, 0.1); padding: 10px; border-radius: 8px; border: 1px solid var(--gold);">
+            <label style="color: var(--gold);">Open Individual Trade</label>
+            <input type="text" id="adminTradeCoinInput" placeholder="Coin (e.g., BTCUSDT)" style="margin-bottom: 8px;">
+            <input type="text" id="adminTradeLinkInput" placeholder="Binance Trade Link (https://...)" style="margin-bottom: 8px;">
+            <button class="btn-block success" onclick="adminOpenTrade()">📡 Open Trade for this User</button>
+            <button class="btn-block danger" onclick="adminCloseTrade()" style="margin-top: 8px;">🔴 Close User Trade</button>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
+        <button class="nav-item active" onclick="showScreen('manageTradesScreen'); loadTradeSubscribers();"><span class="icon">📈</span><span>Trades</span></button>
+        <button class="nav-item" onclick="showScreen('manageInvestmentsScreen')"><span class="icon">💼</span><span>Invest</span></button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
+        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+    </div>
+</div>
+
+<!-- ✅ شاشة إدارة الاستثمارات (للباقات فقط) -->
+<div id="manageInvestmentsScreen" class="screen">
+    <div class="header">
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>INVESTMENTS</h1><span>● PACKAGES</span></div></div>
         <div class="bell-icon" onclick="showScreen('dashboardScreen')">✕</div>
     </div>
-    
-    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Here you can delete old recommendations. Deleting them removes them permanently from the users' app.</p>
 
-    <div id="adminRecommendationsList">
-        <div class="empty-state"><div class="icon">⏳</div><h3>Loading...</h3></div>
+    <div class="section-title">📥 Deposit Requests (Packages)</div>
+    <div id="adminDepositList" class="card">
+        <p style="color:#888; text-align:center; font-size:12px;">No pending deposits.</p>
+    </div>
+
+    <div class="section-title">💸 Withdraw Requests</div>
+    <div id="adminWithdrawList" class="card">
+        <p style="color:#888; text-align:center; font-size:12px;">No pending withdrawals.</p>
     </div>
 
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
+        <button class="nav-item active" onclick="showScreen('manageInvestmentsScreen')"><span class="icon">💼</span><span>Invest</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
@@ -699,7 +736,7 @@
     const ADMIN_EMAIL = "mmatrix081@gmail.com";
     let auth, db;
     let signInWithEmailAndPassword, signOut;
-    let collection, getDocs, doc, getDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot;
+    let collection, getDocs, doc, getDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot, query, where, orderBy;
 
     let appMode = 'crypto';
     let allUsers = [];
@@ -708,6 +745,7 @@
     let currentUserUID = null;
     let currentUserData = null;
     let currentManageMode = 'crypto';
+    let currentTradeUserUID = null;
 
     let currentRefFilter = 'all';
     let currentRewardData = null;
@@ -722,7 +760,8 @@
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
         window.scrollTo(0, 0);
     }
 
@@ -831,7 +870,7 @@
         }
     }
 
-    // ✅ دوال التوصيات (الإدارة والحذف)
+    // ✅ دوال التوصيات
     function openManageRecommendations() {
         showScreen('manageRecommendationsScreen');
         loadRecommendationsForAdmin();
@@ -850,7 +889,6 @@
             }
 
             let html = '';
-            // تحويل الـ snapshot إلى مصفوفة لترتيبها تنازلياً حسب التاريخ
             const recs = [];
             snap.forEach(docSnap => recs.push({ id: docSnap.id, ...docSnap.data() }));
             recs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
@@ -885,7 +923,7 @@
         try {
             await deleteDoc(doc(db, 'tradelix_recommendations', docId));
             showToast('✅ Recommendation deleted');
-            loadRecommendationsForAdmin(); // تحديث القائمة
+            loadRecommendationsForAdmin();
         } catch(e) {
             console.error(e);
             showToast('❌ Error deleting');
@@ -1064,6 +1102,242 @@
         }
     }
 
+    // ✅ دوال التداول المعزولة
+    async function loadTradeSubscribers() {
+        // 1. طلبات الإيداع للتداول
+        const depList = document.getElementById('adminTradeDepositList');
+        depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
+        try {
+            const q = query(collection(db, 'trade_deposits'), where('status', '==', 'pending'), orderBy('createdAt', 'desc'));
+            const snap = await getDocs(q);
+            if (snap.empty) {
+                depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending trade deposits.</p>';
+            } else {
+                depList.innerHTML = snap.docs.map(d => {
+                    const r = d.data();
+                    return `
+                    <div class="card" style="padding: 15px; border-left: 4px solid var(--blue); margin-bottom: 10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <h3 style="color:#fff; margin:0; font-size:15px;">${r.userName}</h3>
+                                <p style="color:#888; font-size:11px;">${r.userEmail}</p>
+                                <p style="color:var(--blue); font-weight:900; font-size:18px; margin-top:5px;">$${r.amount}</p>
+                                <p style="color:#aaa; font-size:10px; word-break:break-all;">TX: ${r.txHash}</p>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:5px;">
+                                <button class="btn-small approve" onclick="processTradeDeposit('${d.id}', '${r.userId}', '${r.amount}', 'approve')">✅ Approve</button>
+                                <button class="btn-small reject" onclick="processTradeDeposit('${d.id}', '${r.userId}', '${r.amount}', 'reject')">❌ Reject</button>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        } catch(e) { console.error(e); depList.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; }
+
+        // 2. المشتركين في التداول
+        const actList = document.getElementById('activeTradeSubscribersList');
+        actList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
+        try {
+            const q = query(collection(db, 'tradelix_users'), where('balance', '>', 0));
+            const snap = await getDocs(q);
+            if (snap.empty) {
+                actList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No active trade subscribers.</p>';
+            } else {
+                actList.innerHTML = snap.docs.map(d => {
+                    const u = d.data();
+                    return `
+                    <div class="user-card" style="border-left: 4px solid var(--green);" onclick="openUserTradeDetail('${d.id}')">
+                        <div class="user-header">
+                            <div>
+                                <div class="user-name">${u.name || 'Unknown'}</div>
+                                <div class="user-email">${u.email || ''}</div>
+                            </div>
+                            <span style="color: var(--gold); font-weight: 900;">$${(u.balance || 0).toFixed(2)}</span>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        } catch(e) { console.error(e); actList.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; }
+    }
+
+    async function processTradeDeposit(requestId, userId, amount, action) {
+        if (!confirm(`Are you sure you want to ${action} this trade deposit?`)) return;
+        try {
+            await updateDoc(doc(db, 'trade_deposits', requestId), {
+                status: action === 'approve' ? 'approved' : 'rejected'
+            });
+            if (action === 'approve') {
+                const userRef = doc(db, 'tradelix_users', userId);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    const currentBalance = userSnap.data().balance || 0;
+                    await updateDoc(userRef, { balance: currentBalance + parseFloat(amount) });
+                }
+            }
+            showToast(`✅ Deposit ${action}d`);
+            loadTradeSubscribers();
+        } catch(e) { console.error(e); showToast('❌ Error'); }
+    }
+
+    async function openUserTradeDetail(uid) {
+        currentTradeUserUID = uid;
+        const userDoc = await getDoc(doc(db, 'tradelix_users', uid));
+        if (!userDoc.exists()) return;
+        const u = userDoc.data();
+        
+        document.getElementById('tradeDetailName').textContent = u.name || '-';
+        document.getElementById('tradeDetailBalance').textContent = '$' + (u.balance || 0).toFixed(2);
+        document.getElementById('tradeDetailProfit').textContent = '$' + (u.totalProfit || 0).toFixed(2);
+        document.getElementById('tradeDetailActive').textContent = u.activeTrade || 'None';
+
+        showScreen('userTradeDetailScreen');
+    }
+
+    async function adminAddTradeProfit() {
+        if (!currentTradeUserUID) return;
+        const amount = parseFloat(document.getElementById('adminTradeProfitAmount').value);
+        if (!amount || amount <= 0) return showToast('❌ Enter valid amount');
+        try {
+            const userRef = doc(db, 'tradelix_users', currentTradeUserUID);
+            const userSnap = await getDoc(userRef);
+            const currentBalance = userSnap.data().balance || 0;
+            const currentProfit = userSnap.data().totalProfit || 0;
+            await updateDoc(userRef, { balance: currentBalance + amount, totalProfit: currentProfit + amount });
+            showToast('✅ Profit added!');
+            document.getElementById('adminTradeProfitAmount').value = '';
+            openUserTradeDetail(currentTradeUserUID);
+        } catch(e) { showToast('❌ Error'); }
+    }
+
+    async function adminOpenTrade() {
+        if (!currentTradeUserUID) return;
+        const coin = document.getElementById('adminTradeCoinInput').value.trim().toUpperCase();
+        const link = document.getElementById('adminTradeLinkInput').value.trim();
+        if (!coin || !link) return showToast('❌ Enter coin and link');
+        try {
+            await updateDoc(doc(db, 'tradelix_users', currentTradeUserUID), {
+                activeTrade: coin,
+                activeTradeLink: link
+            });
+            showToast('✅ Trade opened for user!');
+            document.getElementById('adminTradeCoinInput').value = '';
+            document.getElementById('adminTradeLinkInput').value = '';
+            openUserTradeDetail(currentTradeUserUID);
+        } catch(e) { showToast('❌ Error'); }
+    }
+
+    async function adminCloseTrade() {
+        if (!currentTradeUserUID) return;
+        if (!confirm('Close trade for this user?')) return;
+        try {
+            await updateDoc(doc(db, 'tradelix_users', currentTradeUserUID), {
+                activeTrade: null,
+                activeTradeLink: null
+            });
+            showToast('✅ Trade closed!');
+            openUserTradeDetail(currentTradeUserUID);
+        } catch(e) { showToast('❌ Error'); }
+    }
+
+    // ✅ دوال إدارة الباقات (الطلبات)
+    async function loadDepositRequests() {
+        const list = document.getElementById('adminDepositList');
+        list.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
+        try {
+            const q = query(collection(db, 'deposit_requests'), where('status', '==', 'pending'), orderBy('createdAt', 'desc'));
+            const snap = await getDocs(q);
+            if (snap.empty) {
+                list.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending deposits.</p>';
+                return;
+            }
+            list.innerHTML = snap.docs.map(d => {
+                const r = d.data();
+                return `
+                <div class="card" style="padding: 15px; border-left: 4px solid var(--gold); margin-bottom: 10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h3 style="color:#fff; margin:0; font-size:15px;">${r.userName}</h3>
+                            <p style="color:#888; font-size:11px;">${r.userEmail}</p>
+                            <p style="color:var(--gold); font-weight:900; font-size:18px; margin-top:5px;">$${r.amount}</p>
+                            <p style="color:#aaa; font-size:10px; word-break:break-all;">TX: ${r.txHash}</p>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:5px;">
+                            <button class="btn-small approve" onclick="processDeposit('${d.id}', '${r.userId}', '${r.amount}', 'approve')">✅ Approve</button>
+                            <button class="btn-small reject" onclick="processDeposit('${d.id}', '${r.userId}', '${r.amount}', 'reject')">❌ Reject</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch(e) { console.error(e); list.innerHTML = '<p style="color:red; text-align:center;">Error loading.</p>'; }
+    }
+
+    async function processDeposit(requestId, userId, amount, action) {
+        if (!confirm(`Are you sure you want to ${action} this deposit?`)) return;
+        try {
+            await updateDoc(doc(db, 'deposit_requests', requestId), {
+                status: action === 'approve' ? 'approved' : 'rejected'
+            });
+            if (action === 'approve') {
+                const userRef = doc(db, 'tradelix_users', userId);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    const currentBalance = userSnap.data().balance || 0;
+                    await updateDoc(userRef, { balance: currentBalance + parseFloat(amount) });
+                }
+            }
+            showToast(`✅ Deposit ${action}d`);
+            loadDepositRequests();
+        } catch(e) { console.error(e); showToast('❌ Error'); }
+    }
+
+    async function loadWithdrawRequests() {
+        const list = document.getElementById('adminWithdrawList');
+        list.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
+        try {
+            const q = query(collection(db, 'withdraw_requests'), where('status', '==', 'pending'), orderBy('createdAt', 'desc'));
+            const snap = await getDocs(q);
+            if (snap.empty) {
+                list.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending withdrawals.</p>';
+                return;
+            }
+            list.innerHTML = snap.docs.map(d => {
+                const r = d.data();
+                return `
+                <div class="card" style="padding: 15px; border-left: 4px solid var(--gold); margin-bottom: 10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h3 style="color:#fff; margin:0; font-size:15px;">${r.userName}</h3>
+                            <p style="color:#888; font-size:11px;">${r.userEmail}</p>
+                            <p style="color:var(--gold); font-weight:900; font-size:18px; margin-top:5px;">$${r.amount}</p>
+                            <p style="color:#aaa; font-size:10px; word-break:break-all;">Addr: ${r.address}</p>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:5px;">
+                            <button class="btn-small approve" onclick="processWithdrawal('${d.id}', '${r.userId}', '${r.amount}', 'paid')">✅ Paid</button>
+                            <button class="btn-small reject" onclick="processWithdrawal('${d.id}', '${r.userId}', '${r.amount}', 'rejected')">❌ Reject</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch(e) { console.error(e); list.innerHTML = '<p style="color:red; text-align:center;">Error loading.</p>'; }
+    }
+
+    async function processWithdrawal(requestId, userId, amount, action) {
+        if (!confirm(`Are you sure you want to ${action} this withdrawal?`)) return;
+        try {
+            await updateDoc(doc(db, 'withdraw_requests', requestId), { status: action });
+            if (action === 'paid') {
+                const userRef = doc(db, 'tradelix_users', userId);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    const currentBalance = userSnap.data().balance || 0;
+                    await updateDoc(userRef, { balance: Math.max(0, currentBalance - parseFloat(amount)) });
+                }
+            }
+            showToast(`✅ Withdrawal ${action}`);
+            loadWithdrawRequests();
+        } catch(e) { console.error(e); showToast('❌ Error'); }
+    }
+
     async function initFirebase() {
         if (window.firebaseReady) {
             const authModule = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js");
@@ -1076,7 +1350,7 @@
             signOut = authModule.signOut;
             collection = fsModule.collection; getDocs = fsModule.getDocs; doc = fsModule.doc; getDoc = fsModule.getDoc;
             updateDoc = fsModule.updateDoc; deleteDoc = fsModule.deleteDoc; addDoc = fsModule.addDoc; serverTimestamp = fsModule.serverTimestamp;
-            onSnapshot = fsModule.onSnapshot;
+            onSnapshot = fsModule.onSnapshot; query = fsModule.query; where = fsModule.where; orderBy = fsModule.orderBy;
             
             onSnapshot(collection(db, 'tradelix_users'), (snapshot) => {
                 allUsers = [];
@@ -1089,6 +1363,13 @@
 
                 if (document.getElementById('usersScreen').classList.contains('active')) renderUsers();
                 if (document.getElementById('referralsScreen').classList.contains('active')) loadReferrals();
+                if (document.getElementById('manageInvestmentsScreen').classList.contains('active')) {
+                    loadDepositRequests();
+                    loadWithdrawRequests();
+                }
+                if (document.getElementById('manageTradesScreen').classList.contains('active')) {
+                    loadTradeSubscribers();
+                }
                 
                 const recent = [...allUsers].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 3);
                 const recentDiv = document.getElementById('recentActivity');
@@ -1109,6 +1390,41 @@
                         const data = change.doc.data();
                         if (data.txHash && data.status === 'pending') {
                             triggerNotif(`💰 Deposit: ${data.name || data.email} - $${data.depositAmount || '?'}`);
+                        }
+                    }
+                });
+            });
+
+            // ✅ مراقبة طلبات الإيداع للتداول (معزولة)
+            onSnapshot(collection(db, 'trade_deposits'), (snapshot) => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const r = change.doc.data();
+                        if (Date.now() - (r.createdAt?.seconds * 1000) < 60000) {
+                            triggerNotif(`📈 طلب إيداع تداول جديد: ${r.userName} - $${r.amount}`);
+                        }
+                    }
+                });
+            });
+
+            // ✅ مراقبة طلبات إيداع الباقات
+            onSnapshot(collection(db, 'deposit_requests'), (snapshot) => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const r = change.doc.data();
+                        if (Date.now() - (r.createdAt?.seconds * 1000) < 60000) {
+                            triggerNotif(`📥 طلب إيداع باقة: ${r.userName} - $${r.amount}`);
+                        }
+                    }
+                });
+            });
+
+            onSnapshot(collection(db, 'withdraw_requests'), (snapshot) => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const r = change.doc.data();
+                        if (Date.now() - (r.createdAt?.seconds * 1000) < 60000) {
+                            triggerNotif(`📤 طلب سحب: ${r.userName} - $${r.amount}`);
                         }
                     }
                 });
@@ -1136,7 +1452,6 @@
                 });
             });
 
-            // ✅ إضافة مراقبة التوصيات (لتصل إشعارات للمستخدمين)
             onSnapshot(collection(db, 'tradelix_recommendations'), (snapshot) => {
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
@@ -1380,7 +1695,6 @@
         document.getElementById('signalEntry').value = ''; document.getElementById('signalSL').value = ''; document.getElementById('signalTP').value = '';
     }
 
-    // ✅ دالة إرسال التوصية الجديدة
     async function sendRecommendation() {
         const coin = document.getElementById('recCoin').value.trim().toUpperCase();
         const price = document.getElementById('recPrice').value.trim();
@@ -1392,7 +1706,6 @@
         }
 
         try {
-            // إرسال البيانات إلى مجموعة tradelix_recommendations
             await addDoc(collection(db, 'tradelix_recommendations'), {
                 coin: coin,
                 price: price || null,
@@ -1402,11 +1715,9 @@
             });
             
             showToast('✅ Recommendation sent successfully!');
-            
             document.getElementById('recCoin').value = '';
             document.getElementById('recPrice').value = '';
             document.getElementById('recNotes').value = '';
-            
             setTimeout(() => { showScreen('dashboardScreen'); }, 1500);
 
         } catch (error) {
