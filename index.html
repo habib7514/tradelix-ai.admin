@@ -268,7 +268,7 @@
         <p style="color:#888; text-align:center; font-size:12px;">No pending trade requests.</p>
     </div>
     
-    <div class="section-title">📈 All Trade Subscribers (Balance >= $0)</div>
+    <div class="section-title">📈 All Trade Subscribers</div>
     <div id="activeTradeSubscribersList" class="card">
         <p style="color:#888; text-align:center; font-size:12px;">No trade subscribers.</p>
     </div>
@@ -293,6 +293,8 @@
         <div class="detail-row"><span>Current Balance</span><span id="tradeDetailBalance">$0.00</span></div>
         <div class="detail-row"><span>Total Profit</span><span id="tradeDetailProfit">$0.00</span></div>
         <div class="detail-row"><span>Active Trade</span><span id="tradeDetailActive">None</span></div>
+        
+        <!-- ✅ إضافة ربح -->
         <div class="input-group" style="margin-top: 15px;">
             <label>Add Profit to Balance ($)</label>
             <div style="display: flex; gap: 8px;">
@@ -300,6 +302,16 @@
                 <button class="btn-small approve" onclick="adminAddTradeProfit()">Add</button>
             </div>
         </div>
+
+        <!-- ✅ تعديل الرصيد الإجمالي يدوياً -->
+        <div class="input-group" style="margin-top: 15px; background: rgba(245, 158, 11, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--orange);">
+            <label style="color: var(--orange); font-weight: bold;">Set Exact Balance ($)</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="number" id="adminSetBalanceAmount" placeholder="e.g., 10">
+                <button class="btn-small" style="background: var(--orange); color: #fff;" onclick="adminSetExactBalance()">Set</button>
+            </div>
+        </div>
+
         <div class="input-group" style="margin-top: 15px; background: rgba(212, 175, 55, 0.1); padding: 10px; border-radius: 8px; border: 1px solid var(--gold);">
             <label style="color: var(--gold);">Open Individual Trade</label>
             <input type="text" id="adminTradeCoinInput" placeholder="Coin (e.g., BTCUSDT)" style="margin-bottom: 8px;">
@@ -1076,7 +1088,6 @@
             const subs = [];
             snap.forEach(d => {
                 const u = d.data();
-                // ✅ تم إزالة شرط الرصيد ليظهر الجميع
                 subs.push({ id: d.id, ...u });
             });
             subs.sort((a, b) => (b.balance || 0) - (a.balance || 0));
@@ -1124,11 +1135,9 @@
                     const currentBalance = Number(userSnap.data().balance) || 0;
                     
                     if (colName === 'trade_requests') {
-                        // طلب صفقة من الرصيد -> خصم المبلغ
                         if (currentBalance < amt) throw new Error('User has insufficient balance');
                         transaction.update(userRef, { balance: currentBalance - amt });
                     } else {
-                        // إيداع تداول -> إضافة المبلغ
                         transaction.update(userRef, { balance: currentBalance + amt });
                     }
                     
@@ -1202,6 +1211,29 @@
             document.getElementById('adminTradeProfitAmount').value = '';
             openUserTradeDetail(currentTradeUserUID);
         } catch(e) { showToast('❌ Error'); }
+    }
+
+    // ✅ دالة تعديل الرصيد الإجمالي يدوياً
+    async function adminSetExactBalance() {
+        if (!currentTradeUserUID) return;
+        const newBalance = parseFloat(document.getElementById('adminSetBalanceAmount').value);
+        if (isNaN(newBalance) || newBalance < 0) return showToast('❌ Enter a valid amount');
+        
+        if (!confirm(`Are you sure you want to set the balance to exactly $${newBalance.toFixed(2)}?`)) return;
+
+        try {
+            const userRef = doc(db, 'tradelix_users', currentTradeUserUID);
+            await updateDoc(userRef, { 
+                balance: newBalance 
+            });
+            
+            showToast('✅ Balance updated manually!');
+            document.getElementById('adminSetBalanceAmount').value = '';
+            openUserTradeDetail(currentTradeUserUID);
+        } catch(e) { 
+            console.error(e);
+            showToast('❌ Error updating balance'); 
+        }
     }
 
     async function adminOpenTrade() {
