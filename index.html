@@ -1226,17 +1226,49 @@
         } catch(e) { showToast('❌ Error'); }
     }
 
+    // ✅ دالة إغلاق الصفقة (محدثة لحفظ الربح/الخسارة في السجل)
     async function adminCloseTrade() {
         if (!currentTradeUserUID) return;
-        if (!confirm('Close trade for this user?')) return;
+        
+        // نطلب من الأدمن إدخال نتيجة الصفقة (ربح أو خسارة)
+        const pnlStr = prompt("Enter Trade Result (PnL) in $:\nExample: 5 (for profit) or -3 (for loss)");
+        if (pnlStr === null) return; // إذا ضغط إلغاء
+        
+        const pnl = parseFloat(pnlStr);
+        if (isNaN(pnl)) return showToast('❌ Invalid number entered');
+
         try {
-            await updateDoc(doc(db, 'tradelix_users', currentTradeUserUID), {
+            const userRef = doc(db, 'tradelix_users', currentTradeUserUID);
+            const userSnap = await getDoc(userRef);
+            if (!userSnap.exists()) return;
+
+            const userData = userSnap.data();
+            const activeTradeName = userData.activeTrade || 'Unknown Coin';
+            
+            // تجهيز بيانات الصفقة المغلقة
+            const closedTrade = {
+                coin: activeTradeName,
+                pnl: pnl,
+                closedAt: Date.now()
+            };
+            
+            // جلب السجل القديم وإضافة الصفقة الجديدة في البداية
+            let currentHistory = userData.closedTrades || [];
+            currentHistory.unshift(closedTrade);
+
+            // تحديث بيانات المستخدم: مسح الصفقة النشطة + إضافة السجل الجديد
+            await updateDoc(userRef, {
                 activeTrade: null,
-                activeTradeLink: null
+                activeTradeLink: null,
+                closedTrades: currentHistory
             });
-            showToast('✅ Trade closed!');
+            
+            showToast('✅ Trade closed & saved to user history!');
             openUserTradeDetail(currentTradeUserUID);
-        } catch(e) { showToast('❌ Error'); }
+        } catch(e) { 
+            console.error(e); 
+            showToast('❌ Error closing trade'); 
+        }
     }
 
     // ✅ دوال إدارة الباقات (الطلبات)
