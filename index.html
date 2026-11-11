@@ -195,16 +195,10 @@
     <div class="section-title">⚡ QUICK ACTIONS</div>
     <div class="card" style="padding: 14px;">
         <button class="btn-block" onclick="showScreen('sendSignalScreen')" style="margin-bottom: 8px;">📤 Send New Signal</button>
-        
         <button class="btn-block outline" onclick="showScreen('sendRecommendationScreen')" style="margin-bottom: 8px; border-color: var(--gold); color: var(--gold);">💡 Send Recommendation</button>
-        
         <button class="btn-block outline" onclick="openManageRecommendations()" style="margin-bottom: 8px; border-color: var(--red); color: var(--red);">🗑️ Manage Recommendations</button>
-        
-        <button class="btn-block outline" onclick="showScreen('manageInvestmentsScreen')" style="margin-bottom: 8px; border-color: var(--green); color: var(--green);">💼 Manage Investments</button>
-
-        <!-- ✅ زر إدارة الصفقات (معزول تماماً) -->
+        <button class="btn-block outline" onclick="showScreen('manageInvestmentsScreen'); loadDepositRequests(); loadWithdrawRequests();" style="margin-bottom: 8px; border-color: var(--green); color: var(--green);">💼 Manage Investments</button>
         <button class="btn-block outline" onclick="showScreen('manageTradesScreen'); loadTradeSubscribers();" style="margin-bottom: 8px; border-color: var(--blue); color: var(--blue);">📈 Manage Trades (Isolated)</button>
-        
         <button class="btn-block outline" onclick="showScreen('usersScreen')" style="margin-bottom: 8px;">👥 Manage Users</button>
         <button class="btn-block outline" onclick="openManageSignals()" style="border-color: var(--red); color: var(--red);">🗑️ Manage Sent Signals</button>
     </div>
@@ -221,29 +215,65 @@
     </div>
 </div>
 
-<!-- ✅ شاشة إدارة الصفقات (معزولة) -->
+<!-- ✅ شاشة إرسال التوصية -->
+<div id="sendRecommendationScreen" class="screen">
+    <div class="header">
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>SEND RECOMMENDATION</h1><span>● IDEA</span></div></div>
+        <div class="bell-icon" onclick="showScreen('dashboardScreen')">✕</div>
+    </div>
+    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Send a recommendation to all users (coin + optional price/notes).</p>
+    <div class="card">
+        <div class="input-group"><label>Coin Symbol (e.g., BTC)</label><input type="text" id="recCoin" placeholder="BTC"></div>
+        <div class="input-group"><label>Target Price (Optional)</label><input type="text" id="recPrice" placeholder="e.g., 65000"></div>
+        <div class="input-group"><label>Notes (Optional)</label><textarea id="recNotes" placeholder="Why this recommendation?"></textarea></div>
+        <button class="btn-block" onclick="sendRecommendation()">💡 Send Recommendation</button>
+    </div>
+    <div class="bottom-nav">
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
+        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
+        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+    </div>
+</div>
+
+<!-- ✅ شاشة إدارة التوصيات -->
+<div id="manageRecommendationsScreen" class="screen">
+    <div class="header">
+        <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>MANAGE RECS</h1><span>● DELETE OLD</span></div></div>
+        <div class="bell-icon" onclick="showScreen('dashboardScreen')">✕</div>
+    </div>
+    <div id="adminRecommendationsList">
+        <div class="empty-state"><div class="icon">⏳</div><h3>Loading...</h3></div>
+    </div>
+    <div class="bottom-nav">
+        <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
+        <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
+        <button class="nav-item" onclick="showScreen('referralsScreen'); loadReferrals();"><span class="icon">🎁</span><span>Referrals</span></button>
+        <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
+        <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
+    </div>
+</div>
+
+<!-- ✅ شاشة إدارة الصفقات -->
 <div id="manageTradesScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>MANAGE TRADES</h1><span>● ISOLATED</span></div></div>
         <div class="bell-icon" onclick="showScreen('dashboardScreen')">✕</div>
     </div>
-    
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Subscribers who deposited funds for trading. Click on any name to manage their trade individually.</p>
-
     <div class="section-title">📥 Pending Trade Deposits</div>
     <div id="adminTradeDepositList" class="card">
         <p style="color:#888; text-align:center; font-size:12px;">No pending trade deposits.</p>
     </div>
-
     <div class="section-title">📈 Active Trade Subscribers</div>
     <div id="activeTradeSubscribersList" class="card">
         <p style="color:#888; text-align:center; font-size:12px;">No active trade subscribers.</p>
     </div>
-
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item active" onclick="showScreen('manageTradesScreen'); loadTradeSubscribers();"><span class="icon">📈</span><span>Trades</span></button>
-        <button class="nav-item" onclick="showScreen('manageInvestmentsScreen')"><span class="icon">💼</span><span>Invest</span></button>
+        <button class="nav-item" onclick="showScreen('manageInvestmentsScreen'); loadDepositRequests(); loadWithdrawRequests();"><span class="icon">💼</span><span>Invest</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
@@ -255,14 +285,12 @@
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>USER TRADE</h1><span>● INDIVIDUAL</span></div></div>
         <div class="bell-icon" onclick="showScreen('manageTradesScreen')">✕</div>
     </div>
-
     <div class="card" style="border-color: var(--blue);">
         <h3 style="color: var(--blue); margin-bottom: 16px; font-size: 16px;">📈 Trade Details</h3>
         <div class="detail-row"><span>User Name</span><span id="tradeDetailName">-</span></div>
         <div class="detail-row"><span>Current Balance</span><span id="tradeDetailBalance">$0.00</span></div>
         <div class="detail-row"><span>Total Profit</span><span id="tradeDetailProfit">$0.00</span></div>
         <div class="detail-row"><span>Active Trade</span><span id="tradeDetailActive">None</span></div>
-
         <div class="input-group" style="margin-top: 15px;">
             <label>Add Profit to Balance ($)</label>
             <div style="display: flex; gap: 8px;">
@@ -270,7 +298,6 @@
                 <button class="btn-small approve" onclick="adminAddTradeProfit()">Add</button>
             </div>
         </div>
-
         <div class="input-group" style="margin-top: 15px; background: rgba(212, 175, 55, 0.1); padding: 10px; border-radius: 8px; border: 1px solid var(--gold);">
             <label style="color: var(--gold);">Open Individual Trade</label>
             <input type="text" id="adminTradeCoinInput" placeholder="Coin (e.g., BTCUSDT)" style="margin-bottom: 8px;">
@@ -279,37 +306,33 @@
             <button class="btn-block danger" onclick="adminCloseTrade()" style="margin-top: 8px;">🔴 Close User Trade</button>
         </div>
     </div>
-
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item active" onclick="showScreen('manageTradesScreen'); loadTradeSubscribers();"><span class="icon">📈</span><span>Trades</span></button>
-        <button class="nav-item" onclick="showScreen('manageInvestmentsScreen')"><span class="icon">💼</span><span>Invest</span></button>
+        <button class="nav-item" onclick="showScreen('manageInvestmentsScreen'); loadDepositRequests(); loadWithdrawRequests();"><span class="icon">💼</span><span>Invest</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
 </div>
 
-<!-- ✅ شاشة إدارة الاستثمارات (للباقات فقط) -->
+<!-- ✅ شاشة إدارة الاستثمارات -->
 <div id="manageInvestmentsScreen" class="screen">
     <div class="header">
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>INVESTMENTS</h1><span>● PACKAGES</span></div></div>
         <div class="bell-icon" onclick="showScreen('dashboardScreen')">✕</div>
     </div>
-
     <div class="section-title">📥 Deposit Requests (Packages)</div>
     <div id="adminDepositList" class="card">
         <p style="color:#888; text-align:center; font-size:12px;">No pending deposits.</p>
     </div>
-
     <div class="section-title">💸 Withdraw Requests</div>
     <div id="adminWithdrawList" class="card">
         <p style="color:#888; text-align:center; font-size:12px;">No pending withdrawals.</p>
     </div>
-
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
-        <button class="nav-item active" onclick="showScreen('manageInvestmentsScreen')"><span class="icon">💼</span><span>Invest</span></button>
+        <button class="nav-item active" onclick="showScreen('manageInvestmentsScreen'); loadDepositRequests(); loadWithdrawRequests();"><span class="icon">💼</span><span>Invest</span></button>
         <button class="nav-item" onclick="showScreen('sendSignalScreen')"><span class="icon">📤</span><span>Signal</span></button>
         <button class="nav-item" onclick="handleLogout()"><span class="icon">🚪</span><span>Logout</span></button>
     </div>
@@ -320,17 +343,14 @@
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>REFERRALS</h1><span>● MANAGEMENT</span></div></div>
         <div class="bell-icon" onclick="openNotifModal()">🔔</div>
     </div>
-    
     <div style="display:flex; gap:8px; margin-bottom:16px;">
         <button class="btn-small view" onclick="filterReferrals('all')" id="refBtnAll" style="flex:1;">All</button>
         <button class="btn-small" style="background:var(--orange); color:#fff; flex:1;" onclick="filterReferrals('pending')" id="refBtnPending">Ready for Reward</button>
         <button class="btn-small approve" onclick="filterReferrals('rewarded')" id="refBtnRewarded" style="flex:1;">Rewarded</button>
     </div>
-
     <div id="referralsList">
         <div class="empty-state"><div class="icon">⏳</div><h3>Loading referrals...</h3></div>
     </div>
-
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
@@ -343,15 +363,12 @@
 <div id="rewardModal" class="screen" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99998; display: none; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
         <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">🎁 Give Referral Reward</h3>
-        
         <div class="detail-row"><span>Referrer</span><span id="rewardReferrerName">-</span></div>
         <div class="detail-row"><span>Current Crypto Expiry</span><span id="rewardCurrentExpiry">-</span></div>
         <div class="detail-row"><span>Days Left</span><span id="rewardDaysLeft">-</span></div>
-        
         <div style="background: rgba(34, 197, 94, 0.1); border: 1px dashed var(--green); border-radius: 8px; padding: 12px; margin: 15px 0; text-align: center;">
             <span style="color: var(--green); font-weight: 900; font-size: 14px;">New Expiry: <br><span id="rewardNewExpiry" style="font-size: 18px; margin-top: 5px; display: inline-block;">-</span></span>
         </div>
-
         <button class="btn-block success" onclick="confirmReward()" style="margin-bottom: 8px;">✅ Confirm & Add 7 Days</button>
         <button class="btn-block outline" onclick="closeRewardModal()">Cancel</button>
     </div>
@@ -362,14 +379,11 @@
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>SIGNAL HISTORY</h1><span>● DELETE OLD</span></div></div>
         <div class="bell-icon" onclick="showScreen('dashboardScreen')">✕</div>
     </div>
-    
     <div class="mode-toggle" style="margin-bottom: 20px;">
         <button id="btnManageCrypto" class="mode-btn active" onclick="loadSignalsForAdmin('crypto')">🪙 Tradelix</button>
         <button id="btnManageGold" class="mode-btn inactive" onclick="loadSignalsForAdmin('gold')">🥇 Tradix Gold</button>
     </div>
-
     <div id="adminSignalsList"></div>
-
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
@@ -384,7 +398,6 @@
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>USERS</h1><span>● MANAGEMENT</span></div></div>
         <div class="bell-icon" onclick="openNotifModal()">🔔</div>
     </div>
-    
     <div class="input-group"><input type="text" id="searchUsers" placeholder="🔍 Search by name or email..." oninput="filterUsers()"></div>
     <div style="display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;">
         <button class="btn-small view" onclick="filterByStatus('all')" id="filterAll">All</button>
@@ -393,7 +406,6 @@
         <button class="btn-small reject" onclick="filterByStatus('inactive')" id="filterInactive">Inactive</button>
     </div>
     <div id="usersList"><div class="empty-state"><div class="icon">⏳</div><h3>Loading users...</h3></div></div>
-
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item active" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
@@ -418,12 +430,10 @@
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">💎 Subscription</h3>
         <div class="detail-row"><span>Status</span><span id="detailStatus">-</span></div>
         <div class="detail-row"><span>Plan Type</span><span id="detailType">-</span></div>
-        
         <div class="detail-row" style="background: rgba(245, 158, 11, 0.1); border-radius: 8px; padding: 10px; margin: 10px 0; border: 1px dashed var(--orange);">
             <span style="color: var(--orange); font-weight: 900;">Course Requested</span>
             <span id="detailPendingRequest" style="color: var(--orange); font-weight: 900; font-size: 14px;">-</span>
         </div>
-        
         <div class="detail-row"><span>Crypto Expiry</span><span id="detailCryptoExpiry">-</span></div>
         <div class="detail-row"><span>Gold Expiry</span><span id="detailGoldExpiry">-</span></div>
         <div class="detail-row"><span>Active Courses</span><span id="detailCourses">-</span></div>
@@ -448,17 +458,13 @@
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>SEND SIGNAL</h1><span>● TRADING</span></div></div>
         <div class="bell-icon" onclick="openNotifModal()">🔔</div>
     </div>
-    
     <div class="mode-toggle">
         <button id="btnSignalCrypto" class="mode-btn active" onclick="switchMode('crypto')">🪙 Tradelix</button>
         <button id="btnSignalGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Tradix Gold</button>
     </div>
-
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Send a new signal. Based on the mode selected above, the signal will go to the correct app.</p>
-    
     <div class="card">
         <h3 style="color: var(--gold); margin-bottom: 16px; font-size: 16px;">📈 Signal Details</h3>
-        
         <div class="input-group" id="coinSelectGroup">
             <label>Coin (Crypto)</label>
             <select id="signalCoin">
@@ -534,12 +540,7 @@
                 <option value="OM">MANTRA (OM)</option>
             </select>
         </div>
-
-        <div class="input-group">
-            <label>Pair (Gold)</label>
-            <input type="text" id="signalPairGold" value="XAU/USD">
-        </div>
-
+        <div class="input-group"><label>Pair (Gold)</label><input type="text" id="signalPairGold" value="XAU/USD"></div>
         <div class="input-group">
             <label>Direction (Buy/Sell)</label>
             <div style="display: flex; gap: 10px;">
@@ -548,7 +549,6 @@
             </div>
             <input type="hidden" id="signalDirection" value="BUY">
         </div>
-        
         <div class="input-group"><label>Entry Price</label><input type="text" id="signalEntry"></div>
         <div class="input-group"><label>Stop Loss</label><input type="text" id="signalSL"></div>
         <div class="input-group"><label>Take Profit</label><input type="text" id="signalTP"></div>
@@ -569,105 +569,34 @@
         <div class="header-left"><div class="header-logo">A</div><div class="header-title"><h1>AI ANALYSIS</h1><span>● MARKET SCANNER</span></div></div>
         <div class="bell-icon" onclick="openNotifModal()">🔔</div>
     </div>
-
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Analyze live market data with AI-powered indicators (EMA, RSI, Trend) and get a suggested trade.</p>
-
     <div class="mode-toggle">
         <button id="btnAiModeCrypto" class="mode-btn active" onclick="switchMode('crypto')">🪙 Tradelix</button>
         <button id="btnAiModeGold" class="mode-btn inactive" onclick="switchMode('gold')">🥇 Tradix Gold</button>
     </div>
-
     <div class="input-group" id="aiCoinSelectGroup">
         <label>Select Coin to Analyze</label>
         <select id="aiCoinSelect">
             <option value="BTC">Bitcoin (BTC)</option>
             <option value="ETH">Ethereum (ETH)</option>
-            <option value="BNB">BNB</option>
             <option value="SOL">Solana (SOL)</option>
+            <option value="BNB">BNB</option>
             <option value="XRP">XRP</option>
             <option value="ADA">Cardano (ADA)</option>
             <option value="DOGE">Dogecoin (DOGE)</option>
-            <option value="DOT">Polkadot (DOT)</option>
-            <option value="AVAX">Avalanche (AVAX)</option>
-            <option value="LINK">Chainlink (LINK)</option>
-            <option value="POL">Polygon (POL)</option>
-            <option value="LTC">Litecoin (LTC)</option>
-            <option value="TRX">TRON (TRX)</option>
-            <option value="ATOM">Cosmos (ATOM)</option>
-            <option value="UNI">Uniswap (UNI)</option>
-            <option value="SHIB">Shiba Inu (SHIB)</option>
-            <option value="APT">Aptos (APT)</option>
-            <option value="ARB">Arbitrum (ARB)</option>
-            <option value="OP">Optimism (OP)</option>
-            <option value="NEAR">NEAR (NEAR)</option>
-            <option value="INJ">Injective (INJ)</option>
-            <option value="SUI">Sui (SUI)</option>
-            <option value="FIL">Filecoin (FIL)</option>
-            <option value="ETC">Ethereum Classic (ETC)</option>
-            <option value="TON">Toncoin (TON)</option>
-            <option value="ICP">Internet Computer (ICP)</option>
-            <option value="RENDER">Render (RENDER)</option>
-            <option value="FET">Fetch.ai (FET)</option>
-            <option value="SEI">Sei (SEI)</option>
-            <option value="TIA">Celestia (TIA)</option>
-            <option value="STX">Stacks (STX)</option>
-            <option value="IMX">Immutable (IMX)</option>
-            <option value="GRT">The Graph (GRT)</option>
-            <option value="SAND">The Sandbox (SAND)</option>
-            <option value="MANA">Decentraland (MANA)</option>
-            <option value="AAVE">Aave (AAVE)</option>
-            <option value="MKR">Maker (MKR)</option>
-            <option value="CRV">Curve DAO (CRV)</option>
-            <option value="ALGO">Algorand (ALGO)</option>
-            <option value="VET">VeChain (VET)</option>
-            <option value="HBAR">Hedera (HBAR)</option>
-            <option value="EOS">EOS (EOS)</option>
-            <option value="XLM">Stellar (XLM)</option>
-            <option value="THETA">Theta Network (THETA)</option>
-            <option value="RUNE">THORChain (RUNE)</option>
-            <option value="KAS">Kaspa (KAS)</option>
-            <option value="TAO">Bittensor (TAO)</option>
-            <option value="WIF">dogwifhat (WIF)</option>
-            <option value="PEPE">Pepe (PEPE)</option>
-            <option value="BONK">Bonk (BONK)</option>
-            <option value="WLD">Worldcoin (WLD)</option>
-            <option value="LDO">Lido DAO (LDO)</option>
-            <option value="CHZ">Chiliz (CHZ)</option>
-            <option value="GALA">Gala (GALA)</option>
-            <option value="MINA">Mina Protocol (MINA)</option>
-            <option value="DYDX">dYdX (DYDX)</option>
-            <option value="FLOKI">Floki (FLOKI)</option>
-            <option value="ENA">Ethena (ENA)</option>
-            <option value="BOME">Book of Meme (BOME)</option>
-            <option value="STRK">Starknet (STRK)</option>
-            <option value="JTO">Jito (JTO)</option>
-            <option value="W">Wormhole (W)</option>
-            <option value="ARKM">Arkham (ARKM)</option>
-            <option value="JUP">Jupiter (JUP)</option>
-            <option value="PYTH">Pyth Network (PYTH)</option>
-            <option value="ORDI">ORDI (ORDI)</option>
-            <option value="MEME">Memecoin (MEME)</option>
-            <option value="NOT">Notcoin (NOT)</option>
-            <option value="ETHFI">Ether.fi (ETHFI)</option>
-            <option value="OM">MANTRA (OM)</option>
         </select>
     </div>
-
     <button class="btn-block" onclick="runAIAnalysis()" id="aiAnalyzeBtn" style="margin-bottom: 20px;">🤖 Analyze Market Now</button>
-
     <div id="aiLoading" class="hidden" style="text-align: center; padding: 30px;">
         <div style="font-size: 40px; margin-bottom: 12px;">⏳</div>
         <p style="color: var(--gold); font-weight: 700;">Analyzing...</p>
     </div>
-
     <div id="aiResult" class="hidden"></div>
-
     <div id="aiEmpty" class="empty-state">
         <div class="icon">🤖</div>
         <h3>Ready to Analyze</h3>
         <p>Select a coin and press the button above.</p>
     </div>
-
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
         <button class="nav-item" onclick="showScreen('usersScreen')"><span class="icon">👥</span><span>Users</span></button>
@@ -680,7 +609,6 @@
 <div id="activateModal" class="screen" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99998; display: none; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
         <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 18px;">✅ Activate Subscription</h3>
-        
         <div class="input-group" id="planTypeGroup">
             <label>Plan Type</label>
             <select id="activatePlan">
@@ -690,7 +618,6 @@
                 <option value="Quarterly">VIP Quarterly - $70</option>
             </select>
         </div>
-        
         <div class="input-group">
             <label>Service Type</label>
             <select id="activatePlanType" onchange="toggleCourseInput()">
@@ -700,7 +627,6 @@
                 <option value="course">🎓 Course</option>
             </select>
         </div>
-
         <div class="input-group" id="courseSelectionGroup" style="display: none;">
             <label>Select Course Name</label>
             <select id="activateCourseName">
@@ -710,7 +636,6 @@
                 <option value="Advanced Strategies">4️⃣ Advanced Strategies</option>
             </select>
         </div>
-
         <div class="input-group"><label>Start Date</label><input type="date" id="activateStartDate"></div>
         <button class="btn-block success" onclick="activateSubscription()" style="margin-bottom: 8px;">✅ Confirm</button>
         <button class="btn-block outline" onclick="closeActivateModal()">Cancel</button>
@@ -731,12 +656,11 @@
 </div>
 
 <div id="toast" class="toast">Message</div>
-
 <script>
     const ADMIN_EMAIL = "mmatrix081@gmail.com";
     let auth, db;
     let signInWithEmailAndPassword, signOut;
-    let collection, getDocs, doc, getDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot, query, where, orderBy;
+    let collection, getDocs, doc, getDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot, query, where, orderBy, runTransaction;
 
     let appMode = 'crypto';
     let allUsers = [];
@@ -870,7 +794,6 @@
         }
     }
 
-    // ✅ دوال التوصيات
     function openManageRecommendations() {
         showScreen('manageRecommendationsScreen');
         loadRecommendationsForAdmin();
@@ -930,7 +853,6 @@
         }
     }
 
-    // ✅ دوال الإحالة
     function loadReferrals() {
         const list = document.getElementById('referralsList');
         if (!list) return;
@@ -1102,51 +1024,64 @@
         }
     }
 
-    // ✅ دوال التداول المعزولة
+    // ✅ دوال التداول المعزولة (مُصلحة بالكامل)
     async function loadTradeSubscribers() {
-        // 1. طلبات الإيداع للتداول
         const depList = document.getElementById('adminTradeDepositList');
         depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
         try {
-            const q = query(collection(db, 'trade_deposits'), where('status', '==', 'pending'), orderBy('createdAt', 'desc'));
+            // استعلام بسيط بدون orderBy (يتجنب مشاكل الفهرس)
+            const q = query(collection(db, 'trade_deposits'), where('status', '==', 'pending'));
             const snap = await getDocs(q);
             if (snap.empty) {
                 depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending trade deposits.</p>';
             } else {
-                depList.innerHTML = snap.docs.map(d => {
-                    const r = d.data();
-                    return `
+                // ترتيب برمجياً بدل orderBy
+                const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                docs.sort((a, b) => {
+                    const ta = a.createdAt?.seconds || 0;
+                    const tb = b.createdAt?.seconds || 0;
+                    return tb - ta;
+                });
+                depList.innerHTML = docs.map(r => `
                     <div class="card" style="padding: 15px; border-left: 4px solid var(--blue); margin-bottom: 10px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <h3 style="color:#fff; margin:0; font-size:15px;">${r.userName}</h3>
-                                <p style="color:#888; font-size:11px;">${r.userEmail}</p>
-                                <p style="color:var(--blue); font-weight:900; font-size:18px; margin-top:5px;">$${r.amount}</p>
-                                <p style="color:#aaa; font-size:10px; word-break:break-all;">TX: ${r.txHash}</p>
+                            <div style="flex:1; min-width:0;">
+                                <h3 style="color:#fff; margin:0; font-size:15px; word-break:break-word;">${r.userName || 'Unknown'}</h3>
+                                <p style="color:#888; font-size:11px; word-break:break-all;">${r.userEmail || ''}</p>
+                                <p style="color:var(--blue); font-weight:900; font-size:18px; margin-top:5px;">$${r.amount || 0}</p>
+                                <p style="color:#aaa; font-size:10px; word-break:break-all;">TX: ${r.txHash || '-'}</p>
                             </div>
-                            <div style="display:flex; flex-direction:column; gap:5px;">
-                                <button class="btn-small approve" onclick="processTradeDeposit('${d.id}', '${r.userId}', '${r.amount}', 'approve')">✅ Approve</button>
-                                <button class="btn-small reject" onclick="processTradeDeposit('${d.id}', '${r.userId}', '${r.amount}', 'reject')">❌ Reject</button>
+                            <div style="display:flex; flex-direction:column; gap:5px; margin-left:8px;">
+                                <button class="btn-small approve" onclick="processTradeDeposit('${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'approve')">✅ Approve</button>
+                                <button class="btn-small reject" onclick="processTradeDeposit('${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'reject')">❌ Reject</button>
                             </div>
                         </div>
-                    </div>`;
-                }).join('');
+                    </div>
+                `).join('');
             }
-        } catch(e) { console.error(e); depList.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; }
+        } catch(e) {
+            console.error('loadTradeSubscribers deposits error:', e);
+            depList.innerHTML = `<p style="color:red; text-align:center; font-size:12px;">Error: ${e.message || e.code || 'Unknown'}</p>`;
+        }
 
-        // 2. المشتركين في التداول
         const actList = document.getElementById('activeTradeSubscribersList');
         actList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
         try {
-            const q = query(collection(db, 'tradelix_users'), where('balance', '>', 0));
-            const snap = await getDocs(q);
-            if (snap.empty) {
+            // جلب كل المستخدمين ثم الفلترة برمجياً (بدون where على balance)
+            const snap = await getDocs(collection(db, 'tradelix_users'));
+            const subs = [];
+            snap.forEach(d => {
+                const u = d.data();
+                if (typeof u.balance === 'number' && u.balance > 0) {
+                    subs.push({ id: d.id, ...u });
+                }
+            });
+            subs.sort((a, b) => (b.balance || 0) - (a.balance || 0));
+            if (subs.length === 0) {
                 actList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No active trade subscribers.</p>';
             } else {
-                actList.innerHTML = snap.docs.map(d => {
-                    const u = d.data();
-                    return `
-                    <div class="user-card" style="border-left: 4px solid var(--green);" onclick="openUserTradeDetail('${d.id}')">
+                actList.innerHTML = subs.map(u => `
+                    <div class="user-card" style="border-left: 4px solid var(--green);" onclick="openUserTradeDetail('${u.id}')">
                         <div class="user-header">
                             <div>
                                 <div class="user-name">${u.name || 'Unknown'}</div>
@@ -1154,29 +1089,52 @@
                             </div>
                             <span style="color: var(--gold); font-weight: 900;">$${(u.balance || 0).toFixed(2)}</span>
                         </div>
-                    </div>`;
-                }).join('');
+                    </div>
+                `).join('');
             }
-        } catch(e) { console.error(e); actList.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; }
+        } catch(e) {
+            console.error('loadTradeSubscribers users error:', e);
+            actList.innerHTML = `<p style="color:red; text-align:center; font-size:12px;">Error: ${e.message || e.code || 'Unknown'}</p>`;
+        }
     }
 
     async function processTradeDeposit(requestId, userId, amount, action) {
         if (!confirm(`Are you sure you want to ${action} this trade deposit?`)) return;
+        const amt = parseFloat(amount);
+        if (action === 'approve' && (!amt || isNaN(amt) || amt <= 0)) {
+            return showToast('❌ Invalid amount');
+        }
+        if (!userId) {
+            return showToast('❌ Missing user ID');
+        }
         try {
-            await updateDoc(doc(db, 'trade_deposits', requestId), {
-                status: action === 'approve' ? 'approved' : 'rejected'
-            });
             if (action === 'approve') {
-                const userRef = doc(db, 'tradelix_users', userId);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) {
-                    const currentBalance = userSnap.data().balance || 0;
-                    await updateDoc(userRef, { balance: currentBalance + parseFloat(amount) });
-                }
+                await runTransaction(db, async (transaction) => {
+                    const reqRef = doc(db, 'trade_deposits', requestId);
+                    const userRef = doc(db, 'tradelix_users', userId);
+                    const reqSnap = await transaction.get(reqRef);
+                    const userSnap = await transaction.get(userRef);
+
+                    if (!reqSnap.exists()) throw new Error('Request not found');
+                    if (reqSnap.data().status !== 'pending') throw new Error('Request already processed');
+                    if (!userSnap.exists()) throw new Error('User not found');
+
+                    const currentBalance = Number(userSnap.data().balance) || 0;
+                    transaction.update(userRef, { balance: currentBalance + amt });
+                    transaction.update(reqRef, { status: 'approved', processedAt: serverTimestamp() });
+                });
+            } else {
+                await updateDoc(doc(db, 'trade_deposits', requestId), {
+                    status: 'rejected',
+                    processedAt: serverTimestamp()
+                });
             }
             showToast(`✅ Deposit ${action}d`);
             loadTradeSubscribers();
-        } catch(e) { console.error(e); showToast('❌ Error'); }
+        } catch(e) {
+            console.error('processTradeDeposit error:', e);
+            showToast('❌ ' + (e.message || 'Error'));
+        }
     }
 
     async function openUserTradeDetail(uid) {
@@ -1226,13 +1184,11 @@
         } catch(e) { showToast('❌ Error'); }
     }
 
-    // ✅ دالة إغلاق الصفقة (محدثة لحفظ الربح/الخسارة في السجل)
     async function adminCloseTrade() {
         if (!currentTradeUserUID) return;
         
-        // نطلب من الأدمن إدخال نتيجة الصفقة (ربح أو خسارة)
         const pnlStr = prompt("Enter Trade Result (PnL) in $:\nExample: 5 (for profit) or -3 (for loss)");
-        if (pnlStr === null) return; // إذا ضغط إلغاء
+        if (pnlStr === null) return;
         
         const pnl = parseFloat(pnlStr);
         if (isNaN(pnl)) return showToast('❌ Invalid number entered');
@@ -1245,18 +1201,15 @@
             const userData = userSnap.data();
             const activeTradeName = userData.activeTrade || 'Unknown Coin';
             
-            // تجهيز بيانات الصفقة المغلقة
             const closedTrade = {
                 coin: activeTradeName,
                 pnl: pnl,
                 closedAt: Date.now()
             };
             
-            // جلب السجل القديم وإضافة الصفقة الجديدة في البداية
             let currentHistory = userData.closedTrades || [];
             currentHistory.unshift(closedTrade);
 
-            // تحديث بيانات المستخدم: مسح الصفقة النشطة + إضافة السجل الجديد
             await updateDoc(userRef, {
                 activeTrade: null,
                 activeTradeLink: null,
@@ -1271,103 +1224,134 @@
         }
     }
 
-    // ✅ دوال إدارة الباقات (الطلبات)
     async function loadDepositRequests() {
         const list = document.getElementById('adminDepositList');
         list.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
         try {
-            const q = query(collection(db, 'deposit_requests'), where('status', '==', 'pending'), orderBy('createdAt', 'desc'));
+            const q = query(collection(db, 'deposit_requests'), where('status', '==', 'pending'));
             const snap = await getDocs(q);
             if (snap.empty) {
                 list.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending deposits.</p>';
                 return;
             }
-            list.innerHTML = snap.docs.map(d => {
-                const r = d.data();
-                return `
+            const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            docs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+            list.innerHTML = docs.map(r => `
                 <div class="card" style="padding: 15px; border-left: 4px solid var(--gold); margin-bottom: 10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <h3 style="color:#fff; margin:0; font-size:15px;">${r.userName}</h3>
-                            <p style="color:#888; font-size:11px;">${r.userEmail}</p>
-                            <p style="color:var(--gold); font-weight:900; font-size:18px; margin-top:5px;">$${r.amount}</p>
-                            <p style="color:#aaa; font-size:10px; word-break:break-all;">TX: ${r.txHash}</p>
+                        <div style="flex:1; min-width:0;">
+                            <h3 style="color:#fff; margin:0; font-size:15px;">${r.userName || 'Unknown'}</h3>
+                            <p style="color:#888; font-size:11px;">${r.userEmail || ''}</p>
+                            <p style="color:var(--gold); font-weight:900; font-size:18px; margin-top:5px;">$${r.amount || 0}</p>
+                            <p style="color:#aaa; font-size:10px; word-break:break-all;">TX: ${r.txHash || '-'}</p>
                         </div>
-                        <div style="display:flex; flex-direction:column; gap:5px;">
-                            <button class="btn-small approve" onclick="processDeposit('${d.id}', '${r.userId}', '${r.amount}', 'approve')">✅ Approve</button>
-                            <button class="btn-small reject" onclick="processDeposit('${d.id}', '${r.userId}', '${r.amount}', 'reject')">❌ Reject</button>
+                        <div style="display:flex; flex-direction:column; gap:5px; margin-left:8px;">
+                            <button class="btn-small approve" onclick="processDeposit('${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'approve')">✅ Approve</button>
+                            <button class="btn-small reject" onclick="processDeposit('${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'reject')">❌ Reject</button>
                         </div>
                     </div>
-                </div>`;
-            }).join('');
-        } catch(e) { console.error(e); list.innerHTML = '<p style="color:red; text-align:center;">Error loading.</p>'; }
+                </div>`).join('');
+        } catch(e) { 
+            console.error(e); 
+            list.innerHTML = `<p style="color:red; text-align:center; font-size:12px;">Error: ${e.message || 'Unknown'}</p>`; 
+        }
     }
 
     async function processDeposit(requestId, userId, amount, action) {
         if (!confirm(`Are you sure you want to ${action} this deposit?`)) return;
+        const amt = parseFloat(amount);
+        if (action === 'approve' && (!amt || isNaN(amt) || amt <= 0)) return showToast('❌ Invalid amount');
+        if (!userId) return showToast('❌ Missing user ID');
         try {
-            await updateDoc(doc(db, 'deposit_requests', requestId), {
-                status: action === 'approve' ? 'approved' : 'rejected'
-            });
             if (action === 'approve') {
-                const userRef = doc(db, 'tradelix_users', userId);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) {
-                    const currentBalance = userSnap.data().balance || 0;
-                    await updateDoc(userRef, { balance: currentBalance + parseFloat(amount) });
-                }
+                await runTransaction(db, async (transaction) => {
+                    const reqRef = doc(db, 'deposit_requests', requestId);
+                    const userRef = doc(db, 'tradelix_users', userId);
+                    const reqSnap = await transaction.get(reqRef);
+                    const userSnap = await transaction.get(userRef);
+
+                    if (!reqSnap.exists()) throw new Error('Request not found');
+                    if (reqSnap.data().status !== 'pending') throw new Error('Request already processed');
+                    if (!userSnap.exists()) throw new Error('User not found');
+
+                    const currentBalance = Number(userSnap.data().balance) || 0;
+                    transaction.update(userRef, { balance: currentBalance + amt });
+                    transaction.update(reqRef, { status: 'approved', processedAt: serverTimestamp() });
+                });
+            } else {
+                await updateDoc(doc(db, 'deposit_requests', requestId), { status: 'rejected', processedAt: serverTimestamp() });
             }
             showToast(`✅ Deposit ${action}d`);
             loadDepositRequests();
-        } catch(e) { console.error(e); showToast('❌ Error'); }
+        } catch(e) { 
+            console.error(e); 
+            showToast('❌ ' + (e.message || 'Error')); 
+        }
     }
 
     async function loadWithdrawRequests() {
         const list = document.getElementById('adminWithdrawList');
         list.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
         try {
-            const q = query(collection(db, 'withdraw_requests'), where('status', '==', 'pending'), orderBy('createdAt', 'desc'));
+            const q = query(collection(db, 'withdraw_requests'), where('status', '==', 'pending'));
             const snap = await getDocs(q);
             if (snap.empty) {
                 list.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending withdrawals.</p>';
                 return;
             }
-            list.innerHTML = snap.docs.map(d => {
-                const r = d.data();
-                return `
+            const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            docs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+            list.innerHTML = docs.map(r => `
                 <div class="card" style="padding: 15px; border-left: 4px solid var(--gold); margin-bottom: 10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <h3 style="color:#fff; margin:0; font-size:15px;">${r.userName}</h3>
-                            <p style="color:#888; font-size:11px;">${r.userEmail}</p>
-                            <p style="color:var(--gold); font-weight:900; font-size:18px; margin-top:5px;">$${r.amount}</p>
-                            <p style="color:#aaa; font-size:10px; word-break:break-all;">Addr: ${r.address}</p>
+                        <div style="flex:1; min-width:0;">
+                            <h3 style="color:#fff; margin:0; font-size:15px;">${r.userName || 'Unknown'}</h3>
+                            <p style="color:#888; font-size:11px;">${r.userEmail || ''}</p>
+                            <p style="color:var(--gold); font-weight:900; font-size:18px; margin-top:5px;">$${r.amount || 0}</p>
+                            <p style="color:#aaa; font-size:10px; word-break:break-all;">Addr: ${r.address || '-'}</p>
                         </div>
-                        <div style="display:flex; flex-direction:column; gap:5px;">
-                            <button class="btn-small approve" onclick="processWithdrawal('${d.id}', '${r.userId}', '${r.amount}', 'paid')">✅ Paid</button>
-                            <button class="btn-small reject" onclick="processWithdrawal('${d.id}', '${r.userId}', '${r.amount}', 'rejected')">❌ Reject</button>
+                        <div style="display:flex; flex-direction:column; gap:5px; margin-left:8px;">
+                            <button class="btn-small approve" onclick="processWithdrawal('${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'paid')">✅ Paid</button>
+                            <button class="btn-small reject" onclick="processWithdrawal('${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'rejected')">❌ Reject</button>
                         </div>
                     </div>
-                </div>`;
-            }).join('');
-        } catch(e) { console.error(e); list.innerHTML = '<p style="color:red; text-align:center;">Error loading.</p>'; }
+                </div>`).join('');
+        } catch(e) { 
+            console.error(e); 
+            list.innerHTML = `<p style="color:red; text-align:center; font-size:12px;">Error: ${e.message || 'Unknown'}</p>`; 
+        }
     }
 
     async function processWithdrawal(requestId, userId, amount, action) {
         if (!confirm(`Are you sure you want to ${action} this withdrawal?`)) return;
+        const amt = parseFloat(amount);
+        if (isNaN(amt)) return showToast('❌ Invalid amount');
+        if (!userId) return showToast('❌ Missing user ID');
         try {
-            await updateDoc(doc(db, 'withdraw_requests', requestId), { status: action });
             if (action === 'paid') {
-                const userRef = doc(db, 'tradelix_users', userId);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) {
-                    const currentBalance = userSnap.data().balance || 0;
-                    await updateDoc(userRef, { balance: Math.max(0, currentBalance - parseFloat(amount)) });
-                }
+                await runTransaction(db, async (transaction) => {
+                    const reqRef = doc(db, 'withdraw_requests', requestId);
+                    const userRef = doc(db, 'tradelix_users', userId);
+                    const reqSnap = await transaction.get(reqRef);
+                    const userSnap = await transaction.get(userRef);
+
+                    if (!reqSnap.exists()) throw new Error('Request not found');
+                    if (reqSnap.data().status !== 'pending') throw new Error('Request already processed');
+                    if (!userSnap.exists()) throw new Error('User not found');
+
+                    const currentBalance = Number(userSnap.data().balance) || 0;
+                    transaction.update(userRef, { balance: Math.max(0, currentBalance - amt) });
+                    transaction.update(reqRef, { status: 'paid', processedAt: serverTimestamp() });
+                });
+            } else {
+                await updateDoc(doc(db, 'withdraw_requests', requestId), { status: 'rejected', processedAt: serverTimestamp() });
             }
             showToast(`✅ Withdrawal ${action}`);
             loadWithdrawRequests();
-        } catch(e) { console.error(e); showToast('❌ Error'); }
+        } catch(e) { 
+            console.error(e); 
+            showToast('❌ ' + (e.message || 'Error')); 
+        }
     }
 
     async function initFirebase() {
@@ -1382,7 +1366,7 @@
             signOut = authModule.signOut;
             collection = fsModule.collection; getDocs = fsModule.getDocs; doc = fsModule.doc; getDoc = fsModule.getDoc;
             updateDoc = fsModule.updateDoc; deleteDoc = fsModule.deleteDoc; addDoc = fsModule.addDoc; serverTimestamp = fsModule.serverTimestamp;
-            onSnapshot = fsModule.onSnapshot; query = fsModule.query; where = fsModule.where; orderBy = fsModule.orderBy;
+            onSnapshot = fsModule.onSnapshot; query = fsModule.query; where = fsModule.where; orderBy = fsModule.orderBy; runTransaction = fsModule.runTransaction;
             
             onSnapshot(collection(db, 'tradelix_users'), (snapshot) => {
                 allUsers = [];
@@ -1427,7 +1411,6 @@
                 });
             });
 
-            // ✅ مراقبة طلبات الإيداع للتداول (معزولة)
             onSnapshot(collection(db, 'trade_deposits'), (snapshot) => {
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
@@ -1439,7 +1422,6 @@
                 });
             });
 
-            // ✅ مراقبة طلبات إيداع الباقات
             onSnapshot(collection(db, 'deposit_requests'), (snapshot) => {
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
