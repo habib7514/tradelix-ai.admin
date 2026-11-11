@@ -262,10 +262,12 @@
         <div class="bell-icon" onclick="showScreen('dashboardScreen')">✕</div>
     </div>
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Subscribers who deposited funds for trading. Click on any name to manage their trade individually.</p>
-    <div class="section-title">📥 Pending Trade Deposits</div>
+    
+    <div class="section-title">⏳ Pending Trade Requests</div>
     <div id="adminTradeDepositList" class="card">
-        <p style="color:#888; text-align:center; font-size:12px;">No pending trade deposits.</p>
+        <p style="color:#888; text-align:center; font-size:12px;">No pending trade requests.</p>
     </div>
+    
     <div class="section-title">📈 Active Trade Subscribers</div>
     <div id="activeTradeSubscribersList" class="card">
         <p style="color:#888; text-align:center; font-size:12px;">No active trade subscribers.</p>
@@ -1024,41 +1026,46 @@
         }
     }
 
-    // ✅ دوال التداول المعزولة (مُصلحة بالكامل)
+    // ✅ دوال التداول المعزولة
     async function loadTradeSubscribers() {
         const depList = document.getElementById('adminTradeDepositList');
         depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
+        
         try {
-            const q = query(collection(db, 'trade_deposits'), where('status', '==', 'pending'));
-            const snap = await getDocs(q);
-            if (snap.empty) {
-                depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending trade deposits.</p>';
+            const q1 = query(collection(db, 'trade_deposits'), where('status', '==', 'pending'));
+            const q2 = query(collection(db, 'trade_requests'), where('status', '==', 'pending'));
+            
+            const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+            
+            const allRequests = [];
+            snap1.forEach(d => allRequests.push({ id: d.id, col: 'trade_deposits', ...d.data() }));
+            snap2.forEach(d => allRequests.push({ id: d.id, col: 'trade_requests', ...d.data() }));
+            
+            if (allRequests.length === 0) {
+                depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending trade requests.</p>';
             } else {
-                const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                docs.sort((a, b) => {
-                    const ta = a.createdAt?.seconds || 0;
-                    const tb = b.createdAt?.seconds || 0;
-                    return tb - ta;
-                });
-                depList.innerHTML = docs.map(r => `
-                    <div class="card" style="padding: 15px; border-left: 4px solid var(--blue); margin-bottom: 10px;">
+                allRequests.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                depList.innerHTML = allRequests.map(r => `
+                    <div class="card" style="padding: 15px; border-left: 4px solid ${r.col === 'trade_requests' ? 'var(--gold)' : 'var(--blue)'}; margin-bottom: 10px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div style="flex:1; min-width:0;">
                                 <h3 style="color:#fff; margin:0; font-size:15px; word-break:break-word;">${r.userName || 'Unknown'}</h3>
                                 <p style="color:#888; font-size:11px; word-break:break-all;">${r.userEmail || ''}</p>
-                                <p style="color:var(--blue); font-weight:900; font-size:18px; margin-top:5px;">$${r.amount || 0}</p>
-                                <p style="color:#aaa; font-size:10px; word-break:break-all;">TX: ${r.txHash || '-'}</p>
+                                <p style="color:${r.col === 'trade_requests' ? 'var(--gold)' : 'var(--blue)'}; font-weight:900; font-size:18px; margin-top:5px;">
+                                    ${r.col === 'trade_requests' ? 'Requested' : 'Deposited'}: $${r.amount || 0}
+                                </p>
+                                <p style="color:#aaa; font-size:10px; word-break:break-all;">${r.col === 'trade_requests' ? 'From Balance' : 'TX: ' + (r.txHash || '-')}</p>
                             </div>
                             <div style="display:flex; flex-direction:column; gap:5px; margin-left:8px;">
-                                <button class="btn-small approve" onclick="processTradeDeposit('${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'approve')">✅ Approve</button>
-                                <button class="btn-small reject" onclick="processTradeDeposit('${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'reject')">❌ Reject</button>
+                                <button class="btn-small approve" onclick="processTradeRequest('${r.col}', '${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'approve')">✅ Approve</button>
+                                <button class="btn-small reject" onclick="processTradeRequest('${r.col}', '${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'reject')">❌ Reject</button>
                             </div>
                         </div>
                     </div>
                 `).join('');
             }
         } catch(e) {
-            console.error('loadTradeSubscribers deposits error:', e);
+            console.error('loadTradeSubscribers error:', e);
             depList.innerHTML = `<p style="color:red; text-align:center; font-size:12px;">Error: ${e.message || e.code || 'Unknown'}</p>`;
         }
 
@@ -1095,19 +1102,15 @@
         }
     }
 
-    async function processTradeDeposit(requestId, userId, amount, action) {
-        if (!confirm(`Are you sure you want to ${action} this trade deposit?`)) return;
+    async function processTradeRequest(colName, requestId, userId, amount, action) {
+        if (!confirm(`Are you sure you want to ${action} this request?`)) return;
         const amt = parseFloat(amount);
-        if (action === 'approve' && (!amt || isNaN(amt) || amt <= 0)) {
-            return showToast('❌ Invalid amount');
-        }
-        if (!userId) {
-            return showToast('❌ Missing user ID');
-        }
+        if (!userId) return showToast('❌ Missing user ID');
+        
         try {
             if (action === 'approve') {
                 await runTransaction(db, async (transaction) => {
-                    const reqRef = doc(db, 'trade_deposits', requestId);
+                    const reqRef = doc(db, colName, requestId);
                     const userRef = doc(db, 'tradelix_users', userId);
                     const reqSnap = await transaction.get(reqRef);
                     const userSnap = await transaction.get(userRef);
@@ -1117,19 +1120,47 @@
                     if (!userSnap.exists()) throw new Error('User not found');
 
                     const currentBalance = Number(userSnap.data().balance) || 0;
-                    transaction.update(userRef, { balance: currentBalance + amt });
+                    
+                    if (colName === 'trade_requests') {
+                        // طلب صفقة من الرصيد -> خصم المبلغ
+                        if (currentBalance < amt) throw new Error('User has insufficient balance');
+                        transaction.update(userRef, { balance: currentBalance - amt });
+                    } else {
+                        // إيداع تداول -> إضافة المبلغ
+                        transaction.update(userRef, { balance: currentBalance + amt });
+                    }
+                    
                     transaction.update(reqRef, { status: 'approved', processedAt: serverTimestamp() });
                 });
+                
+                // إشعار للمستخدم
+                await addDoc(collection(db, 'user_notifications'), {
+                    userId: userId,
+                    title: '✅ Request Approved',
+                    body: `Your request for $${amt.toFixed(2)} has been approved.`,
+                    read: false,
+                    createdAt: serverTimestamp()
+                });
+                
             } else {
-                await updateDoc(doc(db, 'trade_deposits', requestId), {
+                await updateDoc(doc(db, colName, requestId), {
                     status: 'rejected',
                     processedAt: serverTimestamp()
                 });
+                
+                // إشعار للمستخدم
+                await addDoc(collection(db, 'user_notifications'), {
+                    userId: userId,
+                    title: '❌ Request Rejected',
+                    body: `Your request for $${amt.toFixed(2)} was rejected.`,
+                    read: false,
+                    createdAt: serverTimestamp()
+                });
             }
-            showToast(`✅ Deposit ${action}d`);
+            showToast(`✅ Request ${action}d`);
             loadTradeSubscribers();
         } catch(e) {
-            console.error('processTradeDeposit error:', e);
+            console.error('processTradeRequest error:', e);
             showToast('❌ ' + (e.message || 'Error'));
         }
     }
@@ -1159,7 +1190,7 @@
             const currentProfit = userSnap.data().totalProfit || 0;
             await updateDoc(userRef, { balance: currentBalance + amount, totalProfit: currentProfit + amount });
             
-            // ✅ إرسال إشعار للمستخدم
+            // إرسال إشعار للمستخدم
             await addDoc(collection(db, 'user_notifications'), {
                 userId: currentTradeUserUID,
                 title: '💰 Profit Added',
@@ -1185,7 +1216,7 @@
                 activeTradeLink: link
             });
             
-            // ✅ إرسال إشعار للمستخدم
+            // إرسال إشعار للمستخدم
             await addDoc(collection(db, 'user_notifications'), {
                 userId: currentTradeUserUID,
                 title: '📈 New Trade Opened',
@@ -1233,7 +1264,7 @@
                 closedTrades: currentHistory
             });
             
-            // ✅ إرسال إشعار للمستخدم بإغلاق الصفقة
+            // إرسال إشعار للمستخدم بإغلاق الصفقة
             const pnlText = pnl >= 0 ? `profit of $${pnl}` : `loss of $${Math.abs(pnl)}`;
             await addDoc(collection(db, 'user_notifications'), {
                 userId: currentTradeUserUID,
@@ -1444,6 +1475,17 @@
                         const r = change.doc.data();
                         if (Date.now() - (r.createdAt?.seconds * 1000) < 60000) {
                             triggerNotif(`📈 طلب إيداع تداول جديد: ${r.userName} - $${r.amount}`);
+                        }
+                    }
+                });
+            });
+
+            onSnapshot(collection(db, 'trade_requests'), (snapshot) => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const r = change.doc.data();
+                        if (Date.now() - (r.createdAt?.seconds * 1000) < 60000) {
+                            triggerNotif(`🚀 طلب صفقة جديدة (من الرصيد): ${r.userName} - $${r.amount}`);
                         }
                     }
                 });
