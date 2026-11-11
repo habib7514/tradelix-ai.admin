@@ -312,6 +312,15 @@
             </div>
         </div>
 
+        <!-- ✅ تعديل إجمالي الأرباح يدوياً -->
+        <div class="input-group" style="margin-top: 15px; background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--blue);">
+            <label style="color: var(--blue); font-weight: bold;">Set Exact Total Profit ($)</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="number" id="adminSetProfitAmount" placeholder="e.g., 10">
+                <button class="btn-small" style="background: var(--blue); color: #fff;" onclick="adminSetExactProfit()">Set</button>
+            </div>
+        </div>
+
         <div class="input-group" style="margin-top: 15px; background: rgba(212, 175, 55, 0.1); padding: 10px; border-radius: 8px; border: 1px solid var(--gold);">
             <label style="color: var(--gold);">Open Individual Trade</label>
             <input type="text" id="adminTradeCoinInput" placeholder="Coin (e.g., BTCUSDT)" style="margin-bottom: 8px;">
@@ -1233,6 +1242,29 @@
         } catch(e) { 
             console.error(e);
             showToast('❌ Error updating balance'); 
+        }
+    }
+
+    // ✅ دالة تعديل إجمالي الأرباح يدوياً
+    async function adminSetExactProfit() {
+        if (!currentTradeUserUID) return;
+        const newProfit = parseFloat(document.getElementById('adminSetProfitAmount').value);
+        if (isNaN(newProfit) || newProfit < 0) return showToast('❌ Enter a valid amount');
+        
+        if (!confirm(`Are you sure you want to set the total profit to exactly $${newProfit.toFixed(2)}?`)) return;
+
+        try {
+            const userRef = doc(db, 'tradelix_users', currentTradeUserUID);
+            await updateDoc(userRef, { 
+                totalProfit: newProfit 
+            });
+            
+            showToast('✅ Total Profit updated manually!');
+            document.getElementById('adminSetProfitAmount').value = '';
+            openUserTradeDetail(currentTradeUserUID);
+        } catch(e) { 
+            console.error(e);
+            showToast('❌ Error updating total profit'); 
         }
     }
 
