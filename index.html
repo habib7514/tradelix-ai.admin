@@ -1029,13 +1029,11 @@
         const depList = document.getElementById('adminTradeDepositList');
         depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
         try {
-            // استعلام بسيط بدون orderBy (يتجنب مشاكل الفهرس)
             const q = query(collection(db, 'trade_deposits'), where('status', '==', 'pending'));
             const snap = await getDocs(q);
             if (snap.empty) {
                 depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending trade deposits.</p>';
             } else {
-                // ترتيب برمجياً بدل orderBy
                 const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 docs.sort((a, b) => {
                     const ta = a.createdAt?.seconds || 0;
@@ -1067,7 +1065,6 @@
         const actList = document.getElementById('activeTradeSubscribersList');
         actList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
         try {
-            // جلب كل المستخدمين ثم الفلترة برمجياً (بدون where على balance)
             const snap = await getDocs(collection(db, 'tradelix_users'));
             const subs = [];
             snap.forEach(d => {
@@ -1161,6 +1158,16 @@
             const currentBalance = userSnap.data().balance || 0;
             const currentProfit = userSnap.data().totalProfit || 0;
             await updateDoc(userRef, { balance: currentBalance + amount, totalProfit: currentProfit + amount });
+            
+            // ✅ إرسال إشعار للمستخدم
+            await addDoc(collection(db, 'user_notifications'), {
+                userId: currentTradeUserUID,
+                title: '💰 Profit Added',
+                body: `A profit of $${amount.toFixed(2)} has been added to your trading balance.`,
+                read: false,
+                createdAt: serverTimestamp()
+            });
+
             showToast('✅ Profit added!');
             document.getElementById('adminTradeProfitAmount').value = '';
             openUserTradeDetail(currentTradeUserUID);
@@ -1177,6 +1184,16 @@
                 activeTrade: coin,
                 activeTradeLink: link
             });
+            
+            // ✅ إرسال إشعار للمستخدم
+            await addDoc(collection(db, 'user_notifications'), {
+                userId: currentTradeUserUID,
+                title: '📈 New Trade Opened',
+                body: `A new trade for ${coin} has been opened on your account.`,
+                read: false,
+                createdAt: serverTimestamp()
+            });
+
             showToast('✅ Trade opened for user!');
             document.getElementById('adminTradeCoinInput').value = '';
             document.getElementById('adminTradeLinkInput').value = '';
@@ -1214,6 +1231,16 @@
                 activeTrade: null,
                 activeTradeLink: null,
                 closedTrades: currentHistory
+            });
+            
+            // ✅ إرسال إشعار للمستخدم بإغلاق الصفقة
+            const pnlText = pnl >= 0 ? `profit of $${pnl}` : `loss of $${Math.abs(pnl)}`;
+            await addDoc(collection(db, 'user_notifications'), {
+                userId: currentTradeUserUID,
+                title: '🔴 Trade Closed',
+                body: `Your ${activeTradeName} trade was closed with a ${pnlText}.`,
+                read: false,
+                createdAt: serverTimestamp()
             });
             
             showToast('✅ Trade closed & saved to user history!');
@@ -1986,4 +2013,3 @@
 <script src="chat.js?v=10"></script>
 </body>
 </html>
-
