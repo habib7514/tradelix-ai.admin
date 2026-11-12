@@ -264,9 +264,9 @@
     </div>
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Subscribers who deposited funds for trading. Click on any name to manage their trade individually.</p>
     
-    <div class="section-title">⏳ Pending Trade Requests</div>
+    <div class="section-title">⏳ Trade Requests (All)</div>
     <div id="adminTradeDepositList" class="card">
-        <p style="color:#888; text-align:center; font-size:12px;">No pending trade requests.</p>
+        <p style="color:#888; text-align:center; font-size:12px;">No trade requests.</p>
     </div>
     
     <div class="section-title">📈 All Trade Subscribers</div>
@@ -1081,8 +1081,9 @@
         depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
         
         try {
-            const q1 = query(collection(db, 'trade_deposits'), where('status', '==', 'pending'));
-            const q2 = query(collection(db, 'trade_requests'), where('status', '==', 'pending'));
+            // ✅ التعديل 1: جلب جميع الطلبات بدون فلتر "pending" لكي لا تختفي المقبولة
+            const q1 = query(collection(db, 'trade_deposits')); 
+            const q2 = query(collection(db, 'trade_requests'));
             
             const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
             
@@ -1091,27 +1092,41 @@
             snap2.forEach(d => allRequests.push({ id: d.id, col: 'trade_requests', ...d.data() }));
             
             if (allRequests.length === 0) {
-                depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No pending trade requests.</p>';
+                depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No trade requests.</p>';
             } else {
                 allRequests.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-                depList.innerHTML = allRequests.map(r => `
-                    <div class="card" style="padding: 15px; border-left: 4px solid ${r.col === 'trade_requests' ? 'var(--gold)' : 'var(--blue)'}; margin-bottom: 10px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div style="flex:1; min-width:0;">
-                                <h3 style="color:#fff; margin:0; font-size:15px; word-break:break-word;">${r.userName || 'Unknown'}</h3>
-                                <p style="color:#888; font-size:11px; word-break:break-all;">${r.userEmail || ''}</p>
-                                <p style="color:${r.col === 'trade_requests' ? 'var(--gold)' : 'var(--blue)'}; font-weight:900; font-size:18px; margin-top:5px;">
-                                    ${r.col === 'trade_requests' ? 'Requested' : 'Deposited'}: $${r.amount || 0}
-                                </p>
-                                <p style="color:#aaa; font-size:10px; word-break:break-all;">${r.col === 'trade_requests' ? 'From Balance' : 'TX: ' + (r.txHash || '-')}</p>
-                            </div>
-                            <div style="display:flex; flex-direction:column; gap:5px; margin-left:8px;">
-                                <button class="btn-small approve" onclick="processTradeRequest('${r.col}', '${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'approve')">✅ Approve</button>
-                                <button class="btn-small reject" onclick="processTradeRequest('${r.col}', '${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'reject')">❌ Reject</button>
+                depList.innerHTML = allRequests.map(r => {
+                    // تحديد الأزرار بناءً على حالة الطلب
+                    let actionButtons = '';
+                    let statusColor = r.status === 'approved' ? 'var(--green)' : (r.status === 'rejected' ? 'var(--red)' : 'var(--blue)');
+                    
+                    if (r.status === 'pending') {
+                        actionButtons = `
+                            <button class="btn-small approve" onclick="processTradeRequest('${r.col}', '${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'approve')">✅ Approve</button>
+                            <button class="btn-small reject" onclick="processTradeRequest('${r.col}', '${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'reject')">❌ Reject</button>
+                        `;
+                    } else {
+                        actionButtons = `<span style="font-size:12px; font-weight:bold; color:${statusColor}; text-align:center;">${r.status.toUpperCase()}</span>`;
+                    }
+
+                    return `
+                        <div class="card" style="padding: 15px; border-left: 4px solid ${statusColor}; margin-bottom: 10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="flex:1; min-width:0;">
+                                    <h3 style="color:#fff; margin:0; font-size:15px; word-break:break-word;">${r.userName || 'Unknown'}</h3>
+                                    <p style="color:#888; font-size:11px; word-break:break-all;">${r.userEmail || ''}</p>
+                                    <p style="color:${statusColor}; font-weight:900; font-size:18px; margin-top:5px;">
+                                        ${r.col === 'trade_requests' ? 'Requested' : 'Deposited'}: $${r.amount || 0}
+                                    </p>
+                                    <p style="color:#aaa; font-size:10px; word-break:break-all;">Status: ${r.status || 'unknown'}</p>
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:5px; margin-left:8px;">
+                                    ${actionButtons}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
         } catch(e) {
             console.error('loadTradeSubscribers error:', e);
@@ -1128,23 +1143,40 @@
                 subs.push({ id: d.id, ...u });
             });
             subs.sort((a, b) => (b.balance || 0) - (a.balance || 0));
+            
             if (subs.length === 0) {
                 actList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No trade subscribers.</p>';
             } else {
-                actList.innerHTML = subs.map(u => `
-                    <div class="user-card" style="border-left: 4px solid var(--green); display:flex; justify-content:space-between; align-items:center;">
-                        <div onclick="openUserTradeDetail('${u.id}')" style="flex:1;">
-                            <div class="user-header" style="margin-bottom:0;">
-                                <div>
-                                    <div class="user-name">${u.name || 'Unknown'}</div>
-                                    <div class="user-email">${u.email || ''}</div>
+                actList.innerHTML = subs.map(u => {
+                    // ✅ التعديل 2: عرض الصفقات النشطة مباشرة بجانب اسم المستخدم في القائمة
+                    let activeTradesTags = '';
+                    let userTrades = u.activeTrades || [];
+                    if (u.activeTrade && !userTrades.find(t => t.coin === u.activeTrade)) {
+                        userTrades.push({ coin: u.activeTrade }); // دعم النظام القديم
+                    }
+                    
+                    if (userTrades.length > 0) {
+                        activeTradesTags = userTrades.map(t => `<span style="background:var(--blue); color:#fff; padding:3px 8px; border-radius:6px; font-size:11px; margin-right:4px; margin-top:6px; display:inline-block; font-weight:bold;">📈 ${t.coin}</span>`).join('');
+                    } else {
+                        activeTradesTags = `<span style="color:#888; font-size:10px; display:inline-block; margin-top:6px;">لا توجد صفقات نشطة</span>`;
+                    }
+
+                    return `
+                        <div class="user-card" style="border-left: 4px solid var(--green); display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap;">
+                            <div onclick="openUserTradeDetail('${u.id}')" style="flex:1; min-width: 200px;">
+                                <div class="user-header" style="margin-bottom:0;">
+                                    <div>
+                                        <div class="user-name">${u.name || 'Unknown'}</div>
+                                        <div class="user-email">${u.email || ''}</div>
+                                        <div>${activeTradesTags}</div>
+                                    </div>
+                                    <span style="color: var(--gold); font-weight: 900; font-size:16px;">$${(u.balance || 0).toFixed(2)}</span>
                                 </div>
-                                <span style="color: var(--gold); font-weight: 900;">$${(u.balance || 0).toFixed(2)}</span>
                             </div>
+                            <button class="btn-small reject" onclick="deleteUserDirect('${u.id}', event)" style="margin-left:10px; padding:10px; margin-top:10px;">🗑️</button>
                         </div>
-                        <button class="btn-small reject" onclick="deleteUserDirect('${u.id}', event)" style="margin-left:10px; padding:10px;">🗑️</button>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
         } catch(e) {
             console.error('loadTradeSubscribers users error:', e);
