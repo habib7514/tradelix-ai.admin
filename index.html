@@ -1387,6 +1387,7 @@
         }
     }
 
+    // ✅ التعديل هنا: دالة إغلاق الصفقة المحسنة
     async function closeSpecificTrade(coinName) {
         if (!currentTradeUserUID) return;
         const pnlInput = document.getElementById(`pnl_${coinName}`).value;
@@ -1401,22 +1402,28 @@
             if (!userSnap.exists()) return;
 
             const userData = userSnap.data();
-            let activeTrades = userData.activeTrades || [];
             
-            const tradeToClose = activeTrades.find(t => t.coin === coinName);
-            if(tradeToClose) {
-                await updateDoc(userRef, { activeTrades: arrayRemoveFn(tradeToClose) });
+            // 1. تحديث الصفقات المتعددة (activeTrades) بطريقة الفلترة الآمنة
+            let updatePayload = {};
+            if (userData.activeTrades && Array.isArray(userData.activeTrades)) {
+                const updatedTrades = userData.activeTrades.filter(t => t.coin !== coinName);
+                updatePayload.activeTrades = updatedTrades;
             }
 
+            // 2. مسح الحقل القديم (activeTrade) إن وجد
             if (userData.activeTrade === coinName) {
-                await updateDoc(userRef, { activeTrade: null, activeTradeLink: null });
+                updatePayload.activeTrade = null;
+                updatePayload.activeTradeLink = null;
             }
 
+            // 3. إضافة الصفقة إلى سجل الصفقات المغلقة
             const closedTrade = { coin: coinName, pnl: pnl, closedAt: Date.now() };
-            let currentHistory = userData.closedTrades || [];
+            let currentHistory = Array.isArray(userData.closedTrades) ? userData.closedTrades : [];
             currentHistory.unshift(closedTrade);
+            updatePayload.closedTrades = currentHistory;
 
-            await updateDoc(userRef, { closedTrades: currentHistory });
+            // تنفيذ جميع التحديثات في خطوة واحدة لضمان النجاح
+            await updateDoc(userRef, updatePayload);
             
             const pnlText = pnl >= 0 ? `profit of $${pnl}` : `loss of $${Math.abs(pnl)}`;
             await sendUserNotification(currentTradeUserUID, '🔴 Trade Closed', `Your ${coinName} trade was closed with a ${pnlText}.`);
@@ -1424,7 +1431,7 @@
             showToast('✅ Trade closed successfully!');
             openUserTradeDetail(currentTradeUserUID);
         } catch(e) { 
-            console.error(e); 
+            console.error("Error closing trade:", e); 
             showToast('❌ Error closing trade'); 
         }
     }
