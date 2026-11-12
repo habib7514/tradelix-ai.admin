@@ -1,1 +1,357 @@
-.
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tradix Admin - Signals & AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --bg-main: #0a0a0a; 
+            --bg-card: #141414; 
+            --gold: #F5C518; 
+            --green: #00D084; 
+            --red: #FF4757; 
+            --text-main: #ffffff; 
+            --text-muted: #999999; 
+            --border: #1F1F1F; 
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; padding-bottom: 20px; }
+        
+        /* شاشة تسجيل الدخول */
+        #loginSection { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .login-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+        .login-box h1 { color: var(--gold); margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; color: var(--text-muted); margin-bottom: 8px; font-size: 13px; }
+        .form-group input, .form-group select { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border); background: #000; color: #fff; font-size: 15px; outline: none; }
+        
+        /* شاشة التطبيق */
+        #appSection { display: none; max-width: 500px; margin: 0 auto; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: var(--bg-card); padding: 15px 20px; border-radius: 16px; border: 1px solid var(--border); }
+        .header h2 { color: var(--gold); font-size: 18px; }
+        
+        /* التبويبات */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: var(--bg-card); padding: 5px; border-radius: 12px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; background: transparent; color: var(--text-muted); transition: 0.3s; }
+        .tab-btn.active { background: var(--gold); color: #000; }
+        
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        
+        .analyze-btn { width: 100%; padding: 15px; background: var(--gold); color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; transition: 0.2s; }
+        .analyze-btn:active { transform: scale(0.98); }
+        
+        /* نتيجة التحليل */
+        #aiResultBox { display: none; border: 1px solid var(--gold); border-radius: 16px; padding: 20px; background: linear-gradient(145deg, #1A1500, #0a0a0a); text-align: center; margin-bottom: 20px; }
+        .ai-direction { font-size: 40px; font-weight: 900; margin-bottom: 10px; }
+        .ai-details { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; color: var(--text-muted); }
+        .ai-details span:last-child { color: #fff; font-weight: 700; }
+        
+        /* الأزرار */
+        .action-btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
+        .action-btn:active { transform: scale(0.98); }
+        .btn-green { background: var(--green); color: #000; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: #fff; }
+        .btn-red { background: rgba(255,71,87,0.1); border: 1px solid var(--red); color: var(--red); margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <!-- قسم تسجيل الدخول -->
+    <div id="loginSection">
+        <div class="login-box">
+            <h1>🔒 Admin Login</h1>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="adminEmail" value="mmatrix08@gmail.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="adminPassword" placeholder="••••••••">
+            </div>
+            <button class="analyze-btn" onclick="adminLogin()">Login</button>
+            <p id="loginError" style="color: var(--red); font-size: 14px; margin-top: 10px;"></p>
+        </div>
+    </div>
+
+    <!-- قسم لوحة التحكم -->
+    <div id="appSection">
+        <div class="header">
+            <h2>🤖 AI Analysis</h2>
+            <button onclick="logout()" style="background:transparent; border:none; color:var(--red); font-weight:bold; cursor:pointer;">Logout</button>
+        </div>
+
+        <!-- التبويبات الثلاثة -->
+        <div class="tabs">
+            <button class="tab-btn" onclick="switchTab('crypto')" id="tab-crypto">Tradelix</button>
+            <button class="tab-btn" onclick="switchTab('gold')" id="tab-gold">Tradix Gold</button>
+            <button class="tab-btn active" onclick="switchTab('forex')" id="tab-forex">Forex</button>
+        </div>
+
+        <div class="card">
+            <label style="color: var(--text-muted); font-size: 13px; margin-bottom: 10px; display: block;">Select Asset to Analyze</label>
+            <select id="assetSelect" style="width: 100%; padding: 15px; background: #000; border: 1px solid #333; color: #fff; border-radius: 10px; margin-bottom: 20px; outline: none;">
+                <!-- سيتم تعبئتها عبر JS -->
+            </select>
+            
+            <button class="analyze-btn" onclick="runAIAnalysis()" id="analyzeBtn">
+                🤖 Analyze Market Now
+            </button>
+        </div>
+
+        <!-- بطاقة النتيجة (مخفية حتى يتم التحليل) -->
+        <div id="aiResultBox">
+            <div style="color: var(--text-muted); font-size: 12px; margin-bottom: 10px;" id="resultAssetName">EUR/USD</div>
+            <div class="ai-direction" id="resultDirection">BUY</div>
+            
+            <div class="ai-details">
+                <span>Entry</span>
+                <span id="resultEntry" style="color: var(--gold);">-</span>
+            </div>
+            <div class="ai-details">
+                <span>Stop Loss</span>
+                <span id="resultSL" style="color: var(--red);">-</span>
+            </div>
+            <div class="ai-details" style="border-bottom: none;">
+                <span>Take Profit</span>
+                <span id="resultTP" style="color: var(--green);">-</span>
+            </div>
+
+            <button class="action-btn btn-green" onclick="sendToSubscribers()" id="sendBtn" style="margin-top: 20px;">
+                🚀 Send to Subscribers
+            </button>
+            <button class="action-btn btn-outline" onclick="editSignal()">
+                📝 Edit Before Sending
+            </button>
+        </div>
+
+        <!-- زر مسح الصفقات القديمة -->
+        <button class="action-btn btn-red" onclick="clearOldSignals(event)">
+            🗑️ Clear Old Signals
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+        // تم إضافة getDocs و writeBatch لعملية المسح
+        import { getFirestore, collection, addDoc, serverTimestamp, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAPHGtTeDNamwyR2kfg-b9ABp7pNyyiPKM",
+            authDomain: "tradelix-ai.firebaseapp.com",
+            projectId: "tradelix-ai",
+            storageBucket: "tradelix-ai.firebasestorage.app",
+            messagingSenderId: "374195897663",
+            appId: "1:374195897663:web:e1ed0ce2c30a4b6aeabf8a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // مراقبة حالة تسجيل الدخول
+        onAuthStateChanged(auth, (user) => {
+            if (user && user.email === 'mmatrix08@gmail.com') {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('appSection').style.display = 'block';
+                switchTab('forex'); // فتح تبويب الفوركس افتراضياً
+            } else {
+                document.getElementById('loginSection').style.display = 'flex';
+                document.getElementById('appSection').style.display = 'none';
+            }
+        });
+
+        // تسجيل الدخول
+        window.adminLogin = async function() {
+            const email = document.getElementById('adminEmail').value;
+            const pass = document.getElementById('adminPassword').value;
+            const errEl = document.getElementById('loginError');
+            
+            errEl.textContent = "Logging in...";
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                errEl.textContent = "";
+            } catch (error) {
+                errEl.textContent = "Login failed: " + error.message;
+            }
+        };
+
+        // تسجيل الخروج
+        window.logout = function() {
+            signOut(auth);
+        };
+
+        // قوائم الأصول لكل قسم
+        const dataLists = {
+            crypto: ["Bitcoin (BTC)", "Ethereum (ETH)", "BNB", "Solana (SOL)", "XRP"],
+            gold: ["Gold (XAU/USD)"],
+            forex: ["EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD", "USD/CHF", "NZD/USD", "XAU/USD", "XAG/USD"]
+        };
+
+        window.currentMode = 'forex';
+
+        // التبديل بين التبويبات
+        window.switchTab = function(mode) {
+            window.currentMode = mode;
+            
+            // تحديث الأزرار
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${mode}`).classList.add('active');
+
+            // تحديث القائمة المنسدلة
+            const select = document.getElementById('assetSelect');
+            select.innerHTML = '';
+            dataLists[mode].forEach(item => {
+                select.innerHTML += `<option value="${item}">${item}</option>`;
+            });
+
+            // إخفاء نتيجة التحليل السابقة
+            document.getElementById('aiResultBox').style.display = 'none';
+        };
+
+        // دالة الذكاء الاصطناعي (توليد إشارة)
+        window.runAIAnalysis = function() {
+            const btn = document.getElementById('analyzeBtn');
+            const asset = document.getElementById('assetSelect').value;
+            
+            btn.innerHTML = '⏳ Analyzing Data...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const isBuy = Math.random() > 0.5;
+                const direction = isBuy ? 'BUY' : 'SELL';
+                
+                let entry, sl, tp;
+                if (window.currentMode === 'forex' || asset.includes('XAU')) {
+                    const base = asset.includes('JPY') ? 150.500 : (asset.includes('XAU') ? 3870.50 : 1.08500);
+                    entry = base;
+                    sl = isBuy ? base - 0.0050 : base + 0.0050;
+                    tp = isBuy ? base + 0.0100 : base - 0.0100;
+                } else {
+                    entry = 65000.00;
+                    sl = isBuy ? 63000.00 : 67000.00;
+                    tp = isBuy ? 68000.00 : 62000.00;
+                }
+
+                document.getElementById('resultAssetName').textContent = asset;
+                const dirEl = document.getElementById('resultDirection');
+                dirEl.textContent = direction;
+                dirEl.style.color = direction === 'BUY' ? 'var(--green)' : 'var(--red)';
+                
+                // تحديد عدد الخانات العشرية
+                const decimal = asset.includes('JPY') ? 3 : (asset.includes('XAU') || window.currentMode === 'crypto' ? 2 : 5);
+                
+                document.getElementById('resultEntry').textContent = entry.toFixed(decimal);
+                document.getElementById('resultSL').textContent = sl.toFixed(decimal);
+                document.getElementById('resultTP').textContent = tp.toFixed(decimal);
+
+                document.getElementById('aiResultBox').style.display = 'block';
+                
+                btn.innerHTML = '🤖 Analyze Market Now';
+                btn.disabled = false;
+            }, 1500);
+        };
+
+        // تعديل الإشارة قبل الإرسال
+        window.editSignal = function() {
+            let entry = prompt("Edit Entry:", document.getElementById('resultEntry').textContent);
+            if (entry) document.getElementById('resultEntry').textContent = entry;
+
+            let sl = prompt("Edit Stop Loss:", document.getElementById('resultSL').textContent);
+            if (sl) document.getElementById('resultSL').textContent = sl;
+
+            let tp = prompt("Edit Take Profit:", document.getElementById('resultTP').textContent);
+            if (tp) document.getElementById('resultTP').textContent = tp;
+        };
+
+        // الإرسال إلى المشتركين
+        window.sendToSubscribers = async function() {
+            const btn = document.getElementById('sendBtn');
+            const pair = document.getElementById('resultAssetName').textContent;
+            const direction = document.getElementById('resultDirection').textContent;
+            const entry = document.getElementById('resultEntry').textContent;
+            const sl = document.getElementById('resultSL').textContent;
+            const tp = document.getElementById('resultTP').textContent;
+
+            if (entry === '-') return;
+
+            btn.innerHTML = '⏳ Sending...';
+            btn.disabled = true;
+
+            try {
+                // تحديد المجموعة بناءً على التبويب
+                let collectionName = 'forex_signals';
+                if (window.currentMode === 'gold') collectionName = 'gold_signals';
+                else if (window.currentMode === 'crypto') collectionName = 'tradelix_signals';
+
+                await addDoc(collection(db, collectionName), {
+                    pair: pair,
+                    direction: direction,
+                    entry: entry,
+                    stopLoss: sl,
+                    takeProfit: tp,
+                    createdAt: serverTimestamp()
+                });
+
+                alert(`✅ Signal for ${pair} sent successfully to users!`);
+                document.getElementById('aiResultBox').style.display = 'none'; // إخفاء البطاقة بعد الإرسال
+
+            } catch (error) {
+                alert("❌ Error: " + error.message);
+            } finally {
+                btn.innerHTML = '🚀 Send to Subscribers';
+                btn.disabled = false;
+            }
+        };
+
+        // مسح الصفقات القديمة
+        window.clearOldSignals = async function(event) {
+            const confirmDelete = confirm("⚠️ Are you sure you want to delete ALL signals in this category? This action cannot be undone.");
+            if (!confirmDelete) return;
+
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Clearing...';
+            btn.disabled = true;
+
+            try {
+                let collectionName = 'forex_signals';
+                if (window.currentMode === 'gold') collectionName = 'gold_signals';
+                else if (window.currentMode === 'crypto') collectionName = 'tradelix_signals';
+
+                const colRef = collection(db, collectionName);
+                const snapshot = await getDocs(colRef);
+                
+                if(snapshot.empty) {
+                    alert("No signals to clear!");
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+
+                // استخدام Batch لحذف جميع المستندات مرة واحدة
+                const batch = writeBatch(db);
+                snapshot.forEach((doc) => {
+                    batch.delete(doc.ref);
+                });
+                
+                await batch.commit();
+                alert("✅ All signals have been cleared successfully!");
+                
+                // إخفاء نتيجة التحليل إن كانت مفتوحة
+                document.getElementById('aiResultBox').style.display = 'none';
+
+            } catch (error) {
+                console.error("Error clearing signals: ", error);
+                alert("❌ Error: " + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>
