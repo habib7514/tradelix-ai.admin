@@ -326,8 +326,17 @@
             <input type="text" id="adminTradeCoinInput" placeholder="Coin (e.g., BTCUSDT)" style="margin-bottom: 8px;">
             <input type="text" id="adminTradeLinkInput" placeholder="Binance Trade Link (https://...)" style="margin-bottom: 8px;">
             <button class="btn-block success" onclick="adminOpenTrade()">📡 Open Trade for this User</button>
-            <button class="btn-block danger" onclick="adminCloseTrade()" style="margin-top: 8px;">🔴 Close User Trade</button>
         </div>
+
+        <!-- ✅ قسم إغلاق الصفقة الجديد -->
+        <div class="input-group" style="margin-top: 15px; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--red);">
+            <label style="color: var(--red); font-weight: bold;">Close Trade (<span id="activeTradeNameDisplay">None</span>)</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="number" id="adminClosePnl" placeholder="PnL e.g., 5 or -3">
+                <button class="btn-small" style="background: var(--red); color: #fff;" onclick="adminCloseTrade()">Close</button>
+            </div>
+        </div>
+
     </div>
     <div class="bottom-nav">
         <button class="nav-item" onclick="showScreen('dashboardScreen')"><span class="icon">📊</span><span>Dash</span></button>
@@ -1047,6 +1056,23 @@
         }
     }
 
+    // ✅ دالة آمنة لإرسال الإشعارات (لن تسبب أخطاء إذا فشلت)
+    async function sendUserNotification(userId, title, body) {
+        try {
+            await addDoc(collection(db, 'user_notifications'), {
+                userId: userId,
+                title: title,
+                body: body,
+                read: false,
+                createdAt: serverTimestamp()
+            });
+            return true;
+        } catch (e) {
+            console.error("Notification error (ignored):", e);
+            return false;
+        }
+    }
+
     // ✅ دوال التداول المعزولة
     async function loadTradeSubscribers() {
         const depList = document.getElementById('adminTradeDepositList');
@@ -1153,13 +1179,7 @@
                     transaction.update(reqRef, { status: 'approved', processedAt: serverTimestamp() });
                 });
                 
-                await addDoc(collection(db, 'user_notifications'), {
-                    userId: userId,
-                    title: '✅ Request Approved',
-                    body: `Your request for $${amt.toFixed(2)} has been approved.`,
-                    read: false,
-                    createdAt: serverTimestamp()
-                });
+                await sendUserNotification(userId, '✅ Request Approved', `Your request for $${amt.toFixed(2)} has been approved.`);
                 
             } else {
                 await updateDoc(doc(db, colName, requestId), {
@@ -1167,13 +1187,7 @@
                     processedAt: serverTimestamp()
                 });
                 
-                await addDoc(collection(db, 'user_notifications'), {
-                    userId: userId,
-                    title: '❌ Request Rejected',
-                    body: `Your request for $${amt.toFixed(2)} was rejected.`,
-                    read: false,
-                    createdAt: serverTimestamp()
-                });
+                await sendUserNotification(userId, '❌ Request Rejected', `Your request for $${amt.toFixed(2)} was rejected.`);
             }
             showToast(`✅ Request ${action}d`);
             loadTradeSubscribers();
@@ -1193,6 +1207,9 @@
         document.getElementById('tradeDetailBalance').textContent = '$' + (u.balance || 0).toFixed(2);
         document.getElementById('tradeDetailProfit').textContent = '$' + (u.totalProfit || 0).toFixed(2);
         document.getElementById('tradeDetailActive').textContent = u.activeTrade || 'None';
+        
+        // ✅ تحديث اسم الصفقة في مربع الإغلاق
+        document.getElementById('activeTradeNameDisplay').textContent = u.activeTrade || 'None';
 
         showScreen('userTradeDetailScreen');
     }
@@ -1206,15 +1223,10 @@
             const userSnap = await getDoc(userRef);
             const currentBalance = userSnap.data().balance || 0;
             const currentProfit = userSnap.data().totalProfit || 0;
+            
             await updateDoc(userRef, { balance: currentBalance + amount, totalProfit: currentProfit + amount });
             
-            await addDoc(collection(db, 'user_notifications'), {
-                userId: currentTradeUserUID,
-                title: '💰 Profit Added',
-                body: `A profit of $${amount.toFixed(2)} has been added to your trading balance.`,
-                read: false,
-                createdAt: serverTimestamp()
-            });
+            await sendUserNotification(currentTradeUserUID, '💰 Profit Added', `A profit of $${amount.toFixed(2)} has been added to your trading balance.`);
 
             showToast('✅ Profit added!');
             document.getElementById('adminTradeProfitAmount').value = '';
@@ -1284,18 +1296,8 @@
                 activeTradeLink: link
             });
 
-            // 2. محاولة إرسال الإشعار (معزولة لكي لا توقف العملية إذا فشلت)
-            try {
-                await addDoc(collection(db, 'user_notifications'), {
-                    userId: currentTradeUserUID,
-                    title: '📈 New Trade Opened',
-                    body: `A new trade for ${coin} has been opened on your account.`,
-                    read: false,
-                    createdAt: serverTimestamp()
-                });
-            } catch (notifError) {
-                console.error("Notification error (Trade opened anyway):", notifError);
-            }
+            // 2. إرسال الإشعار (معزول تماماً)
+            await sendUserNotification(currentTradeUserUID, '📈 New Trade Opened', `A new trade for ${coin} has been opened on your account.`);
 
             showToast('✅ Trade opened for user!');
             document.getElementById('adminTradeCoinInput').value = '';
@@ -1308,14 +1310,15 @@
         }
     }
 
+    // ✅ دالة إغلاق الصفقة (تم تحديثها لتقرأ من المربع الجديد)
     async function adminCloseTrade() {
-        if (!currentTradeUserUID) return;
+        if (!currentTradeUserUID) return showToast('❌ User not selected');
         
-        const pnlStr = prompt("Enter Trade Result (PnL) in $:\nExample: 5 (for profit) or -3 (for loss)");
-        if (pnlStr === null) return;
+        const pnlInput = document.getElementById('adminClosePnl').value;
+        const pnl = parseFloat(pnlInput);
         
-        const pnl = parseFloat(pnlStr);
-        if (isNaN(pnl)) return showToast('❌ Invalid number entered');
+        if (isNaN(pnl)) return showToast('❌ Enter a valid number (e.g., 5 or -3)');
+        if (!confirm(`Are you sure you want to close the trade with a PnL of $${pnl}?`)) return;
 
         try {
             const userRef = doc(db, 'tradelix_users', currentTradeUserUID);
@@ -1341,15 +1344,10 @@
             });
             
             const pnlText = pnl >= 0 ? `profit of $${pnl}` : `loss of $${Math.abs(pnl)}`;
-            await addDoc(collection(db, 'user_notifications'), {
-                userId: currentTradeUserUID,
-                title: '🔴 Trade Closed',
-                body: `Your ${activeTradeName} trade was closed with a ${pnlText}.`,
-                read: false,
-                createdAt: serverTimestamp()
-            });
+            await sendUserNotification(currentTradeUserUID, '🔴 Trade Closed', `Your ${activeTradeName} trade was closed with a ${pnlText}.`);
             
             showToast('✅ Trade closed & saved to user history!');
+            document.getElementById('adminClosePnl').value = '';
             openUserTradeDetail(currentTradeUserUID);
         } catch(e) { 
             console.error(e); 
@@ -1411,8 +1409,12 @@
                     transaction.update(userRef, { balance: currentBalance + amt });
                     transaction.update(reqRef, { status: 'approved', processedAt: serverTimestamp() });
                 });
+                
+                await sendUserNotification(userId, '✅ Deposit Approved', `Your deposit of $${amt.toFixed(2)} has been approved.`);
+                
             } else {
                 await updateDoc(doc(db, 'deposit_requests', requestId), { status: 'rejected', processedAt: serverTimestamp() });
+                await sendUserNotification(userId, '❌ Deposit Rejected', `Your deposit of $${amt.toFixed(2)} was rejected.`);
             }
             showToast(`✅ Deposit ${action}d`);
             loadDepositRequests();
@@ -1476,8 +1478,12 @@
                     transaction.update(userRef, { balance: Math.max(0, currentBalance - amt) });
                     transaction.update(reqRef, { status: 'paid', processedAt: serverTimestamp() });
                 });
+                
+                await sendUserNotification(userId, '✅ Withdrawal Paid', `Your withdrawal of $${amt.toFixed(2)} has been paid.`);
+                
             } else {
                 await updateDoc(doc(db, 'withdraw_requests', requestId), { status: 'rejected', processedAt: serverTimestamp() });
+                await sendUserNotification(userId, '❌ Withdrawal Rejected', `Your withdrawal of $${amt.toFixed(2)} was rejected.`);
             }
             showToast(`✅ Withdrawal ${action}`);
             loadWithdrawRequests();
