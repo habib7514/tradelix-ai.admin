@@ -1094,7 +1094,6 @@
                     let actionButtons = '';
                     let statusColor = r.status === 'approved' ? 'var(--green)' : (r.status === 'rejected' ? 'var(--red)' : 'var(--blue)');
                     
-                    // ✅ زر الإدارة للانتقال المباشر لفتح صفقة لهذا المستخدم
                     let manageBtn = `<button class="btn-small view" onclick="openUserTradeDetail('${r.userId}')" style="margin-top: 5px;">📡 Manage</button>`;
                     let deleteBtn = `<button class="btn-small reject" onclick="deleteTradeRequest('${r.col}', '${r.id}', event)" style="margin-top: 5px;">🗑️ Delete</button>`;
 
@@ -1254,7 +1253,6 @@
         currentTradeUserUID = uid;
         const userDoc = await getDoc(doc(db, 'tradelix_users', uid));
         
-        // ✅ تنبيه إذا لم يكن المستخدم موجوداً في قاعدة بيانات المتداولين
         if (!userDoc.exists()) {
             return showToast('❌ المستخدم غير موجود في قاعدة بيانات المتداولين (tradelix_users)');
         }
@@ -2219,10 +2217,28 @@
         document.getElementById('signalNotes').value = `AI suggested (Confidence: ${currentAITrade.confidence}%)`;
     }
 
+    // ✅ التعديل الجديد: دالة لفتح قفل الصوت في المتصفح لضمان عمل الإشعارات دائماً
+    function unlockAudio() {
+        const c = getAudioContext();
+        if (c && c.state === 'suspended') {
+            c.resume().then(() => {
+                const buffer = c.createBuffer(1, 1, 22050);
+                const source = c.createBufferSource();
+                source.buffer = buffer;
+                source.connect(c.destination);
+                source.start(0);
+            });
+        }
+    }
+
+    // ✅ تفعيل الصوت مع أي حركة أو لمسة (بدون once: true لكي يعمل دائماً)
+    ['click', 'touchstart', 'touchend', 'keydown'].forEach(event => {
+        document.addEventListener(event, unlockAudio);
+    });
+
     window.addEventListener('load', () => {
         initFirebase();
         updateBadge();
-        document.addEventListener('click', () => { getAudioContext(); }, { once: true });
     });
 </script>
 <script src="chat.js?v=10"></script>
