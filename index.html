@@ -1387,7 +1387,7 @@
         }
     }
 
-    // ✅ التعديل هنا: دالة إغلاق الصفقة المحسنة
+    // ✅ التعديل الجديد: دالة إغلاق الصفقة باستخدام المعاملة الذرية (Transaction)
     async function closeSpecificTrade(coinName) {
         if (!currentTradeUserUID) return;
         const pnlInput = document.getElementById(`pnl_${coinName}`).value;
@@ -1398,32 +1398,38 @@
 
         try {
             const userRef = doc(db, 'tradelix_users', currentTradeUserUID);
-            const userSnap = await getDoc(userRef);
-            if (!userSnap.exists()) return;
-
-            const userData = userSnap.data();
             
-            // 1. تحديث الصفقات المتعددة (activeTrades) بطريقة الفلترة الآمنة
-            let updatePayload = {};
-            if (userData.activeTrades && Array.isArray(userData.activeTrades)) {
-                const updatedTrades = userData.activeTrades.filter(t => t.coin !== coinName);
-                updatePayload.activeTrades = updatedTrades;
-            }
+            await runTransaction(db, async (transaction) => {
+                const userSnap = await transaction.get(userRef);
+                if (!userSnap.exists()) throw new Error('User not found');
 
-            // 2. مسح الحقل القديم (activeTrade) إن وجد
-            if (userData.activeTrade === coinName) {
-                updatePayload.activeTrade = null;
-                updatePayload.activeTradeLink = null;
-            }
+                const userData = userSnap.data();
+                
+                // 1. معالجة الصفقات النشطة (activeTrades)
+                let updatedTrades = [];
+                if (userData.activeTrades && Array.isArray(userData.activeTrades)) {
+                    updatedTrades = userData.activeTrades.filter(t => t.coin !== coinName);
+                }
+                // دعم النظام القديم (activeTrade)
+                if (userData.activeTrade === coinName) {
+                    updatedTrades = updatedTrades.filter(t => t.coin !== userData.activeTrade);
+                }
 
-            // 3. إضافة الصفقة إلى سجل الصفقات المغلقة
-            const closedTrade = { coin: coinName, pnl: pnl, closedAt: Date.now() };
-            let currentHistory = Array.isArray(userData.closedTrades) ? userData.closedTrades : [];
-            currentHistory.unshift(closedTrade);
-            updatePayload.closedTrades = currentHistory;
+                // 2. معالجة سجل الصفقات المغلقة (closedTrades)
+                let closedTrades = Array.isArray(userData.closedTrades) ? userData.closedTrades : [];
+                closedTrades.unshift({ coin: coinName, pnl: pnl, closedAt: Date.now() });
 
-            // تنفيذ جميع التحديثات في خطوة واحدة لضمان النجاح
-            await updateDoc(userRef, updatePayload);
+                // 3. تجهيز التحديثات
+                const updatePayload = {
+                    activeTrades: updatedTrades,
+                    closedTrades: closedTrades,
+                    activeTrade: null,
+                    activeTradeLink: null
+                };
+
+                // 4. تنفيذ التحديث دفعة واحدة
+                transaction.update(userRef, updatePayload);
+            });
             
             const pnlText = pnl >= 0 ? `profit of $${pnl}` : `loss of $${Math.abs(pnl)}`;
             await sendUserNotification(currentTradeUserUID, '🔴 Trade Closed', `Your ${coinName} trade was closed with a ${pnlText}.`);
@@ -1432,7 +1438,7 @@
             openUserTradeDetail(currentTradeUserUID);
         } catch(e) { 
             console.error("Error closing trade:", e); 
-            showToast('❌ Error closing trade'); 
+            showToast('❌ Error closing trade: ' + (e.message || 'Unknown error')); 
         }
     }
 
