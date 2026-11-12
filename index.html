@@ -328,7 +328,7 @@
             <button class="btn-block success" onclick="adminOpenTrade()">📡 Open Trade for this User</button>
         </div>
 
-        <!-- ✅ قسم إغلاق الصفقات (تم التعديل ليعرض قائمة ديناميكية) -->
+        <!-- ✅ قسم إغلاق الصفقات (يعرض قائمة ديناميكية للصفقات) -->
         <div style="margin-top: 20px; border-top: 2px dashed #333; padding-top: 15px;">
             <label style="color: var(--red); font-weight: bold; font-size: 16px; display: block; margin-bottom: 10px;">Active Trades & Close Options</label>
             <div id="adminActiveTradesList">
@@ -1199,7 +1199,7 @@
         }
     }
 
-    // ✅ دالة عرض تفاصيل المستخدم (تم تعديلها لعرض الصفقات المتعددة)
+    // ✅ دالة عرض تفاصيل المستخدم (تم تعديلها لعرض الصفقات المتعددة والقديمة)
     async function openUserTradeDetail(uid) {
         currentTradeUserUID = uid;
         const userDoc = await getDoc(doc(db, 'tradelix_users', uid));
@@ -1210,15 +1210,20 @@
         document.getElementById('tradeDetailBalance').textContent = '$' + (u.balance || 0).toFixed(2);
         document.getElementById('tradeDetailProfit').textContent = '$' + (u.totalProfit || 0).toFixed(2);
 
-        // عرض قائمة الصفقات النشطة
-        const list = document.getElementById('adminActiveTradesList');
+        // ✅ دمج الصفقات الجديدة (activeTrades) مع الصفقة القديمة (activeTrade)
         let tradesList = [];
         if (u.activeTrades && Array.isArray(u.activeTrades)) {
-            tradesList = u.activeTrades;
-        } else if (u.activeTrade) {
-            tradesList.push({ coin: u.activeTrade, link: u.activeTradeLink });
+            tradesList = [...u.activeTrades];
+        }
+        if (u.activeTrade && u.activeTrade !== null) {
+            const isAlreadyInList = tradesList.some(t => t.coin === u.activeTrade);
+            if (!isAlreadyInList) {
+                tradesList.push({ coin: u.activeTrade, link: u.activeTradeLink });
+            }
         }
 
+        // عرض قائمة الصفقات النشطة
+        const list = document.getElementById('adminActiveTradesList');
         if (tradesList.length === 0) {
             list.innerHTML = '<p style="color:#888; font-size:13px;">No active trades.</p>';
         } else {
@@ -1335,7 +1340,7 @@
         }
     }
 
-    // ✅ دالة إغلاق صفقة محددة
+    // ✅ دالة إغلاق صفقة محددة (تتعامل مع الصفقات القديمة والجديدة)
     async function closeSpecificTrade(coinName) {
         if (!currentTradeUserUID) return;
         const pnlInput = document.getElementById(`pnl_${coinName}`).value;
@@ -1350,17 +1355,20 @@
             if (!userSnap.exists()) return;
 
             const userData = userSnap.data();
-            
-            // إزالة الصفقة من القائمة
             let activeTrades = userData.activeTrades || [];
+            
+            // 1. إزالة الصفقة من القائمة الجديدة إن وجدت
             const tradeToClose = activeTrades.find(t => t.coin === coinName);
             if(tradeToClose) {
-                await updateDoc(userRef, {
-                    activeTrades: arrayRemoveFn(tradeToClose)
-                });
+                await updateDoc(userRef, { activeTrades: arrayRemoveFn(tradeToClose) });
             }
 
-            // إضافة الصفقة إلى سجل الصفقات المغلقة
+            // 2. مسح الحقل القديم إذا كانت هذه الصفقة هي القديمة
+            if (userData.activeTrade === coinName) {
+                await updateDoc(userRef, { activeTrade: null, activeTradeLink: null });
+            }
+
+            // 3. إضافة الصفقة إلى سجل الصفقات المغلقة
             const closedTrade = { coin: coinName, pnl: pnl, closedAt: Date.now() };
             let currentHistory = userData.closedTrades || [];
             currentHistory.unshift(closedTrade);
