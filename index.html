@@ -1387,7 +1387,7 @@
         }
     }
 
-    // ✅ التعديل الجديد: دالة إغلاق الصفقة باستخدام المعاملة الذرية (Transaction)
+    // ✅ تم إصلاح العطل هنا: العودة لاستخدام updateDoc البسيط الذي كان يعمل
     async function closeSpecificTrade(coinName) {
         if (!currentTradeUserUID) return;
         const pnlInput = document.getElementById(`pnl_${coinName}`).value;
@@ -1398,37 +1398,35 @@
 
         try {
             const userRef = doc(db, 'tradelix_users', currentTradeUserUID);
+            const userSnap = await getDoc(userRef);
+            if (!userSnap.exists()) return showToast('❌ User not found');
+
+            const userData = userSnap.data();
             
-            await runTransaction(db, async (transaction) => {
-                const userSnap = await transaction.get(userRef);
-                if (!userSnap.exists()) throw new Error('User not found');
+            // 1. إزالة الصفقة من القائمة (فلترة آمنة)
+            let updatedTrades = [];
+            if (userData.activeTrades && Array.isArray(userData.activeTrades)) {
+                updatedTrades = userData.activeTrades.filter(t => t.coin !== coinName);
+            }
+            
+            // 2. مسح الحقل القديم إن وجد
+            let activeTrade = userData.activeTrade;
+            let activeTradeLink = userData.activeTradeLink;
+            if (activeTrade === coinName) {
+                activeTrade = null;
+                activeTradeLink = null;
+            }
 
-                const userData = userSnap.data();
-                
-                // 1. معالجة الصفقات النشطة (activeTrades)
-                let updatedTrades = [];
-                if (userData.activeTrades && Array.isArray(userData.activeTrades)) {
-                    updatedTrades = userData.activeTrades.filter(t => t.coin !== coinName);
-                }
-                // دعم النظام القديم (activeTrade)
-                if (userData.activeTrade === coinName) {
-                    updatedTrades = updatedTrades.filter(t => t.coin !== userData.activeTrade);
-                }
+            // 3. إضافة الصفقة لسجل الصفقات المغلقة
+            let closedTrades = Array.isArray(userData.closedTrades) ? userData.closedTrades : [];
+            closedTrades.unshift({ coin: coinName, pnl: pnl, closedAt: Date.now() });
 
-                // 2. معالجة سجل الصفقات المغلقة (closedTrades)
-                let closedTrades = Array.isArray(userData.closedTrades) ? userData.closedTrades : [];
-                closedTrades.unshift({ coin: coinName, pnl: pnl, closedAt: Date.now() });
-
-                // 3. تجهيز التحديثات
-                const updatePayload = {
-                    activeTrades: updatedTrades,
-                    closedTrades: closedTrades,
-                    activeTrade: null,
-                    activeTradeLink: null
-                };
-
-                // 4. تنفيذ التحديث دفعة واحدة
-                transaction.update(userRef, updatePayload);
+            // 4. تنفيذ التحديث دفعة واحدة
+            await updateDoc(userRef, {
+                activeTrades: updatedTrades,
+                activeTrade: activeTrade,
+                activeTradeLink: activeTradeLink,
+                closedTrades: closedTrades
             });
             
             const pnlText = pnl >= 0 ? `profit of $${pnl}` : `loss of $${Math.abs(pnl)}`;
