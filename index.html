@@ -674,7 +674,8 @@
 
 <div id="notifModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:99999; padding:16px; overflow-y:auto;">
     <div style="background: #141414; border: 1px solid #d4af37; border-radius: 16px; padding: 20px; max-width: 420px; margin: 40px auto; position: relative;">
-        <button class="notif-close-top" onclick="closeNotifModal()" aria-label="Close">✕</button>
+        <!-- ✅ زر الإغلاق الجديد المطابق لتطبيق المستخدم -->
+        <button onclick="closeNotifModal()" style="position: absolute; top: 15px; right: 15px; background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.5); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 16px; font-weight: bold; cursor: pointer; z-index: 10;">✕</button>
         <h3 style="color: #d4af37; margin-bottom: 16px; text-align: center; padding-right: 40px; padding-left: 40px;">🔔 Notifications</h3>
         <div style="display:flex; gap:8px; margin-bottom:12px;">
             <button onclick="clearAllNotifs()" class="btn-small reject" style="flex:1;">🗑️ Clear All</button>
@@ -1995,6 +1996,7 @@
     function playNotifSound() {
         const c = getAudioContext(); if (!c) return;
         try {
+            if (c.state === 'suspended') c.resume();
             [0, 0.3].forEach(delay => {
                 const osc = c.createOscillator(); const gain = c.createGain();
                 osc.connect(gain); gain.connect(c.destination);
@@ -2024,12 +2026,18 @@
         updateBadge();
     }
 
+    // ✅ التعديل: إجبار المتصفح على إظهار الرقم الأحمر فور وصول الإشعار
     function updateBadge() {
         const unread = adminNotifs.filter(n => !n.read).length;
         document.querySelectorAll('.bell-icon').forEach(bell => {
             let b = bell.querySelector('.notifBadge');
             if (unread > 0) {
-                if (!b) { b = document.createElement('span'); b.className = 'notifBadge'; bell.appendChild(b); }
+                if (!b) { 
+                    b = document.createElement('span'); 
+                    b.className = 'notifBadge'; 
+                    b.style.display = 'flex';
+                    bell.appendChild(b); 
+                }
                 b.textContent = unread;
             } else if (b) b.remove();
         });
@@ -2217,7 +2225,7 @@
         document.getElementById('signalNotes').value = `AI suggested (Confidence: ${currentAITrade.confidence}%)`;
     }
 
-    // ✅ التعديل الجديد: دالة لفتح قفل الصوت في المتصفح لضمان عمل الإشعارات دائماً
+    // ✅ التعديل: تفعيل الصوت مع أي حركة أو لمسة
     function unlockAudio() {
         const c = getAudioContext();
         if (c && c.state === 'suspended') {
@@ -2231,7 +2239,6 @@
         }
     }
 
-    // ✅ تفعيل الصوت مع أي حركة أو لمسة (بدون once: true لكي يعمل دائماً)
     ['click', 'touchstart', 'touchend', 'keydown'].forEach(event => {
         document.addEventListener(event, unlockAudio);
     });
