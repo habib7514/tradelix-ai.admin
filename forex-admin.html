@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tradix Admin - Signals & AI</title>
+    <title>Forex Admin - AI Analysis</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
@@ -17,44 +17,44 @@
             --text-muted: #999999; 
             --border: #1F1F1F; 
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; padding-bottom: 20px; }
+        /* ✅ تم تكبير الخط الأساسي */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; font-size: 16px; }
+        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; padding-bottom: 30px; }
         
-        /* شاشة تسجيل الدخول */
+        /* ✅ تكبير شاشة تسجيل الدخول */
         #loginSection { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .login-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
-        .login-box h1 { color: var(--gold); margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; color: var(--text-muted); margin-bottom: 8px; font-size: 13px; }
-        .form-group input, .form-group select { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border); background: #000; color: #fff; font-size: 15px; outline: none; }
+        .login-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 40px 25px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+        .login-box h1 { color: var(--gold); margin-bottom: 25px; font-size: 28px; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; color: var(--text-muted); margin-bottom: 10px; font-size: 16px; font-weight: 700; }
+        .form-group input { width: 100%; padding: 18px; border-radius: 12px; border: 1px solid var(--border); background: #000; color: #fff; font-size: 18px; outline: none; }
         
-        /* شاشة التطبيق */
+        /* ✅ تكبير شاشة التطبيق */
         #appSection { display: none; max-width: 500px; margin: 0 auto; padding: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: var(--bg-card); padding: 15px 20px; border-radius: 16px; border: 1px solid var(--border); }
-        .header h2 { color: var(--gold); font-size: 18px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border); }
+        .header h2 { color: var(--gold); font-size: 24px; }
         
-        /* التبويبات */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: var(--bg-card); padding: 5px; border-radius: 12px; }
-        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; background: transparent; color: var(--text-muted); transition: 0.3s; }
-        .tab-btn.active { background: var(--gold); color: #000; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 25px; }
         
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
-        
-        .analyze-btn { width: 100%; padding: 15px; background: var(--gold); color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; transition: 0.2s; }
+        /* ✅ تكبير زر التحليل */
+        .analyze-btn { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; border-radius: 15px; font-weight: 900; font-size: 20px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; transition: 0.2s; }
         .analyze-btn:active { transform: scale(0.98); }
         
-        /* نتيجة التحليل */
-        #aiResultBox { display: none; border: 1px solid var(--gold); border-radius: 16px; padding: 20px; background: linear-gradient(145deg, #1A1500, #0a0a0a); text-align: center; margin-bottom: 20px; }
-        .ai-direction { font-size: 40px; font-weight: 900; margin-bottom: 10px; }
-        .ai-details { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; color: var(--text-muted); }
-        .ai-details span:last-child { color: #fff; font-weight: 700; }
+        /* ✅ تكبير القائمة المنسدلة */
+        #assetSelect { width: 100%; padding: 18px; background: #000; border: 1px solid #333; color: #fff; border-radius: 15px; margin-bottom: 20px; outline: none; font-size: 18px; font-weight: 700; }
         
-        /* الأزرار */
-        .action-btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
+        /* ✅ تكبير نتيجة التحليل */
+        #aiResultBox { display: none; border: 2px solid var(--gold); border-radius: 20px; padding: 25px; background: linear-gradient(145deg, #1A1500, #0a0a0a); text-align: center; margin-bottom: 25px; }
+        .ai-direction { font-size: 55px; font-weight: 900; margin-bottom: 15px; }
+        .ai-details { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #333; color: var(--text-muted); font-size: 18px; }
+        .ai-details span:last-child { color: #fff; font-weight: 900; font-size: 20px; }
+        
+        /* ✅ تكبير الأزرار السفلية */
+        .action-btn { width: 100%; padding: 20px; border: none; border-radius: 15px; font-weight: 900; font-size: 18px; cursor: pointer; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
         .action-btn:active { transform: scale(0.98); }
         .btn-green { background: var(--green); color: #000; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: #fff; }
-        .btn-red { background: rgba(255,71,87,0.1); border: 1px solid var(--red); color: var(--red); margin-top: 20px; }
+        .btn-outline { background: transparent; border: 2px solid var(--border); color: #fff; }
+        .btn-red { background: rgba(255,71,87,0.1); border: 2px solid var(--red); color: var(--red); margin-top: 25px; }
     </style>
 </head>
 <body>
@@ -62,7 +62,7 @@
     <!-- قسم تسجيل الدخول -->
     <div id="loginSection">
         <div class="login-box">
-            <h1>🔒 Admin Login</h1>
+            <h1>🔒 Forex Admin</h1>
             <div class="form-group">
                 <label>Email</label>
                 <input type="email" id="adminEmail" value="mmatrix08@gmail.com" readonly>
@@ -72,27 +72,20 @@
                 <input type="password" id="adminPassword" placeholder="••••••••">
             </div>
             <button class="analyze-btn" onclick="adminLogin()">Login</button>
-            <p id="loginError" style="color: var(--red); font-size: 14px; margin-top: 10px;"></p>
+            <p id="loginError" style="color: var(--red); font-size: 16px; margin-top: 15px;"></p>
         </div>
     </div>
 
     <!-- قسم لوحة التحكم -->
     <div id="appSection">
         <div class="header">
-            <h2>🤖 AI Analysis</h2>
-            <button onclick="logout()" style="background:transparent; border:none; color:var(--red); font-weight:bold; cursor:pointer;">Logout</button>
-        </div>
-
-        <!-- التبويبات الثلاثة -->
-        <div class="tabs">
-            <button class="tab-btn" onclick="switchTab('crypto')" id="tab-crypto">Tradelix</button>
-            <button class="tab-btn" onclick="switchTab('gold')" id="tab-gold">Tradix Gold</button>
-            <button class="tab-btn active" onclick="switchTab('forex')" id="tab-forex">Forex</button>
+            <h2>💱 AI Analysis</h2>
+            <button onclick="logout()" style="background:transparent; border:none; color:var(--red); font-weight:900; font-size: 18px; cursor:pointer;">Logout</button>
         </div>
 
         <div class="card">
-            <label style="color: var(--text-muted); font-size: 13px; margin-bottom: 10px; display: block;">Select Asset to Analyze</label>
-            <select id="assetSelect" style="width: 100%; padding: 15px; background: #000; border: 1px solid #333; color: #fff; border-radius: 10px; margin-bottom: 20px; outline: none;">
+            <label style="color: var(--text-muted); font-size: 16px; font-weight: 700; margin-bottom: 15px; display: block;">Select Asset to Analyze</label>
+            <select id="assetSelect">
                 <!-- سيتم تعبئتها عبر JS -->
             </select>
             
@@ -103,7 +96,7 @@
 
         <!-- بطاقة النتيجة (مخفية حتى يتم التحليل) -->
         <div id="aiResultBox">
-            <div style="color: var(--text-muted); font-size: 12px; margin-bottom: 10px;" id="resultAssetName">EUR/USD</div>
+            <div style="color: var(--text-muted); font-size: 16px; margin-bottom: 10px;" id="resultAssetName">EUR/USD</div>
             <div class="ai-direction" id="resultDirection">BUY</div>
             
             <div class="ai-details">
@@ -119,7 +112,7 @@
                 <span id="resultTP" style="color: var(--green);">-</span>
             </div>
 
-            <button class="action-btn btn-green" onclick="sendToSubscribers()" id="sendBtn" style="margin-top: 20px;">
+            <button class="action-btn btn-green" onclick="sendToSubscribers()" id="sendBtn" style="margin-top: 25px;">
                 🚀 Send to Subscribers
             </button>
             <button class="action-btn btn-outline" onclick="editSignal()">
@@ -150,9 +143,8 @@
         const db = getFirestore(app);
 
         // ==========================================
-        // 🔐 نظام تسجيل الدخول المبسط (كلمة مرور ثابتة)
+        // 🔐 نظام تسجيل الدخول المبسط
         // ==========================================
-        
         const ADMIN_EMAIL = "mmatrix08@gmail.com";
         const ADMIN_PASSWORD = "123456"; 
 
@@ -166,7 +158,7 @@
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('appSection').style.display = 'block';
                 document.getElementById('adminPassword').value = ''; 
-                switchTab('forex'); 
+                loadForexPairs(); // تحميل الأزواج عند الدخول
             } else {
                 errEl.textContent = "Login failed: Incorrect password.";
             }
@@ -178,35 +170,25 @@
         };
 
         // ==========================================
-        // 🛠️ القوائم والتبويبات
+        // 💱 قائمة أزواج العملات
         // ==========================================
+        const forexPairs = [
+            "EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD", "NZD/USD", "USD/CHF", 
+            "EUR/GBP", "EUR/JPY", "GBP/JPY", "AUD/JPY", "CHF/JPY", "EUR/AUD", "EUR/CAD", 
+            "GBP/AUD", "GBP/CAD", "AUD/CAD", "AUD/NZD", "XAU/USD", "XAG/USD"
+        ];
 
-        const dataLists = {
-            crypto: ["Bitcoin (BTC)", "Ethereum (ETH)", "BNB", "Solana (SOL)", "XRP"],
-            gold: ["Gold (XAU/USD)"],
-            // ✅ تم تحديث القائمة هنا لتطابق تطبيق المستخدم
-            forex: [
-                "EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD", "NZD/USD", "USD/CHF", 
-                "EUR/GBP", "EUR/JPY", "GBP/JPY", "AUD/JPY", "CHF/JPY", "EUR/AUD", "EUR/CAD", 
-                "GBP/AUD", "GBP/CAD", "AUD/CAD", "AUD/NZD", "XAU/USD", "XAG/USD"
-            ]
-        };
-
-        window.currentMode = 'forex';
-
-        window.switchTab = function(mode) {
-            window.currentMode = mode;
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`tab-${mode}`).classList.add('active');
-
+        function loadForexPairs() {
             const select = document.getElementById('assetSelect');
             select.innerHTML = '';
-            dataLists[mode].forEach(item => {
+            forexPairs.forEach(item => {
                 select.innerHTML += `<option value="${item}">${item}</option>`;
             });
-            document.getElementById('aiResultBox').style.display = 'none';
-        };
+        }
 
+        // ==========================================
+        // 🤖 توليد التحليل
+        // ==========================================
         window.runAIAnalysis = function() {
             const btn = document.getElementById('analyzeBtn');
             const asset = document.getElementById('assetSelect').value;
@@ -219,23 +201,17 @@
                 const direction = isBuy ? 'BUY' : 'SELL';
                 
                 let entry, sl, tp;
-                if (window.currentMode === 'forex' || asset.includes('XAU')) {
-                    const base = asset.includes('JPY') ? 150.500 : (asset.includes('XAU') ? 3870.50 : 1.08500);
-                    entry = base;
-                    sl = isBuy ? base - 0.0050 : base + 0.0050;
-                    tp = isBuy ? base + 0.0100 : base - 0.0100;
-                } else {
-                    entry = 65000.00;
-                    sl = isBuy ? 63000.00 : 67000.00;
-                    tp = isBuy ? 68000.00 : 62000.00;
-                }
+                const base = asset.includes('JPY') ? 150.500 : (asset.includes('XAU') || asset.includes('XAG') ? 3870.50 : 1.08500);
+                entry = base;
+                sl = isBuy ? base - 0.0050 : base + 0.0050;
+                tp = isBuy ? base + 0.0100 : base - 0.0100;
 
                 document.getElementById('resultAssetName').textContent = asset;
                 const dirEl = document.getElementById('resultDirection');
                 dirEl.textContent = direction;
                 dirEl.style.color = direction === 'BUY' ? 'var(--green)' : 'var(--red)';
                 
-                const decimal = asset.includes('JPY') ? 3 : (asset.includes('XAU') || window.currentMode === 'crypto' ? 2 : 5);
+                const decimal = asset.includes('JPY') ? 3 : (asset.includes('XAU') || asset.includes('XAG') ? 2 : 5);
                 
                 document.getElementById('resultEntry').textContent = entry.toFixed(decimal);
                 document.getElementById('resultSL').textContent = sl.toFixed(decimal);
@@ -259,6 +235,9 @@
             if (tp) document.getElementById('resultTP').textContent = tp;
         };
 
+        // ==========================================
+        // 🚀 إرسال الإشارة
+        // ==========================================
         window.sendToSubscribers = async function() {
             const btn = document.getElementById('sendBtn');
             const pair = document.getElementById('resultAssetName').textContent;
@@ -273,11 +252,7 @@
             btn.disabled = true;
 
             try {
-                let collectionName = 'forex_signals';
-                if (window.currentMode === 'gold') collectionName = 'gold_signals';
-                else if (window.currentMode === 'crypto') collectionName = 'tradelix_signals';
-
-                await addDoc(collection(db, collectionName), {
+                await addDoc(collection(db, 'forex_signals'), {
                     pair: pair,
                     direction: direction,
                     entry: entry,
@@ -286,7 +261,7 @@
                     createdAt: serverTimestamp()
                 });
 
-                alert(`✅ Signal for ${pair} sent successfully to users!`);
+                alert(`✅ Forex Signal for ${pair} sent successfully to users!`);
                 document.getElementById('aiResultBox').style.display = 'none';
 
             } catch (error) {
@@ -297,8 +272,11 @@
             }
         };
 
+        // ==========================================
+        // 🗑️ مسح الصفقات القديمة
+        // ==========================================
         window.clearOldSignals = async function(event) {
-            const confirmDelete = confirm("⚠️ Are you sure you want to delete ALL signals in this category? This action cannot be undone.");
+            const confirmDelete = confirm("⚠️ Are you sure you want to delete ALL Forex signals? This action cannot be undone.");
             if (!confirmDelete) return;
 
             const btn = event.target;
@@ -307,11 +285,7 @@
             btn.disabled = true;
 
             try {
-                let collectionName = 'forex_signals';
-                if (window.currentMode === 'gold') collectionName = 'gold_signals';
-                else if (window.currentMode === 'crypto') collectionName = 'tradelix_signals';
-
-                const colRef = collection(db, collectionName);
+                const colRef = collection(db, 'forex_signals');
                 const snapshot = await getDocs(colRef);
                 
                 if(snapshot.empty) {
@@ -327,7 +301,7 @@
                 });
                 
                 await batch.commit();
-                alert("✅ All signals have been cleared successfully!");
+                alert("✅ All Forex signals have been cleared successfully!");
                 document.getElementById('aiResultBox').style.display = 'none';
 
             } catch (error) {
