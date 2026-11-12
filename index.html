@@ -12,7 +12,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-        // ✅ تم إضافة arrayUnion و arrayRemove لدعم تعدد الصفقات
         import { getFirestore, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -323,7 +322,7 @@
 
         <div class="input-group" style="margin-top: 15px; background: rgba(212, 175, 55, 0.1); padding: 10px; border-radius: 8px; border: 1px solid var(--gold);">
             <label style="color: var(--gold);">Open Individual Trade</label>
-            <input type="text" id="adminTradeCoinInput" placeholder="Coin (e.g., BTCUSDT)" style="margin-bottom: 8px;">
+            <input type="text" id="adminTradeCoinInput" placeholder="Coin (e.g., DOGEUSDT)" style="margin-bottom: 8px;">
             <input type="text" id="adminTradeLinkInput" placeholder="Binance Trade Link (https://...)" style="margin-bottom: 8px;">
             <button class="btn-block success" onclick="adminOpenTrade()">📡 Open Trade for this User</button>
         </div>
@@ -693,7 +692,6 @@
     let signInWithEmailAndPassword, signOut;
     let collection, getDocs, doc, getDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot, query, where, orderBy, runTransaction;
     
-    // ✅ متغيرات إضافية للمصفوفات
     let arrayUnionFn, arrayRemoveFn;
 
     let appMode = 'crypto';
@@ -1058,7 +1056,6 @@
         }
     }
 
-    // ✅ دالة آمنة لإرسال الإشعارات (لن تسبب أخطاء إذا فشلت)
     async function sendUserNotification(userId, title, body) {
         try {
             await addDoc(collection(db, 'user_notifications'), {
@@ -1075,13 +1072,11 @@
         }
     }
 
-    // ✅ دوال التداول المعزولة
     async function loadTradeSubscribers() {
         const depList = document.getElementById('adminTradeDepositList');
         depList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">Loading...</p>';
         
         try {
-            // ✅ التعديل 1: جلب جميع الطلبات بدون فلتر "pending" لكي لا تختفي المقبولة
             const q1 = query(collection(db, 'trade_deposits')); 
             const q2 = query(collection(db, 'trade_requests'));
             
@@ -1096,17 +1091,26 @@
             } else {
                 allRequests.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
                 depList.innerHTML = allRequests.map(r => {
-                    // تحديد الأزرار بناءً على حالة الطلب
                     let actionButtons = '';
                     let statusColor = r.status === 'approved' ? 'var(--green)' : (r.status === 'rejected' ? 'var(--red)' : 'var(--blue)');
                     
+                    // ✅ زر الإدارة للانتقال المباشر لفتح صفقة لهذا المستخدم
+                    let manageBtn = `<button class="btn-small view" onclick="openUserTradeDetail('${r.userId}')" style="margin-top: 5px;">📡 Manage</button>`;
+                    let deleteBtn = `<button class="btn-small reject" onclick="deleteTradeRequest('${r.col}', '${r.id}', event)" style="margin-top: 5px;">🗑️ Delete</button>`;
+
                     if (r.status === 'pending') {
                         actionButtons = `
                             <button class="btn-small approve" onclick="processTradeRequest('${r.col}', '${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'approve')">✅ Approve</button>
                             <button class="btn-small reject" onclick="processTradeRequest('${r.col}', '${r.id}', '${r.userId || ''}', '${r.amount || 0}', 'reject')">❌ Reject</button>
+                            ${manageBtn}
+                            ${deleteBtn}
                         `;
                     } else {
-                        actionButtons = `<span style="font-size:12px; font-weight:bold; color:${statusColor}; text-align:center;">${r.status.toUpperCase()}</span>`;
+                        actionButtons = `
+                            <span style="font-size:12px; font-weight:bold; color:${statusColor}; text-align:center; margin-bottom:5px;">${r.status.toUpperCase()}</span>
+                            ${manageBtn}
+                            ${deleteBtn}
+                        `;
                     }
 
                     return `
@@ -1148,11 +1152,10 @@
                 actList.innerHTML = '<p style="color:#888; text-align:center; font-size:12px;">No trade subscribers.</p>';
             } else {
                 actList.innerHTML = subs.map(u => {
-                    // ✅ التعديل 2: عرض الصفقات النشطة مباشرة بجانب اسم المستخدم في القائمة
                     let activeTradesTags = '';
                     let userTrades = u.activeTrades || [];
                     if (u.activeTrade && !userTrades.find(t => t.coin === u.activeTrade)) {
-                        userTrades.push({ coin: u.activeTrade }); // دعم النظام القديم
+                        userTrades.push({ coin: u.activeTrade }); 
                     }
                     
                     if (userTrades.length > 0) {
@@ -1184,6 +1187,20 @@
         }
     }
 
+    async function deleteTradeRequest(colName, requestId, event) {
+        if (event) event.stopPropagation();
+        if (!confirm('هل أنت متأكد من مسح هذا الطلب نهائياً من قاعدة البيانات؟')) return;
+        
+        try {
+            await deleteDoc(doc(db, colName, requestId));
+            showToast('✅ Trade request deleted');
+            loadTradeSubscribers(); 
+        } catch(e) {
+            console.error(e);
+            showToast('❌ Error deleting request');
+        }
+    }
+
     async function processTradeRequest(colName, requestId, userId, amount, action) {
         if (!confirm(`Are you sure you want to ${action} this request?`)) return;
         const amt = parseFloat(amount);
@@ -1199,8 +1216,8 @@
 
                     if (!reqSnap.exists()) throw new Error('Request not found');
                     if (reqSnap.data().status !== 'pending') throw new Error('Request already processed');
-                    if (!userSnap.exists()) throw new Error('User not found');
-
+                    if (!userSnap.exists()) throw new Error('User not found in tradelix_users');
+                    
                     const currentBalance = Number(userSnap.data().balance) || 0;
                     
                     if (colName === 'trade_requests') {
@@ -1231,18 +1248,23 @@
         }
     }
 
-    // ✅ دالة عرض تفاصيل المستخدم (تم تعديلها لعرض الصفقات المتعددة والقديمة)
     async function openUserTradeDetail(uid) {
+        if (!uid || uid === 'undefined') return showToast('❌ Invalid User ID');
+        
         currentTradeUserUID = uid;
         const userDoc = await getDoc(doc(db, 'tradelix_users', uid));
-        if (!userDoc.exists()) return;
+        
+        // ✅ تنبيه إذا لم يكن المستخدم موجوداً في قاعدة بيانات المتداولين
+        if (!userDoc.exists()) {
+            return showToast('❌ المستخدم غير موجود في قاعدة بيانات المتداولين (tradelix_users)');
+        }
+        
         const u = userDoc.data();
         
         document.getElementById('tradeDetailName').textContent = u.name || '-';
         document.getElementById('tradeDetailBalance').textContent = '$' + (u.balance || 0).toFixed(2);
         document.getElementById('tradeDetailProfit').textContent = '$' + (u.totalProfit || 0).toFixed(2);
 
-        // ✅ دمج الصفقات الجديدة (activeTrades) مع الصفقة القديمة (activeTrade)
         let tradesList = [];
         if (u.activeTrades && Array.isArray(u.activeTrades)) {
             tradesList = [...u.activeTrades];
@@ -1254,7 +1276,6 @@
             }
         }
 
-        // عرض قائمة الصفقات النشطة
         const list = document.getElementById('adminActiveTradesList');
         if (tradesList.length === 0) {
             list.innerHTML = '<p style="color:#888; font-size:13px;">No active trades.</p>';
@@ -1295,7 +1316,6 @@
         } catch(e) { showToast('❌ Error'); }
     }
 
-    // ✅ دالة تعديل الرصيد الإجمالي يدوياً
     async function adminSetExactBalance() {
         if (!currentTradeUserUID) return;
         const newBalance = parseFloat(document.getElementById('adminSetBalanceAmount').value);
@@ -1318,7 +1338,6 @@
         }
     }
 
-    // ✅ دالة تعديل إجمالي الأرباح يدوياً
     async function adminSetExactProfit() {
         if (!currentTradeUserUID) return;
         const newProfit = parseFloat(document.getElementById('adminSetProfitAmount').value);
@@ -1341,7 +1360,6 @@
         }
     }
 
-    // ✅ دالة فتح الصفقة (تدعم التعدد)
     async function adminOpenTrade() {
         if (!currentTradeUserUID) return showToast('❌ User not selected');
         
@@ -1353,12 +1371,10 @@
         try {
             const newTrade = { coin: coin, link: link };
             
-            // استخدام arrayUnion لإضافة الصفقة للقائمة
             await updateDoc(doc(db, 'tradelix_users', currentTradeUserUID), {
                 activeTrades: arrayUnionFn(newTrade)
             });
 
-            // إرسال الإشعار (معزول تماماً)
             await sendUserNotification(currentTradeUserUID, '📈 New Trade Opened', `A new trade for ${coin} has been opened on your account.`);
 
             showToast('✅ Trade opened for user!');
@@ -1372,7 +1388,6 @@
         }
     }
 
-    // ✅ دالة إغلاق صفقة محددة (تتعامل مع الصفقات القديمة والجديدة)
     async function closeSpecificTrade(coinName) {
         if (!currentTradeUserUID) return;
         const pnlInput = document.getElementById(`pnl_${coinName}`).value;
@@ -1389,18 +1404,15 @@
             const userData = userSnap.data();
             let activeTrades = userData.activeTrades || [];
             
-            // 1. إزالة الصفقة من القائمة الجديدة إن وجدت
             const tradeToClose = activeTrades.find(t => t.coin === coinName);
             if(tradeToClose) {
                 await updateDoc(userRef, { activeTrades: arrayRemoveFn(tradeToClose) });
             }
 
-            // 2. مسح الحقل القديم إذا كانت هذه الصفقة هي القديمة
             if (userData.activeTrade === coinName) {
                 await updateDoc(userRef, { activeTrade: null, activeTradeLink: null });
             }
 
-            // 3. إضافة الصفقة إلى سجل الصفقات المغلقة
             const closedTrade = { coin: coinName, pnl: pnl, closedAt: Date.now() };
             let currentHistory = userData.closedTrades || [];
             currentHistory.unshift(closedTrade);
@@ -1570,7 +1582,6 @@
             updateDoc = fsModule.updateDoc; deleteDoc = fsModule.deleteDoc; addDoc = fsModule.addDoc; serverTimestamp = fsModule.serverTimestamp;
             onSnapshot = fsModule.onSnapshot; query = fsModule.query; where = fsModule.where; orderBy = fsModule.orderBy; runTransaction = fsModule.runTransaction;
             
-            // ✅ ربط دوال المصفوفات
             arrayUnionFn = fsModule.arrayUnion;
             arrayRemoveFn = fsModule.arrayRemove;
             
@@ -1900,7 +1911,6 @@
         } catch (error) { showToast('❌ Error'); }
     }
 
-    // ✅ دالة حذف مباشرة
     window.deleteUserDirect = async function(uid, event) {
         if(event) event.stopPropagation();
         if(!confirm('Are you sure you want to delete this user?')) return;
