@@ -136,7 +136,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-        // ⚠️ تم حذف استيراد Firebase Auth بالكامل
 
         const firebaseConfig = {
             apiKey: "AIzaSyAPHGtTeDNamwyR2kfg-b9ABp7pNyyiPKM",
@@ -149,13 +148,11 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        // ⚠️ تم حذف const auth = getAuth(app);
 
         // ==========================================
         // 🔐 نظام تسجيل الدخول المبسط (كلمة مرور ثابتة)
         // ==========================================
         
-        // ⚠️ يمكنك تغيير كلمة المرور من هنا:
         const ADMIN_EMAIL = "mmatrix08@gmail.com";
         const ADMIN_PASSWORD = "123456"; 
 
@@ -168,8 +165,8 @@
                 errEl.textContent = "";
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('appSection').style.display = 'block';
-                document.getElementById('adminPassword').value = ''; // تفريغ الحقل
-                switchTab('forex'); // فتح تبويب الفوركس افتراضياً
+                document.getElementById('adminPassword').value = ''; 
+                switchTab('forex'); 
             } else {
                 errEl.textContent = "Login failed: Incorrect password.";
             }
@@ -181,13 +178,18 @@
         };
 
         // ==========================================
-        // 🛠️ باقي الأكواد (التبويبات، التحليل، الإرسال، المسح)
+        // 🛠️ القوائم والتبويبات
         // ==========================================
 
         const dataLists = {
             crypto: ["Bitcoin (BTC)", "Ethereum (ETH)", "BNB", "Solana (SOL)", "XRP"],
             gold: ["Gold (XAU/USD)"],
-            forex: ["EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD", "USD/CHF", "NZD/USD", "XAU/USD", "XAG/USD"]
+            // ✅ تم تحديث القائمة هنا لتطابق تطبيق المستخدم
+            forex: [
+                "EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD", "NZD/USD", "USD/CHF", 
+                "EUR/GBP", "EUR/JPY", "GBP/JPY", "AUD/JPY", "CHF/JPY", "EUR/AUD", "EUR/CAD", 
+                "GBP/AUD", "GBP/CAD", "AUD/CAD", "AUD/NZD", "XAU/USD", "XAG/USD"
+            ]
         };
 
         window.currentMode = 'forex';
