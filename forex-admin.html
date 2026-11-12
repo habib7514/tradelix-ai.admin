@@ -65,7 +65,7 @@
             <h1>🔒 Admin Login</h1>
             <div class="form-group">
                 <label>Email</label>
-                <input type="email" id="adminEmail" value="mmatrix08@gmail.com">
+                <input type="email" id="adminEmail" value="mmatrix08@gmail.com" readonly>
             </div>
             <div class="form-group">
                 <label>Password</label>
@@ -135,9 +135,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-        // تم إضافة getDocs و writeBatch لعملية المسح
         import { getFirestore, collection, addDoc, serverTimestamp, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+        // ⚠️ تم حذف استيراد Firebase Auth بالكامل
 
         const firebaseConfig = {
             apiKey: "AIzaSyAPHGtTeDNamwyR2kfg-b9ABp7pNyyiPKM",
@@ -150,41 +149,41 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
+        // ⚠️ تم حذف const auth = getAuth(app);
 
-        // مراقبة حالة تسجيل الدخول
-        onAuthStateChanged(auth, (user) => {
-            if (user && user.email === 'mmatrix08@gmail.com') {
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('appSection').style.display = 'block';
-                switchTab('forex'); // فتح تبويب الفوركس افتراضياً
-            } else {
-                document.getElementById('loginSection').style.display = 'flex';
-                document.getElementById('appSection').style.display = 'none';
-            }
-        });
+        // ==========================================
+        // 🔐 نظام تسجيل الدخول المبسط (كلمة مرور ثابتة)
+        // ==========================================
+        
+        // ⚠️ يمكنك تغيير كلمة المرور من هنا:
+        const ADMIN_EMAIL = "mmatrix08@gmail.com";
+        const ADMIN_PASSWORD = "123456"; 
 
-        // تسجيل الدخول
-        window.adminLogin = async function() {
+        window.adminLogin = function() {
             const email = document.getElementById('adminEmail').value;
             const pass = document.getElementById('adminPassword').value;
             const errEl = document.getElementById('loginError');
-            
-            errEl.textContent = "Logging in...";
-            try {
-                await signInWithEmailAndPassword(auth, email, pass);
+
+            if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
                 errEl.textContent = "";
-            } catch (error) {
-                errEl.textContent = "Login failed: " + error.message;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('appSection').style.display = 'block';
+                document.getElementById('adminPassword').value = ''; // تفريغ الحقل
+                switchTab('forex'); // فتح تبويب الفوركس افتراضياً
+            } else {
+                errEl.textContent = "Login failed: Incorrect password.";
             }
         };
 
-        // تسجيل الخروج
         window.logout = function() {
-            signOut(auth);
+            document.getElementById('appSection').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'flex';
         };
 
-        // قوائم الأصول لكل قسم
+        // ==========================================
+        // 🛠️ باقي الأكواد (التبويبات، التحليل، الإرسال، المسح)
+        // ==========================================
+
         const dataLists = {
             crypto: ["Bitcoin (BTC)", "Ethereum (ETH)", "BNB", "Solana (SOL)", "XRP"],
             gold: ["Gold (XAU/USD)"],
@@ -193,26 +192,19 @@
 
         window.currentMode = 'forex';
 
-        // التبديل بين التبويبات
         window.switchTab = function(mode) {
             window.currentMode = mode;
-            
-            // تحديث الأزرار
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`tab-${mode}`).classList.add('active');
 
-            // تحديث القائمة المنسدلة
             const select = document.getElementById('assetSelect');
             select.innerHTML = '';
             dataLists[mode].forEach(item => {
                 select.innerHTML += `<option value="${item}">${item}</option>`;
             });
-
-            // إخفاء نتيجة التحليل السابقة
             document.getElementById('aiResultBox').style.display = 'none';
         };
 
-        // دالة الذكاء الاصطناعي (توليد إشارة)
         window.runAIAnalysis = function() {
             const btn = document.getElementById('analyzeBtn');
             const asset = document.getElementById('assetSelect').value;
@@ -241,7 +233,6 @@
                 dirEl.textContent = direction;
                 dirEl.style.color = direction === 'BUY' ? 'var(--green)' : 'var(--red)';
                 
-                // تحديد عدد الخانات العشرية
                 const decimal = asset.includes('JPY') ? 3 : (asset.includes('XAU') || window.currentMode === 'crypto' ? 2 : 5);
                 
                 document.getElementById('resultEntry').textContent = entry.toFixed(decimal);
@@ -255,7 +246,6 @@
             }, 1500);
         };
 
-        // تعديل الإشارة قبل الإرسال
         window.editSignal = function() {
             let entry = prompt("Edit Entry:", document.getElementById('resultEntry').textContent);
             if (entry) document.getElementById('resultEntry').textContent = entry;
@@ -267,7 +257,6 @@
             if (tp) document.getElementById('resultTP').textContent = tp;
         };
 
-        // الإرسال إلى المشتركين
         window.sendToSubscribers = async function() {
             const btn = document.getElementById('sendBtn');
             const pair = document.getElementById('resultAssetName').textContent;
@@ -282,7 +271,6 @@
             btn.disabled = true;
 
             try {
-                // تحديد المجموعة بناءً على التبويب
                 let collectionName = 'forex_signals';
                 if (window.currentMode === 'gold') collectionName = 'gold_signals';
                 else if (window.currentMode === 'crypto') collectionName = 'tradelix_signals';
@@ -297,7 +285,7 @@
                 });
 
                 alert(`✅ Signal for ${pair} sent successfully to users!`);
-                document.getElementById('aiResultBox').style.display = 'none'; // إخفاء البطاقة بعد الإرسال
+                document.getElementById('aiResultBox').style.display = 'none';
 
             } catch (error) {
                 alert("❌ Error: " + error.message);
@@ -307,7 +295,6 @@
             }
         };
 
-        // مسح الصفقات القديمة
         window.clearOldSignals = async function(event) {
             const confirmDelete = confirm("⚠️ Are you sure you want to delete ALL signals in this category? This action cannot be undone.");
             if (!confirmDelete) return;
@@ -332,7 +319,6 @@
                     return;
                 }
 
-                // استخدام Batch لحذف جميع المستندات مرة واحدة
                 const batch = writeBatch(db);
                 snapshot.forEach((doc) => {
                     batch.delete(doc.ref);
@@ -340,8 +326,6 @@
                 
                 await batch.commit();
                 alert("✅ All signals have been cleared successfully!");
-                
-                // إخفاء نتيجة التحليل إن كانت مفتوحة
                 document.getElementById('aiResultBox').style.display = 'none';
 
             } catch (error) {
