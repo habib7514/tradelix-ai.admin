@@ -12,7 +12,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+        // ✅ تم إضافة arrayUnion و arrayRemove لدعم تعدد الصفقات
+        import { getFirestore, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAPHGtTeDNamwyR2kfg-b9ABp7pNyyiPKM",
@@ -292,7 +293,6 @@
         <div class="detail-row"><span>User Name</span><span id="tradeDetailName">-</span></div>
         <div class="detail-row"><span>Current Balance</span><span id="tradeDetailBalance">$0.00</span></div>
         <div class="detail-row"><span>Total Profit</span><span id="tradeDetailProfit">$0.00</span></div>
-        <div class="detail-row"><span>Active Trade</span><span id="tradeDetailActive">None</span></div>
         
         <!-- ✅ إضافة ربح -->
         <div class="input-group" style="margin-top: 15px;">
@@ -328,12 +328,11 @@
             <button class="btn-block success" onclick="adminOpenTrade()">📡 Open Trade for this User</button>
         </div>
 
-        <!-- ✅ قسم إغلاق الصفقة الجديد -->
-        <div class="input-group" style="margin-top: 15px; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--red);">
-            <label style="color: var(--red); font-weight: bold;">Close Trade (<span id="activeTradeNameDisplay">None</span>)</label>
-            <div style="display: flex; gap: 8px;">
-                <input type="number" id="adminClosePnl" placeholder="PnL e.g., 5 or -3">
-                <button class="btn-small" style="background: var(--red); color: #fff;" onclick="adminCloseTrade()">Close</button>
+        <!-- ✅ قسم إغلاق الصفقات (تم التعديل ليعرض قائمة ديناميكية) -->
+        <div style="margin-top: 20px; border-top: 2px dashed #333; padding-top: 15px;">
+            <label style="color: var(--red); font-weight: bold; font-size: 16px; display: block; margin-bottom: 10px;">Active Trades & Close Options</label>
+            <div id="adminActiveTradesList">
+                <!-- سيتم تعبئتها برمجياً -->
             </div>
         </div>
 
@@ -693,6 +692,9 @@
     let auth, db;
     let signInWithEmailAndPassword, signOut;
     let collection, getDocs, doc, getDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot, query, where, orderBy, runTransaction;
+    
+    // ✅ متغيرات إضافية للمصفوفات
+    let arrayUnionFn, arrayRemoveFn;
 
     let appMode = 'crypto';
     let allUsers = [];
@@ -1197,6 +1199,7 @@
         }
     }
 
+    // ✅ دالة عرض تفاصيل المستخدم (تم تعديلها لعرض الصفقات المتعددة)
     async function openUserTradeDetail(uid) {
         currentTradeUserUID = uid;
         const userDoc = await getDoc(doc(db, 'tradelix_users', uid));
@@ -1206,10 +1209,31 @@
         document.getElementById('tradeDetailName').textContent = u.name || '-';
         document.getElementById('tradeDetailBalance').textContent = '$' + (u.balance || 0).toFixed(2);
         document.getElementById('tradeDetailProfit').textContent = '$' + (u.totalProfit || 0).toFixed(2);
-        document.getElementById('tradeDetailActive').textContent = u.activeTrade || 'None';
-        
-        // ✅ تحديث اسم الصفقة في مربع الإغلاق
-        document.getElementById('activeTradeNameDisplay').textContent = u.activeTrade || 'None';
+
+        // عرض قائمة الصفقات النشطة
+        const list = document.getElementById('adminActiveTradesList');
+        let tradesList = [];
+        if (u.activeTrades && Array.isArray(u.activeTrades)) {
+            tradesList = u.activeTrades;
+        } else if (u.activeTrade) {
+            tradesList.push({ coin: u.activeTrade, link: u.activeTradeLink });
+        }
+
+        if (tradesList.length === 0) {
+            list.innerHTML = '<p style="color:#888; font-size:13px;">No active trades.</p>';
+        } else {
+            list.innerHTML = tradesList.map(trade => `
+                <div style="background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--red); margin-bottom: 10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span style="color:#fff; font-weight:900; font-size:16px;">${trade.coin}</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="number" id="pnl_${trade.coin}" placeholder="PnL (e.g., 5 or -3)" style="flex:1; background: #1a1a1a; border: 1px solid #333; padding: 10px; border-radius: 8px; color: #fff;">
+                        <button class="btn-small" style="background: var(--red); color: #fff;" onclick="closeSpecificTrade('${trade.coin}')">Close</button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
         showScreen('userTradeDetailScreen');
     }
@@ -1280,7 +1304,7 @@
         }
     }
 
-    // ✅ دالة فتح الصفقة (تم فصل عملية الحفظ عن الإشعار لمنع الخطأ)
+    // ✅ دالة فتح الصفقة (تدعم التعدد)
     async function adminOpenTrade() {
         if (!currentTradeUserUID) return showToast('❌ User not selected');
         
@@ -1290,13 +1314,14 @@
         if (!coin || !link) return showToast('❌ Enter coin and link');
         
         try {
-            // 1. حفظ الصفقة للمستخدم (الخطوة الأهم - ستجعله يراها فوراً)
+            const newTrade = { coin: coin, link: link };
+            
+            // استخدام arrayUnion لإضافة الصفقة للقائمة
             await updateDoc(doc(db, 'tradelix_users', currentTradeUserUID), {
-                activeTrade: coin,
-                activeTradeLink: link
+                activeTrades: arrayUnionFn(newTrade)
             });
 
-            // 2. إرسال الإشعار (معزول تماماً)
+            // إرسال الإشعار (معزول تماماً)
             await sendUserNotification(currentTradeUserUID, '📈 New Trade Opened', `A new trade for ${coin} has been opened on your account.`);
 
             showToast('✅ Trade opened for user!');
@@ -1310,15 +1335,14 @@
         }
     }
 
-    // ✅ دالة إغلاق الصفقة (تم تحديثها لتقرأ من المربع الجديد)
-    async function adminCloseTrade() {
-        if (!currentTradeUserUID) return showToast('❌ User not selected');
-        
-        const pnlInput = document.getElementById('adminClosePnl').value;
+    // ✅ دالة إغلاق صفقة محددة
+    async function closeSpecificTrade(coinName) {
+        if (!currentTradeUserUID) return;
+        const pnlInput = document.getElementById(`pnl_${coinName}`).value;
         const pnl = parseFloat(pnlInput);
         
         if (isNaN(pnl)) return showToast('❌ Enter a valid number (e.g., 5 or -3)');
-        if (!confirm(`Are you sure you want to close the trade with a PnL of $${pnl}?`)) return;
+        if (!confirm(`Are you sure you want to close ${coinName} with PnL $${pnl}?`)) return;
 
         try {
             const userRef = doc(db, 'tradelix_users', currentTradeUserUID);
@@ -1326,28 +1350,27 @@
             if (!userSnap.exists()) return;
 
             const userData = userSnap.data();
-            const activeTradeName = userData.activeTrade || 'Unknown Coin';
             
-            const closedTrade = {
-                coin: activeTradeName,
-                pnl: pnl,
-                closedAt: Date.now()
-            };
-            
+            // إزالة الصفقة من القائمة
+            let activeTrades = userData.activeTrades || [];
+            const tradeToClose = activeTrades.find(t => t.coin === coinName);
+            if(tradeToClose) {
+                await updateDoc(userRef, {
+                    activeTrades: arrayRemoveFn(tradeToClose)
+                });
+            }
+
+            // إضافة الصفقة إلى سجل الصفقات المغلقة
+            const closedTrade = { coin: coinName, pnl: pnl, closedAt: Date.now() };
             let currentHistory = userData.closedTrades || [];
             currentHistory.unshift(closedTrade);
 
-            await updateDoc(userRef, {
-                activeTrade: null,
-                activeTradeLink: null,
-                closedTrades: currentHistory
-            });
+            await updateDoc(userRef, { closedTrades: currentHistory });
             
             const pnlText = pnl >= 0 ? `profit of $${pnl}` : `loss of $${Math.abs(pnl)}`;
-            await sendUserNotification(currentTradeUserUID, '🔴 Trade Closed', `Your ${activeTradeName} trade was closed with a ${pnlText}.`);
+            await sendUserNotification(currentTradeUserUID, '🔴 Trade Closed', `Your ${coinName} trade was closed with a ${pnlText}.`);
             
-            showToast('✅ Trade closed & saved to user history!');
-            document.getElementById('adminClosePnl').value = '';
+            showToast('✅ Trade closed successfully!');
             openUserTradeDetail(currentTradeUserUID);
         } catch(e) { 
             console.error(e); 
@@ -1506,6 +1529,10 @@
             collection = fsModule.collection; getDocs = fsModule.getDocs; doc = fsModule.doc; getDoc = fsModule.getDoc;
             updateDoc = fsModule.updateDoc; deleteDoc = fsModule.deleteDoc; addDoc = fsModule.addDoc; serverTimestamp = fsModule.serverTimestamp;
             onSnapshot = fsModule.onSnapshot; query = fsModule.query; where = fsModule.where; orderBy = fsModule.orderBy; runTransaction = fsModule.runTransaction;
+            
+            // ✅ ربط دوال المصفوفات
+            arrayUnionFn = fsModule.arrayUnion;
+            arrayRemoveFn = fsModule.arrayRemove;
             
             onSnapshot(collection(db, 'tradelix_users'), (snapshot) => {
                 allUsers = [];
