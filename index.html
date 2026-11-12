@@ -1268,30 +1268,44 @@
         }
     }
 
+    // ✅ دالة فتح الصفقة (تم فصل عملية الحفظ عن الإشعار لمنع الخطأ)
     async function adminOpenTrade() {
-        if (!currentTradeUserUID) return;
+        if (!currentTradeUserUID) return showToast('❌ User not selected');
+        
         const coin = document.getElementById('adminTradeCoinInput').value.trim().toUpperCase();
         const link = document.getElementById('adminTradeLinkInput').value.trim();
+        
         if (!coin || !link) return showToast('❌ Enter coin and link');
+        
         try {
+            // 1. حفظ الصفقة للمستخدم (الخطوة الأهم - ستجعله يراها فوراً)
             await updateDoc(doc(db, 'tradelix_users', currentTradeUserUID), {
                 activeTrade: coin,
                 activeTradeLink: link
             });
-            
-            await addDoc(collection(db, 'user_notifications'), {
-                userId: currentTradeUserUID,
-                title: '📈 New Trade Opened',
-                body: `A new trade for ${coin} has been opened on your account.`,
-                read: false,
-                createdAt: serverTimestamp()
-            });
+
+            // 2. محاولة إرسال الإشعار (معزولة لكي لا توقف العملية إذا فشلت)
+            try {
+                await addDoc(collection(db, 'user_notifications'), {
+                    userId: currentTradeUserUID,
+                    title: '📈 New Trade Opened',
+                    body: `A new trade for ${coin} has been opened on your account.`,
+                    read: false,
+                    createdAt: serverTimestamp()
+                });
+            } catch (notifError) {
+                console.error("Notification error (Trade opened anyway):", notifError);
+            }
 
             showToast('✅ Trade opened for user!');
             document.getElementById('adminTradeCoinInput').value = '';
             document.getElementById('adminTradeLinkInput').value = '';
             openUserTradeDetail(currentTradeUserUID);
-        } catch(e) { showToast('❌ Error'); }
+            
+        } catch(e) { 
+            console.error("Trade open error:", e);
+            showToast('❌ ' + (e.message || 'Error opening trade')); 
+        }
     }
 
     async function adminCloseTrade() {
